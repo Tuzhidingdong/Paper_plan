@@ -1,0 +1,44 @@
+{
+  "source_region_id": "REG001",
+  "source_panel_id": null,
+  "inspection_mode": "CAPTION_BLIND",
+  "visual_legibility": "Unassessable",
+  "data_origin": "Unavailable",
+  "quantitative_permission": "None",
+  "plot_type": "UNKNOWN",
+  "axes": {
+    "x": {
+      "label": null,
+      "unit": null,
+      "review_status": "UNRESOLVED",
+      "unit_status": "UNCERTAIN"
+    },
+    "y": {
+      "label": null,
+      "unit": null,
+      "review_status": "UNRESOLVED",
+      "unit_status": "UNCERTAIN"
+    }
+  },
+  "legend_series": [],
+  "instrument_fields": {
+    "figure_status": {},
+    "report_status": {}
+  },
+  "observations": [
+    {
+      "description": "",
+      "source_status": "Observed",
+      "numeric_value": null,
+      "unit": null,
+      "series_id": null,
+      "sample_id": null,
+      "mapping_status": "UNMAPPED",
+      "data_origin": "Qualitative_Observation"
+    }
+  ],
+  "uncertainty_note": "",
+  "caption_text": null,
+  "report_narrative": null,
+  "visual_text_discrepancy": null
+}

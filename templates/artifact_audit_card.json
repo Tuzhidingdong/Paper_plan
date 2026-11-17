@@ -1,0 +1,12 @@
+{
+  "audit_id": "ALLOCATE_WITH_PYTHON",
+  "target_result_id": "R001",
+  "factor": "",
+  "relevance": "unknown",
+  "figure_status": "UNCERTAIN",
+  "report_status": "UNCERTAIN",
+  "source_refs": [],
+  "alternative_explanation": "",
+  "confirmation_needed": "",
+  "impact_on_claim_strength": "LIMITS_INTERPRETATION"
+}

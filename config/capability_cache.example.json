@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "qualified_models": [
+    {
+      "provider": "REPLACE_WITH_PROVIDER",
+      "model_id": "REPLACE_WITH_EXACT_MODEL_ID",
+      "model_version": "REPLACE_WITH_VERSION_OR_DATE",
+      "capabilities": {
+        "native_multimodal": "unknown",
+        "high_resolution_image_input": "unknown",
+        "structured_json_output": "unknown",
+        "scientific_reasoning": "unknown",
+        "long_context_consistency": "unknown"
+      },
+      "qualification": {
+        "benchmark_suite": "ERA_VISUAL_BENCHMARK_V1",
+        "status": "NOT_QUALIFIED",
+        "qualified_at": null,
+        "notes": "Populate only after offline development qualification."
+      }
+    }
+  ],
+  "runtime_policy": {
+    "no_per_workspace_benchmark": true,
+    "unknown_capability_blocks_high_risk_visual_interpretation": true,
+    "host_model_switching_assumed": false
+  }
+}
