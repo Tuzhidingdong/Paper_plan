@@ -9,6 +9,69 @@ from pathlib import Path
 
 
 class PdfPipelineTests(unittest.TestCase):
+    def test_vector_review_detects_mixed_raster_and_vector_pages(self):
+        try:
+            import fitz
+            from PIL import Image
+        except ImportError:
+            self.skipTest("PyMuPDF and Pillow are required for PDF integration test")
+
+        repo = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            image_path = root / "banner.png"
+            Image.new("RGB", (180, 40), "white").save(image_path)
+            pdf_path = root / "vector_review.pdf"
+
+            doc = fitz.open()
+
+            # Dense vector chart plus an unrelated embedded banner image:
+            # the raster image must not suppress the vector-review flag.
+            dense_page = doc.new_page(width=600, height=800)
+            dense_page.insert_image(fitz.Rect(20, 20, 200, 60), filename=str(image_path))
+            for i in range(60):
+                y = 220 + i * 5
+                dense_page.draw_line((70, y), (530, y), color=(0, 0, 0), width=0.4)
+                dense_page.draw_line((70 + i * 5, 220), (70 + i * 5, 520), color=(0, 0, 0), width=0.4)
+
+            # A few ordinary decorative paths on a page that also has an image
+            # should not be enough to request vector-figure review.
+            decorative_page = doc.new_page(width=600, height=800)
+            decorative_page.insert_image(fitz.Rect(20, 20, 200, 60), filename=str(image_path))
+            decorative_page.draw_rect(fitz.Rect(30, 30, 190, 55), color=(0.2, 0.2, 0.2))
+            decorative_page.draw_line((30, 70), (190, 70), color=(0.2, 0.2, 0.2))
+            decorative_page.draw_line((30, 72), (190, 72), color=(0.2, 0.2, 0.2))
+
+            # A moderate number of vector bars spread over a figure-sized area
+            # should also be considered a review candidate.
+            chart_page = doc.new_page(width=600, height=800)
+            for i in range(15):
+                x = 70 + i * 28
+                top = 300 + (i % 5) * 20
+                chart_page.draw_rect(fitz.Rect(x, top, x + 14, 600), color=(0, 0, 0))
+
+            doc.save(pdf_path)
+            doc.close()
+
+            workspace = root / "workspace"
+            ingest = subprocess.run(
+                [sys.executable, str(repo / "scripts" / "ingest_pdf.py"), str(pdf_path), "--workspace", str(workspace)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(ingest.returncode, 0, ingest.stdout + ingest.stderr)
+
+            manifest = json.loads((workspace / "state" / "manifest.json").read_text(encoding="utf-8"))
+            pages = manifest["pages"]
+            self.assertEqual(len(pages), 3)
+            self.assertGreater(pages[0]["embedded_image_count"], 0)
+            self.assertGreaterEqual(pages[0]["drawing_count"], 100)
+            self.assertTrue(pages[0]["vector_or_text_figure_review"])
+            self.assertEqual(pages[0]["vector_review_reason"], "dense_vector_paths")
+            self.assertFalse(pages[1]["vector_or_text_figure_review"])
+            self.assertIsNone(pages[1]["vector_review_reason"])
+            self.assertTrue(pages[2]["vector_or_text_figure_review"])
+            self.assertEqual(pages[2]["vector_review_reason"], "distributed_or_complex_vector_drawings")
+
     def test_ingest_extract_panel_registration_and_repeat_ids(self):
         try:
             import fitz

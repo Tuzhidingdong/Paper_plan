@@ -7,6 +7,47 @@ import shutil
 import sys
 from pathlib import Path
 
+
+def assess_vector_figure_review(drawings, page_rect):
+    """Return a conservative review flag and diagnostics for vector-heavy pages.
+
+    Embedded raster images are deliberately not part of this decision: a page may
+    contain both a banner/logo image and a scientifically relevant vector chart.
+    This is a triage heuristic, not automatic figure recognition.
+    """
+    drawing_count = len(drawings)
+    drawing_item_count = sum(len(drawing.get("items") or ()) for drawing in drawings)
+
+    rects = [drawing.get("rect") for drawing in drawings if drawing.get("rect") is not None]
+    if rects and float(page_rect.width) > 0 and float(page_rect.height) > 0:
+        x0 = min(float(rect.x0) for rect in rects)
+        y0 = min(float(rect.y0) for rect in rects)
+        x1 = max(float(rect.x1) for rect in rects)
+        y1 = max(float(rect.y1) for rect in rects)
+        bbox_area_ratio = max(0.0, (x1 - x0) * (y1 - y0)) / (
+            float(page_rect.width) * float(page_rect.height)
+        )
+        bbox_area_ratio = min(1.0, bbox_area_ratio)
+    else:
+        bbox_area_ratio = 0.0
+
+    # Dense vector pages are always candidates. Smaller groups are flagged only
+    # when they contain many drawing commands or span a meaningful page area.
+    if drawing_count >= 100:
+        review_reason = "dense_vector_paths"
+    elif drawing_count >= 12 and (drawing_item_count >= 48 or bbox_area_ratio >= 0.06):
+        review_reason = "distributed_or_complex_vector_drawings"
+    else:
+        review_reason = None
+
+    return {
+        "drawing_item_count": drawing_item_count,
+        "drawing_bbox_area_ratio": round(bbox_area_ratio, 4),
+        "vector_or_text_figure_review": review_reason is not None,
+        "vector_review_reason": review_reason,
+    }
+
+
 from era_core import (
     atomic_write_json,
     atomic_write_text,
@@ -64,6 +105,7 @@ def main() -> int:
         atomic_write_text(text_path, page_text)
         drawings = page.get_drawings()
         images = page.get_images(full=True)
+        vector_review = assess_vector_figure_review(drawings, page.rect)
         page_records.append({
             "page_number": index + 1,
             "width": round(float(page.rect.width), 3),
@@ -74,7 +116,7 @@ def main() -> int:
             "embedded_image_count": len(images),
             "image_block_count": sum(1 for block in page.get_text("dict").get("blocks", []) if block.get("type") == 1),
             "drawing_count": len(drawings),
-            "vector_or_text_figure_review": bool(drawings) and not images,
+            **vector_review,
         })
     document.close()
 
