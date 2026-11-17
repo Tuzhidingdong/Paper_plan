@@ -1,0 +1,25 @@
+schema_version: 1
+required_capabilities:
+  visual_inspection:
+    minimum: native_multimodal_high_resolution
+    fallback: blocked_by_capability
+  artifact_audit:
+    minimum: strong_scientific_reasoning
+    fallback: preserve_observations_and_mark_pending
+  literature_screening:
+    minimum: structured_instruction_following
+    fallback: deterministic_prefilter_only
+  route_synthesis:
+    minimum: strong_cross_evidence_reasoning
+    fallback: do_not_submit_for_human_approval
+  framework_design:
+    minimum: long_context_consistency_and_structured_output
+    fallback: retain_approved_state_and_block_patch
+  academic_writing:
+    minimum: reliable_academic_writing
+    fallback: skeleton_only
+runtime_policy:
+  no_per_run_benchmark: true
+  capability_cache_path: "~/.era/capability_cache.json"
+  unknown_capability_behavior: block_high_risk_task
+  host_model_switching_assumed: false

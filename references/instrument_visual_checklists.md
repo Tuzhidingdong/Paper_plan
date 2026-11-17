@@ -1,0 +1,66 @@
+# Instrument visual checklist
+
+For each field record one state: FOUND, NOT_SHOWN, NOT_LEGIBLE, UNCERTAIN or NOT_APPLICABLE. Keep figure_status separate from report_status.
+
+## XRD
+- two_theta_range
+- x_axis_unit
+- y_axis_unit_or_intensity_basis
+- reference_phase_or_pdf_card
+- peak_labels_or_reference_lines
+- background_or_smoothing_visible
+- stacked_curve_offsets_visible
+- sample_labels_visible
+
+## XPS
+- binding_energy_axis_and_unit
+- charge_calibration_reference
+- c1s_reference_position
+- raw_data_points_visible
+- fit_envelope_visible
+- component_peaks_visible
+- background_model_visible
+- sample_labels_visible
+
+## Raman / FTIR
+- spectral_range
+- wavenumber_unit
+- intensity_or_transmittance_basis
+- baseline_processing_visible
+- peak_labels_visible
+- laser_or_acquisition_conditions_visible (where applicable)
+
+## CV / LSV
+- potential_axis_and_unit
+- reference_electrode
+- scan_rate
+- electrolyte_or_test_medium
+- ir_compensation
+- current_normalization_basis
+- sample_labels_visible
+
+## EIS
+- plot_type
+- frequency_range
+- frequency_markers
+- equivalent_circuit_shown
+- fit_residual_or_quality
+- electrode_area_or_normalization_basis
+
+## Battery cycling / rate performance
+- current_density_or_rate
+- capacity_normalization_basis
+- voltage_window
+- cycle_number
+- coulombic_efficiency
+- loading_or_mass_basis
+- temperature_and_electrolyte (where applicable)
+
+## Microscopy
+- scale_bar_and_unit
+- magnification_or_scale
+- sample_identity
+- number_of_fields_or_images
+- image_processing_or_contrast_note
+
+Checklist fields are prompts for inspection, not mandatory values. NOT_SHOWN means absent from the image only. Search the PDF text separately before claiming NOT_REPORTED.
