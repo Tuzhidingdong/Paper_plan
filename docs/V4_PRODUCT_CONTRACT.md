@@ -28,7 +28,7 @@ The package should make the research contribution, paper argument, visual eviden
 - No fixed number of routes, figures, panels, Introduction paragraphs, SI items or research tasks.
 - No target journal's current policies may be hard-coded as permanent generic facts.
 - A specific output must be linked to evidence or visibly marked as planned/hypothesized.
-- Every core claim needs a traceable support, explicit limitation or an evidence acquisition task.
+- Every core claim needs a traceable support, explicit limitation or an evidence acquisition task. Numeric Result Units supporting the central contribution must be explicitly marked CORE and pass the verified measurement-definition gate, including when reached through a linked Finding.
 - Every essential missing Data Slot must be addressed or explicitly deferred with rationale.
 - Experiments and computations must have measurable outputs and acceptance criteria.
 - Missing inputs block execution; unknown parameters remain TBD.
