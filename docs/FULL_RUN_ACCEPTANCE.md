@@ -10,6 +10,8 @@
 - Journal source/profile status is coherent.
 - Introduction paragraph, literature-claim and Claim references resolve.
 - Storyline steps refer to valid Figures and Claims.
+- Every central numeric Result Unit marked CORE has a verified measurement definition and parent/source calculation lineage.
+- A comparison marked COMPARABLE contains no mismatched or unknown declared dimensions; comparative Panels link to a comparability assessment.
 - Every main Figure has Panels, a take-home message and Claim/Data Slot links.
 - Every Panel has purpose and acceptance criteria.
 - SI items resolve their Claim/Figure/Data Slot references.

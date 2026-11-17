@@ -97,6 +97,32 @@ class ValidationTests(unittest.TestCase):
         errors, _ = validate_evidence(bundle)
         self.assertFalse(errors)
 
+    def test_core_numeric_result_requires_verified_measurement_definition(self):
+        bundle = sample_bundle()
+        result = bundle["result_units"]["R001"]
+        result["claim_role"] = "CORE"
+        result["quantitative_permission"] = "Exact_Values"
+        result["observations"][0]["numeric_value"] = 12.5
+        result["observations"][0]["unit"] = "unit-A"
+        errors, warnings = validate_evidence(bundle)
+        self.assertTrue(any("requires a measurement_definition" in item for item in errors))
+
+    def test_verified_derived_metric_requires_formula_and_parent_result(self):
+        bundle = sample_bundle()
+        result = bundle["result_units"]["R001"]
+        result["claim_role"] = "CORE"
+        result["quantitative_permission"] = "Exact_Values"
+        result["observations"][0]["numeric_value"] = 12.5
+        result["measurement_definition"] = {
+            "status": "VERIFIED", "measurand": "Target quantity",
+            "raw_signal": "Instrument response", "method": "Defined method",
+            "output_unit": "unit-A", "normalization_basis": "Per unit mass",
+            "is_derived_metric": True, "formula": None, "parent_result_ids": [],
+        }
+        errors, warnings = validate_evidence(bundle)
+        self.assertTrue(any("requires an explicit calculation formula" in item for item in errors))
+        self.assertTrue(any("requires parent_result_ids" in item for item in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

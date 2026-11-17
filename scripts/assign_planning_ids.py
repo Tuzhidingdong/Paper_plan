@@ -24,6 +24,7 @@ KINDS = {
     "story-step": ("STORY", "manuscript_story_step"),
     "figure": ("FIG", "manuscript_figure"),
     "si-item": ("SI", "supporting_information_item"),
+    "comparability": ("CMP", "comparability_assessment"),
 }
 
 

@@ -34,7 +34,7 @@ Repeated near-identical top/footer image blocks are labelled REPEATED_LAYOUT_ASS
 
 Contact Sheets are for orientation only. Never read quantitative values, weak peaks, slopes, close line styles or axes from downscaled sheets. Inspect the original-resolution Region/Panel instead.
 
-For the gypsum-report regression, previously registered vector BBoxes on p10/p11 and other manual chart regions should be reused when source hash and page-coordinate provenance match. Do not re-create equivalent crops or re-run their visual inspection merely to consume tokens.
+When previously registered vector BBoxes or other manual regions exist, reuse them only when source hash, page-coordinate provenance and extraction version match. Do not re-create equivalent crops or repeat completed visual inspections without a documented evidence gap.
 
 ## 4. Image-first visual inspection
 
@@ -63,6 +63,9 @@ Figure-level status and report-level status stay separate. NOT_SHOWN means not s
 - Keep Observed, Interpreted and Hypothesized separate.
 - Capture Exact_Text/Exact_Table/Vector_Extracted separately from Visual_Estimate and Qualitative_Observation.
 - Never infer unreported batches, measurement runs, replicates, treatment conditions or raw data.
+- For every quantitative Result Unit that may support a central claim, create a measurement definition recording the measurand, raw signal, method, formula where derived, output unit, normalization basis, calibration/blank corrections, uncertainty and parent Result Unit IDs. Mark incomplete definitions PARTIAL or NOT_ASSESSED; do not promote them to a verified core metric.
+- Mark each Result Unit's intended claim role as UNDECIDED, SUPPORTING, CORE or NOT_USED. A numeric CORE result must pass the measurement-definition checks before it can support a central quantitative claim.
+- Compare experimental conditions explicitly before combining or contrasting Result Units. Record matched, mismatched, unknown and not-applicable dimensions rather than assuming like-for-like comparability.
 
 ## 7. Artifact/confounder audit
 

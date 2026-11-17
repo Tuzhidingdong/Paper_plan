@@ -20,7 +20,8 @@
     "manuscript_sections",
     "deliverables",
     "quality_review",
-    "human_decisions"
+    "human_decisions",
+    "comparability_assessments"
   ],
   "properties": {
     "schema_version": {
@@ -579,6 +580,12 @@
     "workspace_revision_number": {
       "type": "integer",
       "minimum": 0
+    },
+    "comparability_assessments": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/comparability_assessment"
+      }
     }
   },
   "$defs": {
@@ -873,6 +880,13 @@
                   "CONCEPTUAL",
                   "BLOCKED"
                 ]
+              },
+              "comparability_assessment_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
               }
             },
             "additionalProperties": true
@@ -969,6 +983,134 @@
             "NEW_DATA_REQUIRED",
             "BLOCKED"
           ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "comparability_assessment": {
+      "type": "object",
+      "required": [
+        "assessment_id",
+        "comparison_purpose",
+        "comparison_entities",
+        "dimensions",
+        "assessment_status",
+        "limitations",
+        "permitted_inference"
+      ],
+      "properties": {
+        "assessment_id": {
+          "type": "string",
+          "pattern": "^CMP[0-9]{3,}$"
+        },
+        "comparison_purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "comparison_entities": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "entity_id",
+              "entity_type",
+              "label"
+            ],
+            "properties": {
+              "entity_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "entity_type": {
+                "enum": [
+                  "sample",
+                  "result_unit",
+                  "finding"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "result_unit_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "dimensions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "dimension",
+              "match_status"
+            ],
+            "properties": {
+              "dimension": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "values_by_entity": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "match_status": {
+                "enum": [
+                  "MATCHED",
+                  "MISMATCHED",
+                  "UNKNOWN",
+                  "NOT_APPLICABLE"
+                ]
+              },
+              "assessment_note": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "assessment_status": {
+          "enum": [
+            "COMPARABLE",
+            "CONDITIONALLY_COMPARABLE",
+            "NOT_COMPARABLE",
+            "UNASSESSED"
+          ]
+        },
+        "confounders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "permitted_inference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prohibited_inference": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": true

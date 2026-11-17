@@ -31,7 +31,9 @@ This branch develops the V4 manuscript-development product layer while preservin
 | Introduction paragraph architecture | Structured entities and workflow | Agent-executed + references checked |
 | Figure/Panel and SI architecture | Structured Figure/SI entities and workflow | Agent-executed; not automatic visual design |
 | Experiment/computation handoff detail | New work-package workflow | Agent-executed; linked to existing tasks |
-| Integrated package validator | Schema, reference, placement, task-closure, cycle and blocker checks | Implemented in branch |
+| Integrated package validator | Schema, reference, placement, task-closure, cycle, comparison-condition and blocker checks | Implemented in branch |
+| Measurement definition and calculation lineage | Structured fields plus a gate for numeric CORE Result Units | Implemented in branch |
+| Comparability assessment | Structured comparison entities/dimensions linked to Figure Panels | Implemented in branch |
 | Genericity/project isolation rules | Updated Skill, runbooks and product contract | Documented; requires multi-domain acceptance |
 
 ## Known limitations
@@ -47,7 +49,7 @@ This branch develops the V4 manuscript-development product layer while preservin
 ## Verification required before release
 
 - GitHub Actions: Python 3.10, 3.11 and 3.12.
-- New V4 unit tests: schema validity, graph references, essential Data Slot closure, dependency cycles, missing computational inputs, journal source requirements and flexible Figure counts.
+- New V4 unit tests: schema validity, graph references, essential Data Slot closure, dependency cycles, missing computational inputs, journal source requirements, flexible Figure counts, numeric core-metric definitions and comparison-condition compatibility.
 - Existing V3.3 regression suite must remain green.
 - Inspect generic Skill/workflow sources to ensure they contain no project-specific scientific content.
 - Run on a fresh report from a different research domain, without reusing prior project context or project data.

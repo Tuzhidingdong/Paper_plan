@@ -122,6 +122,7 @@ def valid_fixture():
                       "data_slot_ids": ["DS001"], "methods_or_metadata": ["Calibration"],
                       "status": "TO_BE_PREPARED"}
         },
+        "comparability_assessments": {},
         "work_package_task_ids": ["T001"],
         "manuscript_sections": [{"section": "Results and Discussion",
                                  "purpose": "Build the central evidence chain",
@@ -137,7 +138,8 @@ def valid_fixture():
                             "manuscript_framework": "PENDING_HUMAN_REVIEW",
                             "decision_notes": []},
     }
-    evidence = {"result_units": {"R001": {"result_id": "R001"}}, "findings": {}}
+    evidence = {"result_units": {"R001": {"result_id": "R001"}}, "findings": {},
+                "samples": {"S001": {"sample_id": "S001"}, "S002": {"sample_id": "S002"}}}
     return package, framework, literature, evidence
 
 
@@ -226,6 +228,47 @@ class ManuscriptDevelopmentValidationTests(unittest.TestCase):
         result = validate_package(package, framework, literature, evidence)
         self.assertTrue(any("no cited official journal/publisher instruction source" in item
                             for item in result["errors"]))
+
+    def test_comparable_assessment_rejects_unknown_or_mismatched_conditions(self):
+        package, framework, literature, evidence = valid_fixture()
+        package["comparability_assessments"]["CMP001"] = {
+            "assessment_id": "CMP001",
+            "comparison_purpose": "Assess whether two groups can be directly compared",
+            "comparison_entities": [
+                {"entity_id": "S001", "entity_type": "sample", "label": "Group A"},
+                {"entity_id": "S002", "entity_type": "sample", "label": "Group B"},
+            ],
+            "dimensions": [
+                {"dimension": "preparation_condition", "match_status": "MISMATCHED",
+                 "values_by_entity": {"S001": "condition-A", "S002": "condition-B"}},
+            ],
+            "assessment_status": "COMPARABLE",
+            "limitations": [],
+            "permitted_inference": "No direct like-for-like inference is permitted.",
+        }
+        result = validate_package(package, framework, literature, evidence)
+        self.assertTrue(any("COMPARABLE cannot contain mismatched or unknown dimensions" in item
+                            for item in result["errors"]))
+
+    def test_panel_can_link_valid_comparability_assessment(self):
+        package, framework, literature, evidence = valid_fixture()
+        package["comparability_assessments"]["CMP001"] = {
+            "assessment_id": "CMP001",
+            "comparison_purpose": "Assess matched comparison conditions",
+            "comparison_entities": [
+                {"entity_id": "S001", "entity_type": "sample", "label": "Group A"},
+                {"entity_id": "S002", "entity_type": "sample", "label": "Group B"},
+            ],
+            "dimensions": [
+                {"dimension": "measurement_temperature", "unit": "unit-T",
+                 "match_status": "MATCHED", "values_by_entity": {"S001": 1, "S002": 1}},
+            ],
+            "assessment_status": "COMPARABLE", "limitations": [],
+            "permitted_inference": "A controlled comparison is permitted for the listed dimension.",
+        }
+        package["main_figures"]["FIG001"]["panels"][0]["comparability_assessment_ids"] = ["CMP001"]
+        result = validate_package(package, framework, literature, evidence)
+        self.assertEqual(result["errors"], [], result["errors"])
 
 
 if __name__ == "__main__":

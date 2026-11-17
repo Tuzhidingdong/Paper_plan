@@ -46,7 +46,7 @@ DEFAULTS = {
         },
         "claim_ids": [], "data_slot_ids": [],
         "introduction": {"status": "NOT_STARTED", "paragraph_ids": [], "draft": None},
-        "introduction_paragraphs": {}, "storyline": {},
+        "introduction_paragraphs": {}, "storyline": {}, "comparability_assessments": {},
         "toc_graphic": {
             "status": "NOT_STARTED", "journal_requirement_status": "UNKNOWN",
             "concept_brief": "TBD", "elements": [], "claim_ids": [],

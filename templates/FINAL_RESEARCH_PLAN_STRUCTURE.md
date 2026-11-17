@@ -8,6 +8,10 @@ Use this as a coverage guide, not a fixed chapter-count template. Adapt headings
 - Existing evidence versus missing decisive evidence.
 - Core scientific question and one central contribution.
 
+## Measurement definitions and comparability
+- Definition of every central quantitative metric: measurand, raw signal, method, formula, units, normalization, corrections, uncertainty and source lineage.
+- Matched/mismatched/unknown sample and condition dimensions for each material comparison.
+
 ## Research frontier and novelty boundary
 - Current state of the art and closest competing studies.
 - What is known, what is unresolved and why it matters.

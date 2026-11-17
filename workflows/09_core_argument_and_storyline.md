@@ -55,7 +55,9 @@ For every central claim:
 - link supporting and contradicting evidence;
 - list alternative explanations and confounders;
 - state conditions under which the claim would be weakened or rejected;
-- identify the minimum evidence needed to retain the claim.
+- identify the minimum evidence needed to retain the claim;
+- verify that every central quantitative result has a defined measurand, method, signal, calculation/normalization basis and uncertainty;
+- record whether the comparison conditions are matched, mismatched or unknown, and restrict inference accordingly.
 
 For every proposed claim not yet established, write it as a hypothesis or planned test, not a result.
 

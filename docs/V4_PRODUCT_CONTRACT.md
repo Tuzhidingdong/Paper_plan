@@ -8,13 +8,13 @@ The package should make the research contribution, paper argument, visual eviden
 
 ## Required capabilities
 
-1. Evidence inventory: trace each important observation to a source and preserve uncertainty, measurement definition and calculation lineage.
+1. Evidence inventory: trace each important observation to a source and preserve uncertainty, measurement definition and calculation lineage. A numeric metric used for the central contribution must define its measurand, signal, method, formula if derived, units, normalization, corrections and uncertainty.
 2. Research frontier: identify closest competitors, contradictory evidence, bounded gaps and novelty limitations.
 3. Contribution design: select one central question/contribution or explain why the current evidence does not justify a paper.
 4. Journal adaptation: verify current official requirements for the selected journal/article type and record dated sources.
 5. Introduction: produce a paragraph-level rhetorical plan and citation-grounded English draft when evidence permits.
 6. Storyline: connect the manuscript sections as a sequence of scientific questions and answers.
-7. Main Figures: define a project-specific number of Figures and Panels, each with a scientific message, claim/data links and acceptance criteria.
+7. Main Figures: define a project-specific number of Figures and Panels, each with a scientific message, claim/data links and acceptance criteria. Cross-sample/condition comparisons must record which conditions are matched, mismatched or unknown.
 8. TOC/graphical abstract: provide a journal-aware concept brief when required or useful.
 9. Supporting Information: plan reproducibility and supporting evidence with explicit claim/Figure links.
 10. Work packages: create assignable experiment, analysis, theory and computation tasks with inputs, controls, outputs, dependencies and completion criteria.

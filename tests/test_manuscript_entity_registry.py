@@ -62,6 +62,27 @@ class ManuscriptEntityRegistryTests(unittest.TestCase):
             self.assertTrue(any("target-journal requirements are not verified" in item
                                 for item in report["warnings"]))
 
+    def test_comparability_assessment_id_can_be_reserved_and_upserted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp) / "workspace"
+            self.run_script("init_planning_bundles.py", "--workspace", str(workspace))
+            allocation = self.run_script(
+                "assign_planning_ids.py", "--workspace", str(workspace),
+                "comparability", "--anchor-key", "comparison:matched-groups",
+            )
+            self.assertEqual(allocation.returncode, 0, allocation.stdout + allocation.stderr)
+            entity_id = json.loads(allocation.stdout)["entity_id"]
+            record = Path(tmp) / "comparison.json"
+            record.write_text(json.dumps({"assessment_id": entity_id}), encoding="utf-8")
+            upsert = self.run_script(
+                "upsert_planning_entity.py", "--workspace", str(workspace),
+                "--kind", "comparability", "--entity-json", str(record),
+                "--reason", "Persist a comparison-condition assessment",
+            )
+            self.assertEqual(upsert.returncode, 0, upsert.stdout + upsert.stderr)
+            bundle = json.loads((workspace / "state" / "manuscript_development_bundle.json").read_text(encoding="utf-8"))
+            self.assertIn(entity_id, bundle["comparability_assessments"])
+
 
 if __name__ == "__main__":
     unittest.main()

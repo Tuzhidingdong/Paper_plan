@@ -26,6 +26,7 @@ The V4 development branch preserves the V3.3 deterministic evidence engine and a
 - Main Figure and Panel plans with scientific purpose, evidence, Data Slots and acceptance criteria.
 - Supporting Information items linked to main claims and Figures.
 - Work-package links to existing experiment/analysis/computation tasks.
+- Verified measurement-definition checks for central quantitative Result Units and condition-comparability assessments for cross-sample/condition Figure comparisons.
 - Cross-package validation of journal sources, manuscript references, Figure/SI placement, task coverage, dependency cycles and calculation blockers.
 
 The V4 package schema is in schemas/manuscript_development_bundle.schema.json. The workspace bundle is initialized by scripts/init_planning_bundles.py and validated by scripts/validate_manuscript_development.py.

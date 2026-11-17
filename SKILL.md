@@ -43,8 +43,8 @@ The Skill may identify that the available evidence does not yet support a defens
 5. Distinguish exact text/table extraction, vector extraction, visual estimate, qualitative observation and unavailable data.
 6. Low-resolution plots never yield exact values. Visual estimates carry an explicit raw-data-required warning.
 7. Keep Observed, Interpreted and Hypothesized separate from claim type (Descriptive, Comparative, Associational, Causal, Mechanistic).
-8. Every central quantitative metric should have a measurement definition and calculation lineage: measurand, signal, method, formula, units, normalization, blank/calibration, uncertainty and source data where known.
-9. Audit artifacts, confounders, sample identity and comparison-condition compatibility before making causal or mechanistic interpretations.
+8. Every central quantitative metric must have a verified measurement definition and calculation lineage: measurand, raw signal, method, formula where derived, units, normalization, blank/calibration, uncertainty and parent/source data. The evidence validator blocks a numeric Result Unit marked CORE when this definition is absent or incomplete.
+9. Audit artifacts, confounders, sample identity and comparison-condition compatibility before making causal or mechanistic interpretations. Cross-sample/condition comparisons must have a structured comparability assessment; unknown dimensions remain explicit.
 10. Missing metadata means not assessable, not proof that an experiment was not performed.
 11. Never infer unreported batches, runs, conditions, controls, raw data, replicate counts, equipment or material properties.
 12. Literature access tiers are METADATA_ONLY, ABSTRACT_VERIFIED and FULLTEXT_VERIFIED. Do not imply full-text review where only metadata/abstract was inspected.
@@ -76,7 +76,7 @@ Read workflows/07_full_run.md first. Use workflows/01–06 for evidence and rese
     python scripts/validate_bundle_schemas.py --workspace "WORKSPACE"
     python scripts/validate_manuscript_development.py --workspace "WORKSPACE" --deliverables-dir "WORKSPACE/deliverables"
 
-For an existing workspace with the same source hash, refresh only the relevant diagnostics. Do not reset validated evidence or human decisions. Reserve IDs with assign_entity_ids.py / assign_planning_ids.py and persist entities through upsert_planning_entity.py. V4 manuscript entities include journal-source, introduction-paragraph, story-step, figure and si-item. Run the existing validators and the V4 manuscript-development validator after updating the package.
+For an existing workspace with the same source hash, refresh only the relevant diagnostics. Do not reset validated evidence or human decisions. Reserve IDs with assign_entity_ids.py / assign_planning_ids.py and persist entities through upsert_planning_entity.py. V4 manuscript entities include journal-source, introduction-paragraph, story-step, figure, si-item and comparability. Run the existing validators and the V4 manuscript-development validator after updating the package.
 
 For visual inspection, prepare image-only task packs and record structured cards. One targeted automated reinspection per Region/Panel is allowed unless the governing project protocol explicitly permits otherwise.
 

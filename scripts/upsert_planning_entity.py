@@ -26,6 +26,7 @@ ENTITY_MAP = {
     "story-step": ("manuscript_development_bundle.json", "storyline", "STORY", "manuscript_story_step", "step_id"),
     "figure": ("manuscript_development_bundle.json", "main_figures", "FIG", "manuscript_figure", "figure_id"),
     "si-item": ("manuscript_development_bundle.json", "supporting_information", "SI", "supporting_information_item", "item_id"),
+    "comparability": ("manuscript_development_bundle.json", "comparability_assessments", "CMP", "comparability_assessment", "assessment_id"),
 }
 
 

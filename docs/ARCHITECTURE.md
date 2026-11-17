@@ -14,7 +14,7 @@ Paper_plan has four connected layers:
     primary report + user-supplied supplemental research data
       -> immutable source inventory and hashes
       -> evidence extraction, visual triage and sample identity
-      -> measurement definitions, calculations and data lineage
+      -> measurement definitions, condition-comparability checks, calculations and data lineage
       -> literature frontier and competing-study analysis
       -> defensible candidate directions and central contribution
       -> dated target-journal profile
@@ -30,14 +30,14 @@ Paper_plan has four connected layers:
 - literature_bundle.json: search scope, access-tiered records, exact snippets, literature claims and bounded gaps.
 - routes_bundle.json: candidate directions, supporting evidence, recommendation and human decision state.
 - framework_bundle.json: Claims, Data Slots, Data Units, execution tasks and dependency links.
-- manuscript_development_bundle.json: project profile, dated journal sources, central argument, Introduction paragraphs, storyline, TOC, main Figures, SI items, references to Claims/Data Slots/tasks, manuscript sections and deliverables.
+- manuscript_development_bundle.json: project profile, dated journal sources, central argument, Introduction paragraphs, storyline, TOC, main Figures, SI items, condition-comparability assessments, references to Claims/Data Slots/tasks, manuscript sections and deliverables.
 - state_manifest.json: source hashes, workspace revision, stage, tool versions, bundle references and capability profile.
 
 Search logs and entity revision history belong in append-only JSONL sidecars rather than prompt context.
 
 ## Permanent IDs and persistence
 
-Python issues permanent IDs. V4 adds journal-source (JS), Introduction paragraph (IP), story step (STORY), Figure (FIG) and Supporting Information item (SI). Existing Claim (C), Data Slot (DS), Data Unit (DU) and task (T) IDs remain in the framework bundle and are referenced by the manuscript-development bundle. Entity Upsert records revisions in the history log. No model-minted or recycled permanent IDs.
+Python issues permanent IDs. V4 adds journal-source (JS), Introduction paragraph (IP), story step (STORY), Figure (FIG), Supporting Information item (SI) and comparability assessment (CMP). Existing Claim (C), Data Slot (DS), Data Unit (DU) and task (T) IDs remain in the framework bundle and are referenced by the manuscript-development bundle. Entity Upsert records revisions in the history log. No model-minted or recycled permanent IDs.
 
 ## Generality and isolation
 
@@ -49,6 +49,7 @@ The existing validators cover evidence/sample identity, literature provenance, r
 - journal-source/profile consistency;
 - Introduction paragraph and citation references;
 - storyline, Figure, Panel, Claim and Data Slot relationships;
+- cross-sample/condition comparability records and Panel references;
 - SI support relationships;
 - essential missing-slot task closure;
 - task dependency cycles and calculation input blockers;

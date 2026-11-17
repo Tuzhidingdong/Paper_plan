@@ -20,6 +20,7 @@ ENTITY_TYPES = {
     "storyline": "manuscript_story_step",
     "main_figures": "manuscript_figure",
     "supporting_information": "supporting_information_item",
+    "comparability_assessments": "comparability_assessment",
 }
 
 
@@ -113,11 +114,13 @@ def validate_package(package: dict[str, Any],
     storyline = package.get("storyline", {})
     figures = package.get("main_figures", {})
     si_items = package.get("supporting_information", {})
+    comparability = package.get("comparability_assessments", {})
     _unique_map(journal_sources, "source_id", "journal source", errors)
     _unique_map(paragraphs, "paragraph_id", "Introduction paragraph", errors)
     _unique_map(storyline, "step_id", "story step", errors)
     _unique_map(figures, "figure_id", "Figure", errors)
     _unique_map(si_items, "item_id", "SI item", errors)
+    _unique_map(comparability, "assessment_id", "comparability assessment", errors)
 
     journal_profile = package.get("journal_profile", {})
     journal_source_ids = set(journal_sources)
@@ -187,6 +190,8 @@ def validate_package(package: dict[str, Any],
                         claim_ids, errors)
             _check_refs(panel_key, "data_slot_ids", panel.get("data_slot_ids", []),
                         slot_ids, errors)
+            _check_refs(panel_key, "comparability_assessment_ids",
+                        panel.get("comparability_assessment_ids", []), set(comparability), errors)
             if not panel.get("claim_ids") and not panel.get("data_slot_ids"):
                 warnings.append(f"{panel_key}: Panel has no explicit Claim or Data Slot link")
             for evidence_ref in panel.get("existing_evidence_refs", []):
@@ -201,6 +206,36 @@ def validate_package(package: dict[str, Any],
         _check_refs(item_id, "claim_ids", item.get("claim_ids", []), claim_ids, errors)
         _check_refs(item_id, "figure_ids", item.get("figure_ids", []), set(figures), errors)
         _check_refs(item_id, "data_slot_ids", item.get("data_slot_ids", []), slot_ids, errors)
+
+    sample_ids = set(evidence.get("samples", {}))
+    for assessment_id, assessment in comparability.items():
+        entity_ids = set()
+        for entity in assessment.get("comparison_entities", []):
+            entity_id = entity.get("entity_id")
+            entity_type = entity.get("entity_type")
+            entity_ids.add(entity_id)
+            if entity_type == "sample" and entity_id not in sample_ids:
+                errors.append(f"{assessment_id}: unknown comparison Sample {entity_id}")
+            elif entity_type == "result_unit" and entity_id not in result_ids:
+                errors.append(f"{assessment_id}: unknown comparison Result Unit {entity_id}")
+            elif entity_type == "finding" and entity_id not in finding_ids:
+                errors.append(f"{assessment_id}: unknown comparison Finding {entity_id}")
+            elif entity_type not in {"sample", "result_unit", "finding"}:
+                errors.append(f"{assessment_id}: unsupported comparison entity type {entity_type!r}")
+            for result_id in entity.get("result_unit_ids", []):
+                if result_id not in result_ids:
+                    errors.append(f"{assessment_id}: unknown comparison Result Unit {result_id}")
+        statuses = {dimension.get("match_status") for dimension in assessment.get("dimensions", [])}
+        if assessment.get("assessment_status") == "COMPARABLE":
+            if statuses.intersection({"MISMATCHED", "UNKNOWN"}):
+                errors.append(f"{assessment_id}: COMPARABLE cannot contain mismatched or unknown dimensions")
+            if not assessment.get("dimensions"):
+                errors.append(f"{assessment_id}: COMPARABLE requires assessed comparison dimensions")
+        if assessment.get("assessment_status") == "CONDITIONALLY_COMPARABLE":
+            if not statuses.intersection({"MISMATCHED", "UNKNOWN"}):
+                warnings.append(f"{assessment_id}: conditionally comparable assessment has no explicit limitation dimension")
+        if assessment.get("assessment_status") == "NOT_COMPARABLE" and "MATCHED" in statuses and len(statuses) == 1:
+            warnings.append(f"{assessment_id}: all listed dimensions are matched although assessment is NOT_COMPARABLE")
 
     story_orders: dict[int, str] = {}
     story_figure_refs: set[str] = set()
@@ -320,6 +355,7 @@ def validate_package(package: dict[str, Any],
         "introduction_paragraphs": len(paragraphs), "story_steps": len(storyline),
         "main_figures": len(figures), "panels": len(panel_index),
         "supporting_information_items": len(si_items),
+        "comparability_assessments": len(comparability),
         "work_package_tasks": len(work_package_ids),
     }
     return {"status": "ERROR" if errors else ("WARNING" if warnings else "PASS"),

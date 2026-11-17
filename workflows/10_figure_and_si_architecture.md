@@ -29,6 +29,7 @@ For each Panel specify:
 - source Result/Finding/Data Unit IDs for existing data;
 - missing Data Slot IDs for new work;
 - exact sample/condition/control comparisons;
+- link a Comparability Assessment ID for cross-sample or cross-condition comparisons, including the dimensions matched, mismatched or unknown;
 - variables and units to display;
 - plot/image/table/conceptual-diagram type;
 - statistical or image-processing treatment where relevant;
@@ -67,4 +68,4 @@ Critical evidence for the central claim must remain visible in the main paper. S
 
 ## 5. Cross-check
 
-Every main Figure must appear in the storyline. Every Panel must link to a claim or a Data Slot. Every essential missing Data Slot must be placed in a Figure or SI item and linked to a task, or have an explicit reason for exclusion. Every SI item must support a claim, Figure or reproducibility requirement.
+Every main Figure must appear in the storyline. Every Panel must link to a claim or a Data Slot. Every comparative Panel must link to a comparability assessment or explicitly state that comparability is unresolved. Every essential missing Data Slot must be placed in a Figure or SI item and linked to a task, or have an explicit reason for exclusion. Every SI item must support a claim, Figure or reproducibility requirement.
