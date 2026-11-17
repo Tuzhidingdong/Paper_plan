@@ -1,0 +1,12 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"ERA Routes Bundle — Future Phase Contract",
+  "type":"object",
+  "required":["schema_version","routes","approval_A"],
+  "properties":{
+    "schema_version":{"const":1,"type":"integer"},
+    "routes":{"type":"object","additionalProperties":{"type":"object","required":["central_question","novelty_candidate","supporting_result_ids","gap_ids","risk_assessment"],"properties":{"central_question":{"type":"string"},"novelty_candidate":{"type":"string"},"supporting_result_ids":{"type":"array","items":{"type":"string"}},"gap_ids":{"type":"array","items":{"type":"string"}},"risk_assessment":{"type":"array","items":{"type":"string"}},"status":{"enum":["EXPLORATORY","CANDIDATE","APPROVED","REJECTED"]}}}},
+    "approval_A":{"type":["object","null"]}
+  },
+  "additionalProperties":false
+}

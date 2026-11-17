@@ -40,5 +40,8 @@
   "uncertainty_note": "",
   "caption_text": null,
   "report_narrative": null,
-  "visual_text_discrepancy": null
+  "visual_text_discrepancy": null,
+  "caption_text_included": false,
+  "report_narrative_included": false,
+  "caption_separation_status": "UNVERIFIED"
 }

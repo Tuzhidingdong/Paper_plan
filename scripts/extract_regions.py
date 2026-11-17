@@ -63,7 +63,8 @@ def record_region(workspace: Path, bundle: dict[str, Any], page_number: int,
         "image_path": relative_path.as_posix(), "pixel_sha256": pixel_hash,
         "pixel_width": pixel_width, "pixel_height": pixel_height, "perceptual_hash": None,
         "region_type": region_type, "extractor_version": extractor_version,
-        "caption_blind_ready": region_type in {"embedded_image_block", "specified_pdf_region"},
+        "caption_blind_ready": False,
+        "caption_separation_status": "UNVERIFIED",
     }
     bundle["regions"][region_id] = region
     return region

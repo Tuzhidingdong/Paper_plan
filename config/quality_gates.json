@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "max_automated_reinspection_per_region": 1,
+  "caption_blind_first_pass_required": true,
+  "quantitative_panel_requires_independent_x_and_y_axis_review": true,
+  "low_or_unassessable_visual_legibility_disallows_numeric_values": true
+}

@@ -18,6 +18,8 @@ python scripts/build_contact_sheet.py --workspace ERA_Workspace
 python scripts/validate_evidence.py --workspace ERA_Workspace
 python scripts/validate_samples.py --workspace ERA_Workspace
 python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
+python scripts/prepare_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode initial
+python scripts/record_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode initial --record-json visual_card.json
 §§§
 
 For a vector-only figure, create a JSON list of page-coordinate regions and pass it with --regions-json. For a multi-panel image, create an explicit panel layout with normalized coordinates relative to the parent region and run segment_panels.py.

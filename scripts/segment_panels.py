@@ -89,6 +89,7 @@ def main() -> int:
             "segmentation_status": "SPECIFIED",
             "quantitative": bool(panel_spec.get("quantitative", False)),
             "axes_review_status": "PENDING",
+            "caption_separation_status": "UNVERIFIED",
         }
     document.close()
     paths = workspace_paths(workspace)

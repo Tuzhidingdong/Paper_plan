@@ -113,7 +113,7 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             errors.append(f"{result_id}: invalid epistemic_status")
         if bool(result.get("is_visual_estimate", False)) != (origin == "Visual_Estimate"):
             errors.append(f"{result_id}: is_visual_estimate disagrees with data_origin")
-        if legibility in {"Low", "Unassessable"} and permission == "Exact_Values":
+        if origin in {"Visual_Estimate", "Qualitative_Observation", "Unavailable"} and legibility in {"Low", "Unassessable"} and permission == "Exact_Values":
             errors.append(f"{result_id}: low/unassessable image cannot grant Exact_Values permission")
         if origin in {"Visual_Estimate", "Qualitative_Observation"} and permission == "Exact_Values":
             errors.append(f"{result_id}: visual/qualitative origin cannot grant Exact_Values permission")
@@ -139,7 +139,7 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                 errors.append(f"{result_id}: association cannot be CONFIRMED when Sample Entity is unresolved")
         for observation in result.get("observations", []):
             numeric = observation.get("numeric_value")
-            if numeric is not None and (permission != "Exact_Values" or legibility in {"Low", "Unassessable"}):
+            if numeric is not None and (permission != "Exact_Values" or (origin in {"Visual_Estimate", "Qualitative_Observation", "Unavailable"} and legibility in {"Low", "Unassessable"})):
                 errors.append(f"{result_id}: numeric_value forbidden by quantitative_permission")
             if observation.get("sample_id") and observation["sample_id"] not in samples:
                 errors.append(f"{result_id}: observation references unknown sample {observation['sample_id']}")

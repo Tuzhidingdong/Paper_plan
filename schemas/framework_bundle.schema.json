@@ -1,0 +1,17 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"ERA Framework Bundle — Future Phase Contract",
+  "type":"object",
+  "required":["schema_version","claims","data_slots","data_units","tasks","approval_B"],
+  "properties":{
+    "schema_version":{"const":1,"type":"integer"},
+    "claims":{"type":"object","additionalProperties":{"type":"object","required":["claim_text","epistemic_status","claim_type","evidence_ids"],"properties":{"claim_text":{"type":"string"},"epistemic_status":{"enum":["Observed","Interpreted","Hypothesized"]},"claim_type":{"enum":["Descriptive","Comparative","Associational","Causal","Mechanistic"]},"evidence_ids":{"type":"array","items":{"type":"string"}}}}},
+    "data_slots":{"type":"object","additionalProperties":{"type":"object","required":["target_claim_id","required_evidence_description","status"],"properties":{"target_claim_id":{"type":"string"},"required_evidence_description":{"type":"string"},"status":{"enum":["FILLED","PARTIAL","MISSING","BLOCKED"]},"manuscript_section":{"type":["string","null"]}}}},
+    "data_units":{"type":"object"},
+    "tasks":{"type":"object","additionalProperties":{"type":"object","required":["task_type","target_data_slot_ids","prerequisites","expected_output"],"properties":{"task_type":{"enum":["EXPERIMENT","ANALYSIS","THEORY","COMPUTATION","LITERATURE"]},"target_data_slot_ids":{"type":"array","items":{"type":"string"}},"prerequisites":{"type":"array","items":{"type":"string"}},"expected_output":{"type":"string"},"status":{"enum":["READY","BLOCKED_BY_EXPERIMENT","PLANNED","DONE"]}}}},
+    "sections":{"type":"object"},
+    "figure_plan":{"type":"object"},
+    "approval_B":{"type":["object","null"]}
+  },
+  "additionalProperties":false
+}

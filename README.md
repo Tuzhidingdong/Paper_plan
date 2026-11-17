@@ -37,6 +37,7 @@ python scripts/extract_regions.py --workspace ERA_Workspace
 python scripts/build_contact_sheet.py --workspace ERA_Workspace
 python scripts/validate_evidence.py --workspace ERA_Workspace
 python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
+python scripts/prepare_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode initial
 ```
 
 The contact sheet is for triage only. It must not be used for quantitative plot reading. Embedded images can be extracted automatically. Vector-only figures require a region specification before they can be inspected at figure resolution.

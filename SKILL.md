@@ -50,6 +50,28 @@ python scripts/validate_samples.py --workspace ERA_Workspace
 python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
 ```
 
+For caption-blind visual inspection, prepare an image-only task pack and record the structured response. The first-pass pack omits external caption and report narrative:
+
+§§§powershell
+python scripts/prepare_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode initial
+python scripts/record_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode initial --record-json visual_card.json
+§§§
+
+One targeted automated reinspection is allowed per Region/Panel and requires an explicit reason:
+
+§§§powershell
+python scripts/prepare_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode reinspection --reason "Check whether the x-axis unit is legible"
+python scripts/record_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode reinspection --reason "Check whether the x-axis unit is legible" --record-json visual_card_recheck.json
+§§§
+
+Reserve Result, Finding and Sample IDs through Python before writing permanent entities:
+
+§§§powershell
+python scripts/assign_entity_ids.py --workspace ERA_Workspace result-slot --parent-region-id REG001 --slot-index 1
+python scripts/assign_entity_ids.py --workspace ERA_Workspace finding-slot --slot-index 1
+python scripts/assign_entity_ids.py --workspace ERA_Workspace sample --alias "Sample A" --source-ref REG001
+§§§
+
 Panel segmentation accepts a proposed normalized panel layout:
 
 ```bash

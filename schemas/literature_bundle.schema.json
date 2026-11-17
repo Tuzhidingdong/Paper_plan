@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"ERA Literature Bundle — Future Phase Contract",
+  "type":"object",
+  "required":["schema_version","literature_records","literature_claims","research_gaps"],
+  "properties":{
+    "schema_version":{"const":1,"type":"integer"},
+    "literature_records":{"type":"object","additionalProperties":{"type":"object","required":["title","access_level","source_api"],"properties":{"title":{"type":"string"},"doi":{"type":["string","null"]},"year":{"type":["integer","null"]},"source_api":{"type":"array","items":{"type":"string"}},"access_level":{"enum":["METADATA_ONLY","ABSTRACT_VERIFIED","FULLTEXT_VERIFIED"]},"verbatim_evidence_snippets":{"type":"array","items":{"type":"object","required":["text","source_location"],"properties":{"text":{"type":"string","minLength":1},"source_location":{"type":"string"},"source_url":{"type":["string","null"]}}}}},"additionalProperties":true}},
+    "literature_claims":{"type":"object"},
+    "research_gaps":{"type":"object"},
+    "search_log_refs":{"type":"array","items":{"type":"string"}}
+  },
+  "additionalProperties":false
+}

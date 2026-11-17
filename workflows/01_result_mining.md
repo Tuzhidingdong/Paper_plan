@@ -20,6 +20,8 @@ Inspect individual image regions at their extracted resolution. For vector-only 
 
 The first visual pass receives only the cropped figure/panel. Do not provide the external caption or report narrative. Keep image-internal labels, ticks, units, legends and annotations visible.
 
+Prepare the task pack with `prepare_visual_inspection.py`, then record the structured response with `record_visual_inspection.py`. The Python gate permits one initial inspection and at most one reasoned reinspection per Region/Panel. A further automated reinspection is rejected. The inspection card must explicitly state that caption and report narrative were not included. If descriptive caption text is embedded inside the crop, mark crop separation unresolved and request a tighter crop.
+
 Identify each panel before interpreting a multi-panel figure. Never transfer an axis, unit or legend across panels. Record what is visible and what cannot be read.
 
 Do not return exact values unless the image is legible and the extraction policy permits them.
