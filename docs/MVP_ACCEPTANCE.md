@@ -1,53 +1,43 @@
-# P0/P1 MVP acceptance plan
+# P0/P1 MVP acceptance and full-plan handoff
+
+This document preserves the original deterministic PDF/evidence acceptance boundary. The full research-plan workflow is specified in workflows/07_full_run.md.
 
 ## Local setup
 
-§§§powershell
-py -3.11 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -m unittest discover -s tests -v
-§§§
+    py -3.11 -m venv .venv
+    .venv\Scripts\Activate.ps1
+    python -m pip install -r requirements.txt
+    python -m unittest discover -s tests -v
 
-The script commands below can be run from the repository root:
+## P0/P1 commands
 
-§§§powershell
-python scripts/ingest_pdf.py "D:\path\to\student_report.pdf" --workspace ERA_Workspace
-python scripts/extract_regions.py --workspace ERA_Workspace
-python scripts/build_contact_sheet.py --workspace ERA_Workspace
-python scripts/validate_evidence.py --workspace ERA_Workspace
-python scripts/validate_samples.py --workspace ERA_Workspace
-python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
-python scripts/prepare_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode initial
-python scripts/record_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode initial --record-json visual_card.json
-§§§
+    python scripts/ingest_pdf.py "D:\path\to\student_report.pdf" --workspace ERA_Workspace
+    python scripts/extract_regions.py --workspace ERA_Workspace
+    python scripts/build_contact_sheet.py --workspace ERA_Workspace
+    python scripts/validate_evidence.py --workspace ERA_Workspace
+    python scripts/validate_samples.py --workspace ERA_Workspace
+    python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
 
-For a vector-only figure, create a JSON list of page-coordinate regions and pass it with --regions-json. For a multi-panel image, create an explicit panel layout with normalized coordinates relative to the parent region and run segment_panels.py.
+For an existing workspace with the same PDF SHA-256, use refresh_vector_candidates.py to update the vector diagnostics without resetting evidence. Contact Sheets omit repeated top/footer layout assets by default; use --include-layout-assets to inspect everything.
 
-Reserve permanent Result Unit and Finding IDs before writing those entities:
+## Planning handoff
 
-§§§powershell
-python scripts/assign_entity_ids.py --workspace ERA_Workspace result-slot --parent-region-id REG001 --slot-index 1
-python scripts/assign_entity_ids.py --workspace ERA_Workspace finding-slot --slot-index 1
-python scripts/assign_entity_ids.py --workspace ERA_Workspace sample --alias "Sample A" --source-ref REG001
-§§§
+    python scripts/init_planning_bundles.py --workspace ERA_Workspace
+    python scripts/check_capability.py --workspace ERA_Workspace --task literature_screening
+    python scripts/validate_planning.py --workspace ERA_Workspace
+    python scripts/validate_bundle_schemas.py --workspace ERA_Workspace
 
-The Python registry owns all permanent IDs. Models may only reference these IDs.
+Allocate all permanent literature, route, claim, Data Slot, Data Unit and task IDs with assign_planning_ids.py. Persist each entity through upsert_planning_entity.py. Read workflows/07_full_run.md for the complete literature, research-route, experiment-plan, Introduction and PDF deliverable workflow.
 
-## Adversarial acceptance tests
+## Adversarial acceptance
 
-| ID | Fixture | Pass criterion |
-|---|---|---|
-| T01 | Low-resolution spectrum with blurred ticks | No exact values or invented peak positions |
-| T02 | Same sample under multiple aliases with an unresolved mapping | Unresolved mapping cannot support cross-result causal/structure–property claims |
-| T03 | Apparent performance improvement with missing normalization | Alternative explanations and missing metadata are recorded; no unsupported intrinsic-performance claim |
-| T04 | Repeated extraction of the same PDF region | Existing Region IDs are reused |
-| T05 | Caption asserts a trend not independently visible | Blind visual record remains independent; discrepancy is surfaced after caption comparison |
-| T06 | Multi-panel plot with different axes | Panels remain separate; no axis/legend transfer |
-| T07 | Checklist field absent from image but present in report text | Figure status and report status remain distinct |
-| T08 | Region remains unreadable after one reinspection | Further automated retries stop; issue enters confirmation list |
-| T09 | Workspace reopened in a new Agent session | State and IDs recover from disk, not chat history |
+- Dense vector plots mixed with raster banners are flagged for review.
+- Sparse decorative lines are not independently enough to trigger vector review.
+- Repeated raster header/footer assets are hidden only from default triage sheets, never deleted from evidence.
+- Unknown model capabilities block high-risk tasks.
+- Metadata-only literature cannot substantiate a literature claim.
+- Dangling IDs, evidence citations, Data Slot references and task dependencies are rejected.
+- A required experiment blocks a dependent calculation until its prerequisite is completed.
+- Duplicate Data Units derived from the same Result Unit are warned as one evidence lineage.
 
-## Acceptance boundary
-
-Automated unit tests verify deterministic boundaries. They do not prove scientific competence of the active VLM. The user must inspect a representative real student report locally, including extracted regions, sample mappings, visual observations and artifact audits. Record model/provider/version and capability qualification for that run.
+Deterministic tests do not prove scientific competence. The active model's exact provider/version and its actual search/visual capabilities must be recorded for the local run.

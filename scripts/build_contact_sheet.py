@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build triage-only contact sheets from extracted image regions."""
+"""Build triage-only contact sheets, omitting repeated layout assets by default."""
 from __future__ import annotations
 
 import argparse
@@ -13,6 +13,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--per-sheet", type=int, default=6)
+    parser.add_argument("--include-layout-assets", action="store_true")
     args = parser.parse_args()
     try:
         from PIL import Image, ImageDraw
@@ -22,9 +23,17 @@ def main() -> int:
     workspace = args.workspace.expanduser().resolve()
     paths = workspace_paths(workspace)
     bundle = load_evidence_bundle(workspace)
-    regions = sorted(bundle.get("regions", {}).values(), key=lambda item: (item["page_number"], item["region_id"]))
+    all_regions = sorted(bundle.get("regions", {}).values(), key=lambda item: (item["page_number"], item["region_id"]))
+    omitted = [] if args.include_layout_assets else [
+        item for item in all_regions if item.get("triage_role") == "REPEATED_LAYOUT_ASSET"
+    ]
+    regions = all_regions if args.include_layout_assets else [
+        item for item in all_regions if item.get("triage_role") != "REPEATED_LAYOUT_ASSET"
+    ]
+    print(f"Regions retained in evidence: {len(all_regions)}")
+    print(f"Repeated layout assets omitted from triage: {len(omitted)}")
     if not regions:
-        print("No extracted regions. Vector-only figures may need manual BBox specifications.")
+        print("No triage candidates remain. Use --include-layout-assets to inspect all preserved regions.")
         return 0
     columns = 2
     rows = math.ceil(args.per_sheet / columns)
@@ -44,7 +53,7 @@ def main() -> int:
             y = (offset // columns) * cell_h + 38
             sheet.paste(image, (x, y))
             draw.text(((offset % columns) * cell_w + 12, (offset // columns) * cell_h + 10),
-                      f"{region['region_id']} | page {region['page_number']} | TRIAGE ONLY", fill="black")
+                      f"{region['region_id']} | p{region['page_number']} | TRIAGE ONLY", fill="black")
         output = paths["contact_sheets"] / f"contact_{start // args.per_sheet + 1:03d}.jpg"
         sheet.save(output, quality=90)
         print(output)

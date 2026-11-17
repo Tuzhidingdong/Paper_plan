@@ -1,65 +1,68 @@
 # Paper_plan — Experiment Report Analyzer (ERA)
 
-ERA is an evidence-driven Agent Skill for discovering research opportunities from a single, potentially unstructured PDF experimental report and planning a data-centric SCI manuscript.
+ERA is an evidence-driven Agent Skill that starts from one potentially unstructured experimental-report PDF and develops a traceable research opportunity, a data-centric SCI manuscript framework, and a prioritized experimental/analytical/computational execution plan.
 
-## Current implementation
+## Current capability
 
-**ERA V3.2 — P0/P1 MVP**
+**ERA V3.3 — Evidence Mining + Agent-executable Research Planning**
 
-The first milestone focuses on trustworthy PDF ingestion and experimental-result mining:
+### Deterministic Python layer
+- PDF fingerprint, page inventory and immutable source preservation.
+- Embedded raster-image Region extraction with stable Python-owned anchors.
+- Vector-figure candidate detection using page-body spatial clusters and primitive types; candidates still require human review.
+- Explicit PDF-coordinate BBox rendering for vector-only figures and explicit panel registration.
+- Repeated near-identical header/footer asset hints; these assets remain preserved but are excluded from default triage sheets.
+- Caption-blind task packs, inspection records and one-reinspection gate.
+- Sample entities, evidence provenance and numeric-permission validation.
+- Python-issued planning IDs for literature, gaps, routes, claims, Data Slots, Data Units and tasks.
+- Planning bundle initialization, cross-bundle provenance/dependency validation and JSON Schema validation.
+- Model capability profile recording and fail-closed checks for high-risk stages.
+- Markdown-to-PDF export through installed Edge/Chrome, with page/text verification.
 
-- PDF inventory with source SHA-256 and reproducible extraction metadata.
-- Embedded-image region extraction with Python-generated stable anchors.
-- Parent Figure / child Panel representation.
-- Caption-blind visual inspection protocol.
-- Instrument-specific visual checklists.
-- Two-layer sample representation and conditional Micro-Gate 0.5.
-- Observed / Interpreted / Hypothesized evidence separation.
-- Artifact and confounder audit records.
-- Deterministic validation and compact prompt-context compilation.
-- HEAD-only state bundles and a persistent ID registry.
+### Agent-executed scientific layer
+- Three-stage literature frontier review: terminology, primary competitors, counter-evidence.
+- Three genuinely distinct research routes and a provisional recommendation.
+- Claim–Evidence graph, Data Slots, Data Units and conceptual figure/section architecture.
+- Prioritized experiment, analysis and conditional theory/computation plans.
+- English Introduction draft and student-facing self-check message.
+- Consolidated editable Markdown and verified PDF research plan.
 
-Research-frontier analysis, route generation, manuscript framework revision, and final report production are specified as later workflow contracts; they are not claimed as implemented in this MVP.
+The literature and scientific reasoning are executed by the host Agent using its available search/reasoning tools. Python validates provenance and structure; it does not independently prove novelty, causality or scientific mechanisms. Gate A and Gate B remain PENDING_HUMAN_REVIEW until a human actually decides.
 
 ## Quick start
 
-Python 3.10+ is required. Install the optional PDF/image dependencies:
+Python 3.10+ is required.
 
-```bash
-python -m pip install -r requirements.txt
-```
+    python -m pip install -r requirements.txt
+    python -m unittest discover -s tests -v
 
-In the repository root:
+Run the full workflow from repository root:
 
-```bash
-python scripts/ingest_pdf.py path/to/report.pdf --workspace ERA_Workspace
-python scripts/extract_regions.py --workspace ERA_Workspace
-python scripts/build_contact_sheet.py --workspace ERA_Workspace
-python scripts/validate_evidence.py --workspace ERA_Workspace
-python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
-python scripts/prepare_visual_inspection.py --workspace ERA_Workspace --entity-id REG001 --mode initial
-```
+    python scripts/ingest_pdf.py path/to/report.pdf --workspace ERA_Workspace
+    python scripts/extract_regions.py --workspace ERA_Workspace
+    python scripts/build_contact_sheet.py --workspace ERA_Workspace
+    python scripts/validate_evidence.py --workspace ERA_Workspace
+    python scripts/validate_samples.py --workspace ERA_Workspace
+    python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
+    python scripts/init_planning_bundles.py --workspace ERA_Workspace
+    python scripts/validate_planning.py --workspace ERA_Workspace
+    python scripts/validate_bundle_schemas.py --workspace ERA_Workspace
+    python scripts/export_plan_pdf.py ERA_Workspace/deliverables/FINAL_RESEARCH_PLAN.md
 
-The contact sheet is for triage only. It must not be used for quantitative plot reading. Embedded images can be extracted automatically. Vector-only figures require a region specification before they can be inspected at figure resolution.
+Follow workflows/07_full_run.md for the complete Agent sequence, literature verification, route synthesis and final deliverables. Use scripts/assign_entity_ids.py and scripts/assign_planning_ids.py for all permanent IDs, then scripts/upsert_planning_entity.py to persist one entity with a JSONL revision event. For an existing same-hash workspace use scripts/refresh_vector_candidates.py; do not reset its evidence.
 
-## Skill entry point
+## Scientific boundaries
 
-See [SKILL.md](SKILL.md). The detailed P0/P1 procedure is in [workflows/01_result_mining.md](workflows/01_result_mining.md).
-
-## Safety and scientific boundaries
-
-- The original PDF and extracted source regions are treated as immutable evidence.
-- A visual estimate is never represented as an exact numeric measurement.
+- The original PDF and extracted source regions are immutable evidence.
+- A vector candidate flag is only a prompt for visual review, not automatic chart recognition.
+- Repeated layout images are never deleted or merged; triage hints only affect default Contact Sheets.
+- Low-resolution visual estimates are never represented as exact numeric measurements.
 - Missing information in the report does not prove that an experiment was not performed.
-- Unconfirmed sample mappings cannot support cross-result causal or structure–property claims.
-- The model must not invent instrument settings, sample identities, raw data, literature evidence, or calculations.
-- Python validates deterministic structure; scientific interpretation remains explicitly qualified and reviewable.
-- Real student-report end-to-end acceptance is intentionally left to the user after local synchronization.
+- Unconfirmed sample mappings cannot support causal or structure–property claims.
+- The model must not invent instrument settings, sample identities, raw data, literature evidence, novelty or calculation inputs.
+- Literature access levels are explicit: metadata, abstract or full text actually inspected.
+- Derived views of one Result Unit are not independent experiments.
+- Computations requiring unavailable experimental structures/models are BLOCKED_BY_EXPERIMENT.
+- Student self-check messages must be gentle and non-accusatory.
 
-## Development checks
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-See [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) for scope and known limitations.
+See docs/IMPLEMENTATION_STATUS.md for the boundary between deterministic code and Agent-executed scientific work.

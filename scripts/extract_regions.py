@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Extract embedded raster image blocks and explicitly specified PDF regions."""
+"""Extract embedded raster blocks and explicit PDF regions with layout triage hints."""
 from __future__ import annotations
 
 import argparse
 import io
 import json
+import math
 import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +43,19 @@ def canonicalize_image(data: bytes) -> tuple[bytes, str, int, int]:
             raise ValueError("Cannot decode extracted image into canonical pixels; preserve it for manual review") from exc
 
 
+def difference_hash(png_data: bytes) -> str:
+    """A 64-bit visual-similarity hint; it never merges or deletes Region IDs."""
+    from PIL import Image
+    image = Image.open(io.BytesIO(png_data)).convert("L").resize((9, 8))
+    pixels = list(image.getdata())
+    bits = []
+    for row in range(8):
+        offset = row * 9
+        for col in range(8):
+            bits.append("1" if pixels[offset + col] > pixels[offset + col + 1] else "0")
+    return "".join(bits)
+
+
 def record_region(workspace: Path, bundle: dict[str, Any], page_number: int,
                   bbox: tuple[float, float, float, float], page_width: float, page_height: float,
                   image_data: bytes, region_type: str, extractor_version: str) -> dict[str, Any]:
@@ -61,13 +76,48 @@ def record_region(workspace: Path, bundle: dict[str, Any], page_number: int,
         "region_id": region_id, "anchor_key": anchor, "page_number": page_number,
         "bbox_pdf": [round(float(v), 3) for v in bbox], "bbox_normalized": normalized,
         "image_path": relative_path.as_posix(), "pixel_sha256": pixel_hash,
-        "pixel_width": pixel_width, "pixel_height": pixel_height, "perceptual_hash": None,
+        "pixel_width": pixel_width, "pixel_height": pixel_height,
+        "layout_fingerprint": difference_hash(png_data),
         "region_type": region_type, "extractor_version": extractor_version,
+        "triage_role": "REVIEW_CANDIDATE",
+        "triage_reasons": [],
         "caption_blind_ready": False,
         "caption_separation_status": "UNVERIFIED",
     }
     bundle["regions"][region_id] = region
     return region
+
+
+def mark_repeated_layout_assets(bundle: dict[str, Any], page_count: int) -> int:
+    """Label repeated top/bottom assets for Contact Sheet suppression only."""
+    groups = defaultdict(list)
+    for region in bundle.get("regions", {}).values():
+        if region.get("region_type") != "embedded_image_block":
+            continue
+        bbox = region.get("bbox_normalized") or [0, 0, 1, 1]
+        y0, y1 = float(bbox[1]), float(bbox[3])
+        zone = "header" if y1 <= 0.24 else ("footer" if y0 >= 0.76 else "body")
+        if zone != "body" and region.get("layout_fingerprint"):
+            pixel_width = int(region.get("pixel_width") or 0)
+            pixel_height = int(region.get("pixel_height") or 0)
+            bbox_width = round(float(bbox[2]) - float(bbox[0]), 2)
+            bbox_height = round(float(bbox[3]) - float(bbox[1]), 2)
+            shape_bucket = (round(pixel_width / 16), round(pixel_height / 16), bbox_width, bbox_height)
+            groups[(region["layout_fingerprint"], zone, shape_bucket)].append(region)
+
+    minimum_pages = max(3, int(math.ceil(page_count * 0.15)))
+    marked = 0
+    for (fingerprint, zone, shape_bucket), members in groups.items():
+        pages = {item["page_number"] for item in members}
+        if len(pages) < minimum_pages:
+            continue
+        for region in members:
+            region["triage_role"] = "REPEATED_LAYOUT_ASSET"
+            region["triage_reasons"] = [
+                f"Near-identical {zone} image appears on {len(pages)} pages; retained in evidence but omitted from default triage sheets"
+            ]
+            marked += 1
+    return marked
 
 
 def main() -> int:
@@ -109,6 +159,7 @@ def main() -> int:
                 continue
             record_region(workspace, bundle, page_index + 1, bbox, page_width, page_height,
                           image_data, "embedded_image_block", EXTRACTOR_VERSION)
+            added += 1
 
     if args.regions_json:
         specs = json.loads(args.regions_json.read_text(encoding="utf-8"))
@@ -125,15 +176,22 @@ def main() -> int:
             pix = page.get_pixmap(matrix=fitz.Matrix(args.dpi / 72, args.dpi / 72), clip=rect, alpha=False)
             record_region(workspace, bundle, page_number, tuple(rect), float(page.rect.width),
                           float(page.rect.height), pix.tobytes("png"), "specified_pdf_region", EXTRACTOR_VERSION)
+            added += 1
 
+    page_count = len(document)
     document.close()
+    repeated = mark_repeated_layout_assets(bundle, page_count)
     paths = workspace_paths(workspace)
     atomic_write_json(paths["bundle"], bundle)
     manifest = json.loads(paths["manifest"].read_text(encoding="utf-8"))
     manifest["stage"] = "REGIONS_EXTRACTED"
     manifest["region_count"] = len(bundle["regions"])
+    manifest["repeated_layout_asset_count"] = repeated
     atomic_write_json(paths["manifest"], manifest)
+    print(f"Newly processed regions: {added}")
     print(f"Total known regions: {len(bundle['regions'])}")
+    print(f"Repeated header/footer assets marked for triage suppression: {repeated}")
+    print("All Regions remain preserved; layout hints do not delete evidence or merge IDs.")
     print("Reminder: vector-only charts may still require explicit region BBoxes.")
     return 0
 

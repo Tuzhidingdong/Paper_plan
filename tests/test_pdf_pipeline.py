@@ -66,11 +66,11 @@ class PdfPipelineTests(unittest.TestCase):
             self.assertGreater(pages[0]["embedded_image_count"], 0)
             self.assertGreaterEqual(pages[0]["drawing_count"], 100)
             self.assertTrue(pages[0]["vector_or_text_figure_review"])
-            self.assertEqual(pages[0]["vector_review_reason"], "dense_vector_paths")
+            self.assertEqual(pages[0]["vector_review_reason"], "dense_vector_figure_cluster")
             self.assertFalse(pages[1]["vector_or_text_figure_review"])
             self.assertIsNone(pages[1]["vector_review_reason"])
             self.assertTrue(pages[2]["vector_or_text_figure_review"])
-            self.assertEqual(pages[2]["vector_review_reason"], "distributed_or_complex_vector_drawings")
+            self.assertEqual(pages[2]["vector_review_reason"], "moderate_rectangular_plot_cluster")
 
     def test_ingest_extract_panel_registration_and_repeat_ids(self):
         try:

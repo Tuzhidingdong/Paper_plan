@@ -1,59 +1,62 @@
-# ERA V3.2 architecture
+# ERA V3.3 architecture
 
 ## Principles
 
 - One initial PDF source.
-- Python owns region anchors, permanent IDs, persistence and deterministic validation.
-- Agent owns qualified scientific interpretation and literature reasoning.
-- Humans own ambiguous identity confirmation and final research decisions.
+- Python owns physical evidence anchors, permanent IDs, persistence, bundle validation and repeatable transformations.
+- The Agent owns scientific interpretation, current literature searching, route synthesis and manuscript planning.
+- Humans own ambiguous sample identity and final scientific decisions.
 - Full state remains on disk; prompt context is task-specific.
-- Raw evidence is immutable; derived records are versioned.
+- Raw evidence is immutable; derived records are versioned and retain lineage.
 
 ## Data flow
 
-```text
-PDF
- └─ ingest and page inventory
-     └─ raster region extraction / vector-region review
-         └─ Figure and Panel registration
-             └─ caption-blind visual inspection
-                 └─ separate caption and narrative extraction
-                     └─ Evidence Bundle
-                         ├─ sample mapping
-                         ├─ instrument checklist
-                         ├─ artifact/confounder audit
-                         └─ Observed / Interpreted / Hypothesized
-```
+    PDF
+     -> ingestion and page inventory
+     -> embedded raster extraction + vector candidate triage
+     -> explicit vector crop and panel registration where needed
+     -> image-first visual pass
+     -> caption/text comparison
+     -> Result Units, Sample Entities and artifact/confounder audit
+     -> evidence validation
+     -> literature frontier and verified citation claims
+     -> three candidate research routes
+     -> Claim–Evidence graph and Data Slots
+     -> Data Units and dependency-aware execution tasks
+     -> Introduction, manuscript framework and research-plan export
 
 ## HEAD-only bundles
 
-1. evidence_bundle.json: source references, regions, panels, samples, Result Units, findings and audits.
-2. literature_bundle.json: later literature records, claims, snippets, gaps and retrieval references.
-3. routes_bundle.json: later research routes and Gate A decision.
-4. framework_bundle.json: later claims, Data Slots, Data Units, tasks and Gate B state.
-5. state_manifest.json: workspace revision, stage, schema versions, hashes and capability status.
+1. evidence_bundle.json: source references, regions, panels, samples, Result Units, Findings, inspections and audits.
+2. literature_bundle.json: search scope, access-tiered literature records, exact snippets, literature claims and bounded gaps.
+3. routes_bundle.json: candidate routes, supporting evidence, recommendation and Gate A decision state.
+4. framework_bundle.json: claims, Data Slots, Data Units, tasks, sections, figure plan, Introduction and Gate B state.
+5. state_manifest.json: source, workspace revision, stage, tool versions, bundle references and capability profile.
 
-History and raw search responses belong in append-only JSONL sidecars, not the HEAD bundles.
+Search logs and entity revision history belong in append-only JSONL sidecars rather than full prompt context.
 
-## Stable anchors
+## Stable IDs and lineage
 
-Python creates a physical region anchor from source PDF SHA-256, page number, normalized BBox, pixel SHA-256 and extractor version. Perceptual hashes are similarity hints only; never merge regions from perceptual similarity alone.
+Python creates physical Region anchors from source PDF SHA-256, page, normalized BBox, pixel SHA-256 and extractor version. Similarity hashes are hints only. The registry allocates and reuses IDs; deleted IDs are tombstoned, never recycled. Planning IDs are reserved using a stable semantic anchor key. LLMs may reference IDs but may not mint them.
 
-The ID registry is Python-owned. Repeated extraction reuses known anchor mappings. New IDs are allocated atomically. Deleted IDs are tombstoned and never recycled. LLMs may reference existing IDs but may not choose permanent IDs.
+A Data Unit records all source Result Unit IDs and transformations. Multiple derived views of one source do not become independent experiments.
 
-## Sample representation
+## Visual and layout triage
 
-Use a simple Sample Entity with aliases, optional preparation-condition dictionary, optional batch note and identity status. Put Measurement Context inside each Result Unit. Each independently labeled curve/series may have its own sample association. Do not infer separate batches or measurement runs unless explicitly identified.
+Vector candidates are selected from central-page spatial clusters and chart-like drawing primitives. Full-page drawing BBox is diagnostic only. Candidate flags are not semantic chart labels.
 
-## Evidence state
+Repeated near-identical top/footer image blocks are labelled as layout assets for default Contact Sheet suppression. They remain in the Evidence Bundle and can be included explicitly.
 
-Epistemic status: Observed / Interpreted / Hypothesized.
-Data origin: Exact_Text / Exact_Table / Vector_Extracted / Visual_Estimate / Qualitative_Observation / Unavailable.
-Visual legibility: High / Medium / Low / Unassessable.
-Quantitative permission: Exact_Values / Trend_Only / Qualitative_Only / None.
+Image-first inspection precedes caption/report-text extraction. If the model context has already seen the narrative, cognitive independence is not guaranteed and must be declared.
 
-Checklist state: FOUND, NOT_SHOWN, NOT_LEGIBLE, UNCERTAIN, NOT_APPLICABLE. NOT_SHOWN is scoped to the inspected figure, not the whole report.
+## Capability and validation
 
-## Later-stage contracts
+The active model provider, exact model ID/version, capabilities and evidence basis are recorded per workspace. Unknown capability blocks the associated high-risk task. This is operator-attested, not a model benchmark.
 
-Research frontier, route generation, Data-centric framework, human revision and final deliverables are documented but not implemented in this MVP.
+Deterministic validation is layered:
+- evidence provenance, source hash, Region/Sample IDs and numeric permissions;
+- sample mapping and conditional Micro-Gate;
+- Draft 2020-12 JSON Schema validation;
+- cross-bundle citation, route, claim, Data Slot, Data Unit lineage and task dependency validation.
+
+None of these checks proves a scientific mechanism or novelty claim.

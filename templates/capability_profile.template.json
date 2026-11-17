@@ -1,0 +1,17 @@
+{
+  "provider": "RECORD_EXACT_PROVIDER",
+  "model_id": "RECORD_EXACT_MODEL_ID",
+  "model_version": "RECORD_EXACT_VERSION_OR_DATE",
+  "capabilities": {
+    "native_multimodal": "unknown",
+    "high_resolution_image_input": "unknown",
+    "structured_json_output": "unknown",
+    "scientific_reasoning": "unknown",
+    "long_context_consistency": "unknown",
+    "web_search_access": "unknown"
+  },
+  "evidence_basis": [
+    "RECORD_PROVIDER_DOCUMENTATION_OR_HOST_CAPABILITY_EVIDENCE"
+  ],
+  "notes": "Do not mark a capability yes solely because a task appeared to work once. Unknown capability blocks high-risk interpretation."
+}

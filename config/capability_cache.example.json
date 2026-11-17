@@ -1,28 +1,29 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "qualified_models": [
     {
-      "provider": "REPLACE_WITH_PROVIDER",
-      "model_id": "REPLACE_WITH_EXACT_MODEL_ID",
-      "model_version": "REPLACE_WITH_VERSION_OR_DATE",
+      "provider": "RECORD_EXACT_PROVIDER",
+      "model_id": "RECORD_EXACT_MODEL_ID",
+      "model_version": "RECORD_EXACT_VERSION_OR_DATE",
       "capabilities": {
         "native_multimodal": "unknown",
         "high_resolution_image_input": "unknown",
         "structured_json_output": "unknown",
         "scientific_reasoning": "unknown",
-        "long_context_consistency": "unknown"
+        "long_context_consistency": "unknown",
+        "web_search_access": "unknown"
       },
       "qualification": {
-        "benchmark_suite": "ERA_VISUAL_BENCHMARK_V1",
         "status": "NOT_QUALIFIED",
+        "evidence_basis": [],
         "qualified_at": null,
-        "notes": "Populate only after offline development qualification."
+        "notes": "Operator-attested capability metadata; do not treat a successful single task as a benchmark."
       }
     }
   ],
   "runtime_policy": {
     "no_per_workspace_benchmark": true,
-    "unknown_capability_blocks_high_risk_visual_interpretation": true,
+    "unknown_capability_blocks_high_risk_visual_or_literature_interpretation": true,
     "host_model_switching_assumed": false
   }
 }

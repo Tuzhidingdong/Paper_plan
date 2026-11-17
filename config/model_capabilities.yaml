@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 required_capabilities:
   visual_inspection:
     minimum: native_multimodal_high_resolution
@@ -7,8 +7,8 @@ required_capabilities:
     minimum: strong_scientific_reasoning
     fallback: preserve_observations_and_mark_pending
   literature_screening:
-    minimum: structured_instruction_following
-    fallback: deterministic_prefilter_only
+    minimum: web_search_and_structured_instruction_following
+    fallback: do_not_claim_frontier_review_complete
   route_synthesis:
     minimum: strong_cross_evidence_reasoning
     fallback: do_not_submit_for_human_approval
@@ -20,6 +20,7 @@ required_capabilities:
     fallback: skeleton_only
 runtime_policy:
   no_per_run_benchmark: true
-  capability_cache_path: "~/.era/capability_cache.json"
+  capability_cache_path: workspace/state/capability_profile.json
   unknown_capability_behavior: block_high_risk_task
   host_model_switching_assumed: false
+  capability_profile_is_operator_attested: true

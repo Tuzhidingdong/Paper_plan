@@ -2,80 +2,88 @@
 
 ## Objective
 
-Turn one unstructured PDF report into a traceable inventory of candidate experimental results without inventing values, sample identities, conditions or conclusions.
+Turn one unstructured experimental-report PDF into a traceable inventory of candidate experimental results without inventing values, sample identities, conditions or conclusions.
 
-## 1. Deterministic ingestion
+## 1. Source and workspace
 
-Run ingest_pdf.py and extract_regions.py. Python must compute source SHA-256; record page count, dimensions, rotation and extracted text; extract embedded raster image blocks; retain page-coordinate BBoxes and pixel hashes; register stable Region IDs; and flag pages with vector drawings/text but no embedded image blocks.
+- Preserve the original PDF and record SHA-256, byte size and page count.
+- Use one isolated workspace for this PDF. Never overwrite a different source.
+- If a previously validated workspace exists for the identical SHA-256, reuse its Evidence Bundle, ID Registry, visual-inspection cards and raw source assets rather than repeating model calls.
+- Any reuse must first verify the source hash and the provenance of every referenced asset.
 
-Do not claim all figures were extracted. Vector-only plots need separately defined regions.
+## 2. Page inventory and vector triage
 
-## 2. Triage
+Run ingest_pdf.py on a new workspace, or refresh_vector_candidates.py on an existing workspace. Both use the same spatial vector-cluster heuristic.
 
-Generate a contact sheet to identify likely figure regions and prioritize inspection. It is only a triage view and must not be used to read exact values, weak peaks, slopes or close line styles.
+The candidate heuristic:
+- ignores page-edge furniture when scoring the central body area;
+- groups drawing centers into a page grid and finds spatially connected clusters;
+- counts line/rectangle/quad primitives within the strongest cluster;
+- records drawing-grid occupancy, cluster drawing count and plot primitive types;
+- allows raster images and vector drawings on the same page.
 
-Inspect individual image regions at their extracted resolution. For vector-only figures, define a page-coordinate BBox and render at a declared DPI.
+drawing_bbox_area_ratio reports the largest central cluster's grid bounding area, not the union of every page drawing. The legacy whole-page union is retained separately as drawing_full_page_union_bbox_area_ratio.
 
-## 3. Caption-blind visual inspection
+A candidate flag is only a prompt for page-level review, not semantic chart detection. Review candidate pages against the rendered page before creating a Result Unit. Do not manually register decorative rules as scientific figures.
 
-The first visual pass receives only the cropped figure/panel. Do not provide the external caption or report narrative. Keep image-internal labels, ticks, units, legends and annotations visible.
+## 3. Raster extraction and Contact Sheet triage
 
-Prepare the task pack with `prepare_visual_inspection.py`, then record the structured response with `record_visual_inspection.py`. The Python gate permits one initial inspection and at most one reasoned reinspection per Region/Panel. A further automated reinspection is rejected. The inspection card must explicitly state that caption and report narrative were not included. If descriptive caption text is embedded inside the crop, mark crop separation unresolved and request a tighter crop.
+Run extract_regions.py. It extracts embedded raster image blocks and can render explicit PDF-coordinate BBoxes for vector-only figures.
 
-Identify each panel before interpreting a multi-panel figure. Never transfer an axis, unit or legend across panels. Record what is visible and what cannot be read.
+Repeated near-identical top/footer image blocks are labelled REPEATED_LAYOUT_ASSET only for triage. They remain in the Evidence Bundle and their IDs are not merged or deleted. The default Contact Sheet omits these repeated assets; use --include-layout-assets to inspect all.
 
-Do not return exact values unless the image is legible and the extraction policy permits them.
+Contact Sheets are for orientation only. Never read quantitative values, weak peaks, slopes, close line styles or axes from downscaled sheets. Inspect the original-resolution Region/Panel instead.
 
-## 4. Instrument checklist
+For the gypsum-report regression, previously registered vector BBoxes on p10/p11 and other manual chart regions should be reused when source hash and page-coordinate provenance match. Do not re-create equivalent crops or re-run their visual inspection merely to consume tokens.
 
-Load only the checklist for the recognized technique. For each field use FOUND, NOT_SHOWN, NOT_LEGIBLE, UNCERTAIN or NOT_APPLICABLE.
+## 4. Image-first visual inspection
 
-Keep figure-level status separate from report-wide status. After visual inspection, search report text for the same field. NOT_SHOWN is not equivalent to “not performed”.
+Before opening page text, captions or narrative:
+1. Check scripts/check_capability.py --task visual_inspection.
+2. Inspect original-resolution images individually.
+3. Create a CAPTION_BLIND task pack and record visibility, axes/units, sample labels actually visible, legibility and confidence.
+4. Keep each panel, axis, unit, tick, legend and series association independent.
+5. Exact values require legible ticks, axis, units and series identity. Low-resolution plots never yield exact values.
+6. One targeted reinspection per Region/Panel is allowed, with a written reason.
 
-## 5. Caption and narrative comparison
+If the same Agent has already read the report text in the active context, set cognitive_blindness = NOT_GUARANTEED. The JSON task pack omitting captions does not erase context already seen by the model. Do not describe the inspection as fully independent.
 
-Only after the blind visual pass, retrieve the associated caption and nearby report text. Compare visual observation, caption and narrative. If they disagree, create VISUAL_TEXT_DISCREPANCY with source references. Do not conclude that the student is wrong.
+## 5. Text and caption comparison
 
-## 6. Result Units and panels
+Only after the first image-only pass, inspect extracted page text and external captions. Compare what the text says with what is directly visible. Record agreement, text-only details not visible in the figure, visual/text discrepancies, text that overstates the image and unresolved crop/caption contamination.
 
-A Result Unit is one independently meaningful result, not necessarily one image. A Figure can contain multiple Results; a Result may use one Panel or several coordinated regions. Preserve every parent/child relationship.
+Figure-level status and report-level status stay separate. NOT_SHOWN means not shown in the inspected figure, not absent from the whole report.
 
-For multi-curve plots, use series-level sample associations. If the curve-to-sample mapping is unclear, leave it unresolved.
+## 6. Results, sample identities and context
 
-## 7. Sample mapping and Micro-Gate 0.5
+- Create Sample Entities only from explicit sample names/aliases or documented mappings.
+- Keep CONFIRMED, PROBABLE, AMBIGUOUS, UNMAPPED and NOT_APPLICABLE distinct.
+- Reserve Result and Finding IDs with assign_entity_ids.py.
+- One Result Unit represents one source observation/series with Region/Panel provenance and a Measurement Context.
+- Keep Observed, Interpreted and Hypothesized separate.
+- Capture Exact_Text/Exact_Table/Vector_Extracted separately from Visual_Estimate and Qualitative_Observation.
+- Never infer unreported batches, measurement runs, replicates, treatment conditions or raw data.
 
-Create provisional Sample Entities from explicit names and preparation descriptions. Do not infer batches/runs.
+## 7. Artifact/confounder audit
 
-Trigger Micro-Gate 0.5 only if unresolved mapping breaks a central cross-result relationship, changes a key interpretation, or is required by a core claim. Show only relevant aliases and candidate mappings. The user may confirm, reject or defer. Deferral does not block independent analysis.
+Before upgrading observations into interpretations, consider relevant sample identity, preparation differences, instrument calibration, acquisition settings, baseline/background/fitting, normalization and units, replicate variability, controls, alternate mechanisms, image cropping/contrast and selection bias.
 
-Unconfirmed mappings cannot support cross-result causal, mechanistic or structure–property conclusions.
+For every relevant factor record whether the report shows it, where that evidence came from, plausible alternatives and what would resolve the uncertainty. Missing metadata makes the stronger claim not assessable; it does not prove the experiment is wrong.
 
-## 8. Artifact audit and epistemic separation
+## 8. Validation and context compilation
 
-For each important candidate finding:
-- separate Observed, Interpreted and Hypothesized statements;
-- record data origin, legibility and quantitative permission;
-- check relevant instrument-specific artifact factors;
-- record alternative explanations and their evidence status;
-- distinguish figure-level NOT_SHOWN from report-wide NOT_REPORTED;
-- do not treat missing metadata as proof of error.
+Run:
 
-Incomplete normalization or critical conditions may still allow descriptive reporting, but not stronger intrinsic-performance or causal claims.
+    python scripts/validate_evidence.py --workspace WORKSPACE
+    python scripts/validate_samples.py --workspace WORKSPACE
+    python scripts/compile_prompt_context.py --workspace WORKSPACE --output WORKSPACE/cache/prompt_context/evidence_context.md
 
-## 9. Validation and context compilation
-
-```bash
-python scripts/validate_evidence.py --workspace ERA_Workspace
-python scripts/validate_samples.py --workspace ERA_Workspace
-python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
-```
-
-Do not mark evidence audited while deterministic errors remain. Surface warnings.
+A PASS is structural only. Surface sample warnings and unresolved mappings. Trigger Micro-Gate 0.5 only when an unresolved association blocks a central cross-result link; independent results can still be analyzed.
 
 ## Required outputs
 
-Evidence Bundle, State Manifest, ID Registry, PDF/page inventory, extracted images, Result Units, Sample Entities, instrument checklist, artifact audit, visual/text discrepancies, validation report and compact context.
+Evidence Bundle, State Manifest, ID Registry, PDF/page inventory, all extracted Regions, Contact Sheets, Result Units, Sample Entities, instrument checklist, artifact audit, visual/text discrepancies, validation reports and compact context.
 
 ## Stop conditions
 
-Stop only the affected interpretation when required visual capability is unavailable, resolution is inadequate, a panel cannot be separated, or sample mapping remains ambiguous. Continue unrelated independent extraction.
+Block only the affected interpretation when capability is insufficient, resolution is inadequate, a panel cannot be separated, or sample identity is unresolved. Continue unrelated independent evidence extraction. Never claim all figures were extracted when vector-only BBoxes remain unregistered.

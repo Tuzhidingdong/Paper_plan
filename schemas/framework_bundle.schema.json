@@ -1,17 +1,96 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "title":"ERA Framework Bundle — Future Phase Contract",
-  "type":"object",
-  "required":["schema_version","claims","data_slots","data_units","tasks","approval_B"],
-  "properties":{
-    "schema_version":{"const":1,"type":"integer"},
-    "claims":{"type":"object","additionalProperties":{"type":"object","required":["claim_text","epistemic_status","claim_type","evidence_ids"],"properties":{"claim_text":{"type":"string"},"epistemic_status":{"enum":["Observed","Interpreted","Hypothesized"]},"claim_type":{"enum":["Descriptive","Comparative","Associational","Causal","Mechanistic"]},"evidence_ids":{"type":"array","items":{"type":"string"}}}}},
-    "data_slots":{"type":"object","additionalProperties":{"type":"object","required":["target_claim_id","required_evidence_description","status"],"properties":{"target_claim_id":{"type":"string"},"required_evidence_description":{"type":"string"},"status":{"enum":["FILLED","PARTIAL","MISSING","BLOCKED"]},"manuscript_section":{"type":["string","null"]}}}},
-    "data_units":{"type":"object"},
-    "tasks":{"type":"object","additionalProperties":{"type":"object","required":["task_type","target_data_slot_ids","prerequisites","expected_output"],"properties":{"task_type":{"enum":["EXPERIMENT","ANALYSIS","THEORY","COMPUTATION","LITERATURE"]},"target_data_slot_ids":{"type":"array","items":{"type":"string"}},"prerequisites":{"type":"array","items":{"type":"string"}},"expected_output":{"type":"string"},"status":{"enum":["READY","BLOCKED_BY_EXPERIMENT","PLANNED","DONE"]}}}},
-    "sections":{"type":"object"},
-    "figure_plan":{"type":"object"},
-    "approval_B":{"type":["object","null"]}
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ERA Data-centric Manuscript Framework Bundle",
+  "type": "object",
+  "required": ["schema_version", "claims", "data_slots", "data_units", "tasks", "approval_B"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "claims": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["claim_id", "claim_text", "epistemic_status", "claim_type", "evidence_refs"],
+        "properties": {
+          "claim_id": {"type": "string", "pattern": "^C[0-9]{3,}$"},
+          "claim_text": {"type": "string", "minLength": 1},
+          "epistemic_status": {"enum": ["Observed", "Interpreted", "Hypothesized"]},
+          "claim_type": {"enum": ["Descriptive", "Comparative", "Associational", "Causal", "Mechanistic"]},
+          "evidence_refs": {"type": "array", "items": {"type": "object", "required": ["kind", "id"]}},
+          "alternative_explanations": {"type": "array"},
+          "limitations": {"type": "array"},
+          "manuscript_section": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "data_slots": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["data_slot_id", "target_claim_id", "required_evidence_description", "status"],
+        "properties": {
+          "data_slot_id": {"type": "string", "pattern": "^DS[0-9]{3,}$"},
+          "target_claim_id": {"type": "string"},
+          "required_evidence_description": {"type": "string", "minLength": 1},
+          "status": {"enum": ["FILLED", "PARTIAL", "MISSING", "BLOCKED"]},
+          "available_result_ids": {"type": "array", "items": {"type": "string"}},
+          "acceptance_criteria": {"type": "array", "items": {"type": "string"}},
+          "priority": {"enum": ["ESSENTIAL", "STRENGTHENING", "OPTIONAL"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "data_units": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["data_unit_id", "source_result_ids"],
+        "properties": {
+          "data_unit_id": {"type": "string", "pattern": "^DU[0-9]{3,}$"},
+          "source_result_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "derived": {"type": "boolean"},
+          "transformation": {"type": ["string", "null"]},
+          "independence_group_id": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "tasks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["task_id", "task_type", "target_data_slot_ids", "expected_output", "completion_criteria", "status"],
+        "properties": {
+          "task_id": {"type": "string", "pattern": "^T[0-9]{3,}$"},
+          "task_type": {"enum": ["EXPERIMENT", "ANALYSIS", "THEORY", "COMPUTATION", "LITERATURE"]},
+          "target_data_slot_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "target_claim_ids": {"type": "array", "items": {"type": "string"}},
+          "prerequisites": {"type": "array", "items": {"type": "string"}},
+          "priority": {"enum": ["P0", "P1", "P2"]},
+          "expected_output": {"type": "string", "minLength": 1},
+          "completion_criteria": {"type": "string", "minLength": 1},
+          "status": {"enum": ["READY", "BLOCKED_BY_EXPERIMENT", "PLANNED", "DONE"]},
+          "requires_experiment_before_calculation": {"type": "boolean"},
+          "blocked_by_experiment_ids": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": true
+      }
+    },
+    "sections": {"type": "object"},
+    "figure_plan": {"type": "object"},
+    "recommended_route_id": {"type": ["string", "null"]},
+    "introduction_outline": {"type": "array"},
+    "introduction_draft": {"type": ["string", "null"]},
+    "approval_B": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["PENDING_HUMAN_REVIEW", "APPROVED", "DEFERRED", "REJECTED"]},
+        "decision": {"type": ["string", "null"]},
+        "reviewer": {"type": ["string", "null"]},
+        "decided_at": {"type": ["string", "null"]}
+      }
+    }
   },
-  "additionalProperties":false
+  "additionalProperties": false
 }
