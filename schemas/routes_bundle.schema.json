@@ -2,46 +2,161 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ERA Research Routes Bundle",
   "type": "object",
-  "required": ["schema_version", "routes", "approval_A"],
+  "required": [
+    "schema_version",
+    "routes",
+    "approval_A"
+  ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {
+      "const": 1
+    },
     "routes": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["route_id", "central_question", "novelty_candidate", "bounded_gap", "supporting_result_ids", "gap_ids", "feasibility", "novelty_risk"],
+        "required": [
+          "route_id",
+          "central_question",
+          "novelty_candidate",
+          "bounded_gap",
+          "supporting_result_ids",
+          "gap_ids",
+          "feasibility",
+          "novelty_risk"
+        ],
         "properties": {
-          "route_id": {"type": "string", "pattern": "^ROUTE[0-9]{3,}$"},
-          "central_question": {"type": "string", "minLength": 1},
-          "novelty_candidate": {"type": "string", "minLength": 1},
-          "bounded_gap": {"type": "string", "minLength": 1},
-          "supporting_result_ids": {"type": "array", "items": {"type": "string"}},
-          "supporting_finding_ids": {"type": "array", "items": {"type": "string"}},
-          "sample_dependency_ids": {"type": "array", "items": {"type": "string"}},
-          "gap_ids": {"type": "array", "items": {"type": "string"}},
-          "supporting_literature_claim_ids": {"type": "array", "items": {"type": "string"}},
-          "competing_literature_ids": {"type": "array", "items": {"type": "string"}},
-          "alternative_explanations": {"type": "array"},
-          "data_slot_needs": {"type": "array"},
-          "feasibility": {"type": "string"},
-          "novelty_risk": {"type": "string"},
-          "status": {"enum": ["EXPLORATORY", "CANDIDATE", "APPROVED", "REJECTED"]}
+          "route_id": {
+            "type": "string",
+            "pattern": "^ROUTE[0-9]{3,}$"
+          },
+          "central_question": {
+            "type": "string",
+            "minLength": 1
+          },
+          "novelty_candidate": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bounded_gap": {
+            "type": "string",
+            "minLength": 1
+          },
+          "supporting_result_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "supporting_finding_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sample_dependency_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gap_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "supporting_literature_claim_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "competing_literature_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "alternative_explanations": {
+            "type": "array"
+          },
+          "data_slot_needs": {
+            "type": "array"
+          },
+          "feasibility": {
+            "type": "string"
+          },
+          "novelty_risk": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "EXPLORATORY",
+              "CANDIDATE",
+              "APPROVED",
+              "REJECTED"
+            ]
+          }
         },
         "additionalProperties": true
       }
     },
-    "recommended_route_id": {"type": ["string", "null"]},
-    "recommendation_rationale": {"type": ["string", "null"]},
-    "route_generation_note": {"type": ["string", "null"]},
+    "recommended_route_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recommendation_rationale": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "route_generation_note": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "approval_A": {
       "type": "object",
-      "required": ["status"],
+      "required": [
+        "status"
+      ],
       "properties": {
-        "status": {"enum": ["PENDING_HUMAN_REVIEW", "APPROVED", "DEFERRED", "REJECTED"]},
-        "decision": {"type": ["string", "null"]},
-        "reviewer": {"type": ["string", "null"]},
-        "decided_at": {"type": ["string", "null"]}
+        "status": {
+          "enum": [
+            "PENDING_HUMAN_REVIEW",
+            "APPROVED",
+            "DEFERRED",
+            "REJECTED"
+          ]
+        },
+        "decision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decided_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
+    },
+    "workspace_revision_number": {
+      "type": "integer",
+      "minimum": 0
     }
   },
   "additionalProperties": false

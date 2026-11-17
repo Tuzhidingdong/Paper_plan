@@ -1,35 +1,47 @@
-# Full-run acceptance — evidence to research plan
+# Full-run acceptance — Paper_plan V4 manuscript-development package
 
 ## Technical acceptance
 
-- Source SHA-256 matches the supplied PDF and source remains unchanged.
-- The spatial vector detector is tested with dense mixed raster/vector, moderate vector bars and sparse decorative paths.
-- Existing workspaces can refresh vector diagnostics without resetting the Evidence Bundle or visual-inspection records.
-- Repeated near-identical header/footer image assets are suppressed only from default Contact Sheets; every Region remains in the bundle.
-- Capability checks block unknown high-risk capabilities and pass a valid operator-attested profile.
-- Planning IDs are Python-issued and every permanent planning entity is written by guarded Entity Upsert with JSONL history.
-- Literature citation/access-tier, route, Claim, Data Slot, Data Unit lineage, task dependency and cycle checks pass.
-- All five HEAD bundles pass Draft 2020-12 JSON Schema validation when populated.
-- A calculation requiring missing experimental structure/model inputs is BLOCKED_BY_EXPERIMENT.
-- Markdown export creates a readable PDF; the PDF is reopened and page count/text extraction verified.
+- Source hashes and evidence provenance remain valid; originals are unchanged.
+- Existing V3.3 extraction, identity, evidence and planning tests do not regress.
+- The Manuscript Development Bundle is initialized without overwriting existing work.
+- All V4 permanent IDs are Python-issued and upsert history is recorded.
+- Manuscript JSON Schema is valid and representative package records conform.
+- Journal source/profile status is coherent.
+- Introduction paragraph, literature-claim and Claim references resolve.
+- Storyline steps refer to valid Figures and Claims.
+- Every main Figure has Panels, a take-home message and Claim/Data Slot links.
+- Every Panel has purpose and acceptance criteria.
+- SI items resolve their Claim/Figure/Data Slot references.
+- Essential unsatisfied Data Slots have work-package coverage or an explicit no-task rationale.
+- Work-package dependencies resolve and are acyclic.
+- A calculation with missing required inputs cannot be READY or IN_PROGRESS.
+- Deliverable paths remain workspace-relative; files marked FINAL exist.
+- Final Markdown exports to PDF, which is reopened and checked for page count and expected text.
+- Python 3.10, 3.11 and 3.12 CI matrix passes.
 
-## Scientific acceptance (local real PDF)
+## Scientific/product acceptance
 
-- Existing evidence for an identical PDF may be reused only after the SHA-256 is verified.
-- Image-first inspection is recorded before report-text review; any same-context leakage is declared.
-- Main experimental results are linked to source Region/Panel and Result Unit IDs.
-- Observations, interpretations and hypotheses are separated.
-- Sample identity uncertainty and artifacts/confounders are visible.
-- Every literature claim points to verified source snippets and exact access level.
-- Three routes are scientifically distinct or a documented evidence-based reason explains fewer.
-- The recommended route is provisional; Gate A remains pending until a human selects it.
-- Each main manuscript claim links to evidence; every Data Slot has a status and acceptance criterion.
-- Every unsatisfied essential Data Slot has a task or explicit no-task rationale.
-- Experiment tasks include controls, measurements, raw data, replicate plan/TBD and completion criteria.
-- Unsupported theoretical/computational work is not presented as executable.
-- Introduction citations are verified and no results are invented.
-- Gate B remains pending until a human accepts the framework.
+- The plan has one central contribution or an explicit stop/redirect recommendation.
+- The contribution is bounded by the strongest competing literature and counter-evidence.
+- The target-journal profile uses current official sources or clearly reports unresolved requirements.
+- Introduction, storyline, Figures, SI, tasks and final plan express the same central argument.
+- Figure count and arrangement follow the science and journal, not a fixed template.
+- Every planned Panel identifies existing evidence or a missing Data Slot; no invented results.
+- Supporting Information is linked to claims/Figures and does not conceal decisive missing evidence.
+- Every proposed experiment/analysis/computation has a defined question, output and completion criteria.
+- Computational tasks are handoff-ready and blocked when essential inputs are absent.
+- Conditions, sample quantities, instruments, replicates and timelines are not invented.
+- The package is usable by a supervisor to approve, reject or revise the direction and by a student/collaborator to understand assigned work.
+- The Skill is evaluated using a fresh project without access to any prior project's source data or context.
 
-## Token/cost acceptance
+## Generality / contamination acceptance
 
-Record active provider/model and counters before/after. Separate Antigravity, OpenCode Go, cache and other providers. If exact per-task metering is unavailable, report the limitation without inventing precision. Avoid re-reading whole PDFs or repeating image calls already completed for the same verified source.
+- Generic SKILL.md, README, workflows, references, schemas and default templates contain no real project-specific names, measurements, sample codes, equations, mechanisms, paper conclusions, source citations or figure layouts.
+- Project-specific outputs stay in isolated workspaces.
+- Synthetic tests use neutral data and do not encode any user's real experimental details.
+- No fixed field-specific story, Figure count, route count, instrument sequence or journal policy is imposed.
+
+## Verdict
+
+Use PASS only when technical and product-level checks are complete and no critical contradiction remains. Use PASS_WITH_WARNINGS when a bounded package is useful but unresolved limitations remain. Use BLOCKED when the evidence, journal fit or execution prerequisites prevent a responsible plan. CI success alone is not product acceptance.

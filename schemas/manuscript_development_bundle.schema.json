@@ -1,0 +1,969 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Paper_plan V4 Manuscript Development Bundle",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "project_profile",
+    "journal_profile",
+    "journal_sources",
+    "core_argument",
+    "claim_ids",
+    "data_slot_ids",
+    "introduction",
+    "introduction_paragraphs",
+    "storyline",
+    "toc_graphic",
+    "main_figures",
+    "supporting_information",
+    "work_package_task_ids",
+    "manuscript_sections",
+    "deliverables",
+    "quality_review",
+    "human_decisions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "project_profile": {
+      "type": "object",
+      "required": [
+        "project_label",
+        "scientific_domain",
+        "source_manifest",
+        "user_constraints"
+      ],
+      "properties": {
+        "project_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scientific_domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_manifest": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "source_id",
+              "source_type",
+              "description"
+            ],
+            "properties": {
+              "source_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "path_or_uri": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "role": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "user_constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "journal_profile": {
+      "type": "object",
+      "required": [
+        "target_journal",
+        "article_type",
+        "status",
+        "checked_at",
+        "source_ids",
+        "requirements",
+        "unresolved_items"
+      ],
+      "properties": {
+        "target_journal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "article_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "UNVERIFIED",
+            "PARTIAL",
+            "VERIFIED"
+          ]
+        },
+        "checked_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "requirements": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "unresolved_items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "journal_sources": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/journal_source"
+      }
+    },
+    "core_argument": {
+      "type": "object",
+      "required": [
+        "scientific_problem",
+        "literature_gap",
+        "central_question",
+        "central_thesis",
+        "core_contribution",
+        "novelty_confidence",
+        "novelty_boundaries",
+        "competing_explanations"
+      ],
+      "properties": {
+        "scientific_problem": {
+          "type": "string",
+          "minLength": 1
+        },
+        "literature_gap": {
+          "type": "string",
+          "minLength": 1
+        },
+        "central_question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "central_thesis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "core_contribution": {
+          "type": "string",
+          "minLength": 1
+        },
+        "novelty_confidence": {
+          "enum": [
+            "UNASSESSED",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "novelty_boundaries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "competing_explanations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contribution_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "deferred_directions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "claim_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "data_slot_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "introduction": {
+      "type": "object",
+      "required": [
+        "status",
+        "paragraph_ids",
+        "draft"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "NOT_STARTED",
+            "OUTLINE",
+            "DRAFT",
+            "REVIEWED"
+          ]
+        },
+        "paragraph_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "draft": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "introduction_paragraphs": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/introduction_paragraph"
+      }
+    },
+    "storyline": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/story_step"
+      }
+    },
+    "toc_graphic": {
+      "type": "object",
+      "required": [
+        "status",
+        "journal_requirement_status",
+        "concept_brief",
+        "elements",
+        "claim_ids",
+        "data_slot_ids"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "NOT_REQUIRED",
+            "NOT_STARTED",
+            "PLANNED",
+            "DRAFTED",
+            "REVIEWED"
+          ]
+        },
+        "journal_requirement_status": {
+          "enum": [
+            "REQUIRED",
+            "OPTIONAL",
+            "NOT_REQUIRED",
+            "UNKNOWN"
+          ]
+        },
+        "concept_brief": {
+          "type": "string",
+          "minLength": 1
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "role",
+              "description"
+            ],
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "source_claim_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "data_slot_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "generation_brief": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "main_figures": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/figure"
+      }
+    },
+    "supporting_information": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/si_item"
+      }
+    },
+    "work_package_task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "manuscript_sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "section",
+          "purpose",
+          "claim_ids",
+          "figure_ids"
+        ],
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "content_points": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claim_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "figure_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "citation_literature_claim_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "deliverables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "kind",
+          "required",
+          "status"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "NOT_STARTED",
+              "IN_PROGRESS",
+              "DRAFT",
+              "READY",
+              "FINAL",
+              "BLOCKED",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "quality_review": {
+      "type": "object",
+      "required": [
+        "status",
+        "checks",
+        "unresolved_critical_questions"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "NOT_RUN",
+            "IN_PROGRESS",
+            "PASS",
+            "PASS_WITH_WARNINGS",
+            "BLOCKED"
+          ]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "check_id",
+              "area",
+              "status",
+              "finding"
+            ],
+            "properties": {
+              "check_id": {
+                "type": "string"
+              },
+              "area": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "PASS",
+                  "WARNING",
+                  "FAIL",
+                  "NOT_ASSESSED"
+                ]
+              },
+              "finding": {
+                "type": "string"
+              },
+              "required_action": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "unresolved_critical_questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "human_decisions": {
+      "type": "object",
+      "required": [
+        "research_direction",
+        "journal_positioning",
+        "manuscript_framework"
+      ],
+      "properties": {
+        "research_direction": {
+          "enum": [
+            "PENDING_HUMAN_REVIEW",
+            "APPROVED",
+            "DEFERRED",
+            "REJECTED"
+          ]
+        },
+        "journal_positioning": {
+          "enum": [
+            "PENDING_HUMAN_REVIEW",
+            "APPROVED",
+            "DEFERRED",
+            "REJECTED"
+          ]
+        },
+        "manuscript_framework": {
+          "enum": [
+            "PENDING_HUMAN_REVIEW",
+            "APPROVED",
+            "DEFERRED",
+            "REJECTED"
+          ]
+        },
+        "decision_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "workspace_revision_number": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "$defs": {
+    "journal_source": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "title",
+        "url",
+        "accessed_at",
+        "scope"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^JS[0-9]{3,}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "accessed_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "introduction_paragraph": {
+      "type": "object",
+      "required": [
+        "paragraph_id",
+        "role",
+        "purpose",
+        "claim_ids",
+        "literature_claim_ids",
+        "status"
+      ],
+      "properties": {
+        "paragraph_id": {
+          "type": "string",
+          "pattern": "^IP[0-9]{3,}$"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "topic_sentence": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "argument_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "literature_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "PLANNED",
+            "DRAFTED",
+            "REVIEWED"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "story_step": {
+      "type": "object",
+      "required": [
+        "step_id",
+        "order",
+        "section",
+        "narrative_question",
+        "take_home_message",
+        "claim_ids",
+        "figure_ids",
+        "transition_logic"
+      ],
+      "properties": {
+        "step_id": {
+          "type": "string",
+          "pattern": "^STORY[0-9]{3,}$"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "section": {
+          "type": "string",
+          "minLength": 1
+        },
+        "narrative_question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "take_home_message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "figure_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "transition_logic": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "figure": {
+      "type": "object",
+      "required": [
+        "figure_id",
+        "order",
+        "working_title",
+        "scientific_question",
+        "take_home_message",
+        "claim_ids",
+        "data_slot_ids",
+        "panels",
+        "main_text_rationale",
+        "status"
+      ],
+      "properties": {
+        "figure_id": {
+          "type": "string",
+          "pattern": "^FIG[0-9]{3,}$"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "working_title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scientific_question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "take_home_message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "data_slot_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "panels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "purpose",
+              "content_description",
+              "claim_ids",
+              "data_slot_ids",
+              "display_type",
+              "acceptance_criteria",
+              "status"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1
+              },
+              "content_description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "claim_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              },
+              "data_slot_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              },
+              "existing_evidence_refs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "comparison_design": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "display_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "acceptance_criteria": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              },
+              "status": {
+                "enum": [
+                  "EXISTING_DATA",
+                  "PARTIAL",
+                  "NEW_DATA_REQUIRED",
+                  "CONCEPTUAL",
+                  "BLOCKED"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "main_text_rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "supporting_information_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "layout_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "enum": [
+            "PLANNED",
+            "PARTIAL",
+            "READY",
+            "BLOCKED"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "si_item": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "item_type",
+        "title",
+        "content_description",
+        "claim_ids",
+        "figure_ids",
+        "data_slot_ids",
+        "status"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "pattern": "^SI[0-9]{3,}$"
+        },
+        "item_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "figure_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "data_slot_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "methods_or_metadata": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "enum": [
+            "EXISTING",
+            "TO_BE_PREPARED",
+            "NEW_DATA_REQUIRED",
+            "BLOCKED"
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

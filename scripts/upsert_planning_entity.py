@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Safely upsert one Python-ID-backed planning entity and append its revision event."""
+"""Safely upsert one Python-ID-backed entity and append its revision event."""
 from __future__ import annotations
 
 import argparse
@@ -21,10 +21,17 @@ ENTITY_MAP = {
     "data-slot": ("framework_bundle.json", "data_slots", "DS", "data_slot", "data_slot_id"),
     "data-unit": ("framework_bundle.json", "data_units", "DU", "data_unit", "data_unit_id"),
     "task": ("framework_bundle.json", "tasks", "T", "execution_task", "task_id"),
+    "journal-source": ("manuscript_development_bundle.json", "journal_sources", "JS", "journal_source", "source_id"),
+    "introduction-paragraph": ("manuscript_development_bundle.json", "introduction_paragraphs", "IP", "introduction_paragraph", "paragraph_id"),
+    "story-step": ("manuscript_development_bundle.json", "storyline", "STORY", "manuscript_story_step", "step_id"),
+    "figure": ("manuscript_development_bundle.json", "main_figures", "FIG", "manuscript_figure", "figure_id"),
+    "si-item": ("manuscript_development_bundle.json", "supporting_information", "SI", "supporting_information_item", "item_id"),
 }
 
 
 def upsert(workspace: Path, kind: str, entity: dict[str, Any], reason: str) -> dict[str, Any]:
+    if kind not in ENTITY_MAP:
+        raise ValueError(f"Unsupported entity kind: {kind}")
     bundle_name, collection_name, prefix, expected_type, id_field = ENTITY_MAP[kind]
     entity_id = entity.get(id_field)
     if not isinstance(entity_id, str) or not entity_id.startswith(prefix):
@@ -37,12 +44,6 @@ def upsert(workspace: Path, kind: str, entity: dict[str, Any], reason: str) -> d
         raise ValueError(f"{entity_id} is not present in the Python ID registry")
     if registration.get("entity_type") != expected_type:
         raise ValueError(f"{entity_id} registry type is {registration.get('entity_type')!r}, expected {expected_type!r}")
-    if kind == "literature":
-        for snippet in entity.get("evidence_snippets", []):
-            snippet_id = snippet.get("snippet_id")
-            snippet_registration = registry.get("entities", {}).get(snippet_id)
-            if not snippet_registration or snippet_registration.get("entity_type") != "literature_snippet":
-                raise ValueError(f"{snippet_id} is not a Python-issued literature_snippet ID")
     if kind == "literature":
         for snippet in entity.get("evidence_snippets", []):
             snippet_id = snippet.get("snippet_id")
