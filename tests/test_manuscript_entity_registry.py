@@ -46,6 +46,22 @@ class ManuscriptEntityRegistryTests(unittest.TestCase):
             history = (state / "history" / "planning_entity_history.jsonl").read_text(encoding="utf-8")
             self.assertIn(entity_id, history)
 
+    def test_initialized_package_is_flagged_incomplete_until_journal_is_verified(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp) / "workspace"
+            init = self.run_script("init_planning_bundles.py", "--workspace", str(workspace))
+            self.assertEqual(init.returncode, 0, init.stdout + init.stderr)
+            run = self.run_script(
+                "validate_manuscript_development.py",
+                "--workspace", str(workspace),
+                "--deliverables-dir", str(workspace / "deliverables"),
+            )
+            self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            report = json.loads(run.stdout)
+            self.assertEqual(report["status"], "WARNING")
+            self.assertTrue(any("target-journal requirements are not verified" in item
+                                for item in report["warnings"]))
+
 
 if __name__ == "__main__":
     unittest.main()

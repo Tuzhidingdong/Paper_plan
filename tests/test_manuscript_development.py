@@ -203,6 +203,30 @@ class ManuscriptDevelopmentValidationTests(unittest.TestCase):
         result = validate_package(package, framework, literature, evidence)
         self.assertTrue(any("no cited official journal/publisher instruction source" in item for item in result["errors"]))
 
+    def test_windows_absolute_deliverable_path_is_rejected(self):
+        package, framework, literature, evidence = valid_fixture()
+        package["deliverables"][0]["path"] = r"C:\\outside\\FINAL_PLAN.md"
+        result = validate_package(package, framework, literature, evidence)
+        self.assertTrue(any("deliverable path must remain workspace-relative" in item
+                            for item in result["errors"]))
+
+    def test_final_required_deliverable_must_exist(self):
+        import tempfile
+        package, framework, literature, evidence = valid_fixture()
+        package["deliverables"][0]["status"] = "FINAL"
+        with tempfile.TemporaryDirectory() as tmp:
+            result = validate_package(package, framework, literature, evidence,
+                                      deliverables_dir=Path(tmp))
+        self.assertTrue(any("required deliverable marked FINAL but file is missing" in item
+                            for item in result["errors"]))
+
+    def test_verified_profile_cannot_rely_only_on_secondary_source(self):
+        package, framework, literature, evidence = valid_fixture()
+        package["journal_sources"]["JS001"]["source_type"] = "SECONDARY"
+        result = validate_package(package, framework, literature, evidence)
+        self.assertTrue(any("no cited official journal/publisher instruction source" in item
+                            for item in result["errors"]))
+
 
 if __name__ == "__main__":
     unittest.main()
