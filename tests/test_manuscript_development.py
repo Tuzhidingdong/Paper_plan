@@ -57,7 +57,7 @@ def valid_fixture():
         "journal_sources": {
             "JS001": {"source_id": "JS001", "title": "Official author guide",
                       "url": "https://example.org/guide", "accessed_at": "2026-01-01",
-                      "scope": "Article types and figure requirements"}
+                      "scope": "Article types and figure requirements", "source_type": "OFFICIAL_JOURNAL"}
         },
         "core_argument": {
             "scientific_problem": "A defined scientific problem",
@@ -201,7 +201,7 @@ class ManuscriptDevelopmentValidationTests(unittest.TestCase):
         package, framework, literature, evidence = valid_fixture()
         package["journal_profile"]["source_ids"] = []
         result = validate_package(package, framework, literature, evidence)
-        self.assertTrue(any("no traceable official or publisher sources" in item for item in result["errors"]))
+        self.assertTrue(any("no cited official journal/publisher instruction source" in item for item in result["errors"]))
 
 
 if __name__ == "__main__":

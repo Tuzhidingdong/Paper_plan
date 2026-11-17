@@ -5,10 +5,10 @@ from __future__ import annotations
 import argparse
 import json
 from collections import defaultdict
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, FormatChecker
 
 from era_core import atomic_write_json, workspace_paths
 
@@ -26,6 +26,9 @@ ENTITY_TYPES = {
 def _unique_map(items: dict[str, Any], id_field: str, label: str,
                 errors: list[str]) -> None:
     for key, item in items.items():
+        if not isinstance(item, dict):
+            errors.append(f"{label} {key}: record must be an object")
+            continue
         if item.get(id_field) != key:
             errors.append(f"{label} {key}: {id_field} must match its bundle key")
 
@@ -82,7 +85,7 @@ def validate_package(package: dict[str, Any],
 
     try:
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-        validator = Draft202012Validator(schema)
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
         for issue in sorted(validator.iter_errors(package),
                             key=lambda e: list(map(str, e.absolute_path))):
             location = ".".join(str(x) for x in issue.absolute_path) or "<root>"
@@ -120,8 +123,15 @@ def validate_package(package: dict[str, Any],
     journal_source_ids = set(journal_sources)
     _check_refs("journal_profile", "source_ids",
                 journal_profile.get("source_ids", []), journal_source_ids, errors)
-    if journal_profile.get("status") == "VERIFIED" and not journal_profile.get("source_ids"):
-        errors.append("journal_profile is VERIFIED but has no traceable official or publisher sources")
+    selected_journal_sources = [
+        journal_sources[source_id] for source_id in journal_profile.get("source_ids", [])
+        if source_id in journal_sources and isinstance(journal_sources[source_id], dict)
+    ]
+    official_source_types = {"OFFICIAL_JOURNAL", "OFFICIAL_PUBLISHER"}
+    if journal_profile.get("status") == "VERIFIED" and not any(
+        item.get("source_type") in official_source_types for item in selected_journal_sources
+    ):
+        errors.append("journal_profile is VERIFIED but has no cited official journal/publisher instruction source")
     if journal_profile.get("status") == "PARTIAL" and not journal_profile.get("unresolved_items"):
         warnings.append("journal_profile is PARTIAL but unresolved_items is empty")
     if journal_profile.get("status") == "UNVERIFIED":
@@ -288,8 +298,10 @@ def validate_package(package: dict[str, Any],
 
     for deliverable in package.get("deliverables", []):
         path_text = deliverable.get("path", "")
-        relative = Path(path_text)
-        if relative.is_absolute() or ".." in relative.parts:
+        normalized_path = path_text.replace("\\", "/")
+        relative = Path(normalized_path)
+        windows_path = PureWindowsPath(path_text)
+        if relative.is_absolute() or windows_path.is_absolute() or ".." in relative.parts or ".." in windows_path.parts:
             errors.append(f"deliverable path must remain workspace-relative: {path_text}")
         if deliverables_dir is not None and deliverable.get("required") and deliverable.get("status") == "FINAL":
             target = deliverables_dir / relative

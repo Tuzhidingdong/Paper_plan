@@ -589,7 +589,8 @@
         "title",
         "url",
         "accessed_at",
-        "scope"
+        "scope",
+        "source_type"
       ],
       "properties": {
         "source_id": {
@@ -614,6 +615,14 @@
         },
         "notes": {
           "type": "string"
+        },
+        "source_type": {
+          "enum": [
+            "OFFICIAL_JOURNAL",
+            "OFFICIAL_PUBLISHER",
+            "SECONDARY",
+            "OTHER"
+          ]
         }
       },
       "additionalProperties": true
