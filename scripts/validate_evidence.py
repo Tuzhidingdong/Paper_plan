@@ -139,7 +139,7 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                 errors.append(f"{result_id}: association cannot be CONFIRMED when Sample Entity is unresolved")
         for observation in result.get("observations", []):
             numeric = observation.get("numeric_value")
-            if numeric is not None and permission != "Exact_Values":
+            if numeric is not None and (permission != "Exact_Values" or legibility in {"Low", "Unassessable"}):
                 errors.append(f"{result_id}: numeric_value forbidden by quantitative_permission")
             if observation.get("sample_id") and observation["sample_id"] not in samples:
                 errors.append(f"{result_id}: observation references unknown sample {observation['sample_id']}")
