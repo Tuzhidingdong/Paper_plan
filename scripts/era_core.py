@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 import time
@@ -17,6 +18,84 @@ EXTRACTOR_VERSION = "era-region-extractor/0.1.0"
 BUNDLE_NAME = "evidence_bundle.json"
 MANIFEST_NAME = "state_manifest.json"
 REGISTRY_NAME = "id_registry.json"
+
+
+# ---------------------------------------------------------------------------
+# Quantitative-evidence semantics shared by every validator.
+#
+# A value is machine-readable only when it is carried by the structured fields
+# ``numeric_value`` or ``numeric_values`` and parses to a finite number. Free
+# text (descriptions, captions, sample labels, page numbers) is never scanned
+# for numbers: prose digits are not a measurement declaration. A Result Unit
+# may still be quantitative through its validated ``quantitative_permission``
+# declaration, which records that exact values were transcribed even when no
+# structured numeric field was populated.
+# ---------------------------------------------------------------------------
+_NUMERIC_STRING = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$")
+
+
+def parse_numeric_scalar(value: Any) -> float | None:
+    """Return a finite float for a number or a clean numeric string, else None.
+
+    Rejects booleans, free text, identifiers and any non-finite value so that
+    unrelated digits cannot be mistaken for a measurement.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        try:
+            number = float(value)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return number if math.isfinite(number) else None
+    if isinstance(value, str):
+        text = value.strip()
+        if not _NUMERIC_STRING.fullmatch(text):
+            return None
+        try:
+            number = float(text)
+        except (ValueError, OverflowError):
+            return None
+        return number if math.isfinite(number) else None
+    return None
+
+
+def observation_numeric_values(observation: dict[str, Any]) -> list[float]:
+    """Collect machine-readable measurement values carried by an observation."""
+    if not isinstance(observation, dict):
+        return []
+    values: list[float] = []
+    single = parse_numeric_scalar(observation.get("numeric_value"))
+    if single is not None:
+        values.append(single)
+    for item in observation.get("numeric_values", []) or []:
+        parsed = parse_numeric_scalar(item)
+        if parsed is not None:
+            values.append(parsed)
+    return values
+
+
+def observation_is_numeric(observation: dict[str, Any]) -> bool:
+    return bool(observation_numeric_values(observation))
+
+
+def result_has_machine_readable_number(result: dict[str, Any]) -> bool:
+    return any(observation_is_numeric(item) for item in result.get("observations", []) or [])
+
+
+def result_is_quantitative(result: dict[str, Any]) -> bool:
+    """True when a Result Unit declares exact numeric evidence.
+
+    Recognises two structured routes: a machine-readable value in an
+    observation, or the validated ``quantitative_permission == Exact_Values``
+    declaration. Description text is never scanned.
+    """
+    if result_has_machine_readable_number(result):
+        return True
+    return (
+        result.get("quantitative_permission") == "Exact_Values"
+        and bool(result.get("observations"))
+    )
 
 
 def sha256_bytes(data: bytes) -> str:

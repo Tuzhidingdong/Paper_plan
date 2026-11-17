@@ -389,8 +389,20 @@
         "numeric_value": {
           "type": [
             "number",
+            "string",
             "null"
-          ]
+          ],
+          "description": "Canonical machine-readable measurement value for this observation. A numeric string is accepted and must parse to a finite number. Qualitative descriptions and unrelated digits must not be placed here."
+        },
+        "numeric_values": {
+          "type": "array",
+          "items": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "description": "Machine-readable measurement values when an observation carries a transcribed series or multiple readings. Each entry must parse to a finite number. Use instead of embedding values only in description text."
         },
         "unit": {
           "type": [

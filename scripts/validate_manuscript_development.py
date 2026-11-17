@@ -10,7 +10,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from era_core import atomic_write_json, workspace_paths
+from era_core import atomic_write_json, result_is_quantitative, workspace_paths
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schemas" / "manuscript_development_bundle.schema.json"
@@ -163,16 +163,14 @@ def validate_package(package: dict[str, Any],
         central_claim = claims.get(central_claim_id, {})
         for result_id in claim_result_ids(central_claim):
             result = evidence.get("result_units", {}).get(result_id, {})
-            observations = result.get("observations", [])
-            is_numeric = any(item.get("numeric_value") is not None for item in observations)
-            if not is_numeric:
+            if not result_is_quantitative(result):
                 continue
             if result.get("claim_role") != "CORE":
                 errors.append(f"{central_claim_id}: numeric Result Unit {result_id} supporting the central contribution must be marked claim_role CORE")
             definition = result.get("measurement_definition", {})
             if definition.get("status") != "VERIFIED":
                 errors.append(f"{central_claim_id}: numeric Result Unit {result_id} supporting the central contribution lacks a VERIFIED measurement definition")
-            elif definition.get("is_derived_metric") and (
+            if definition.get("is_derived_metric") and (
                 not definition.get("formula") or not definition.get("parent_result_ids")
             ):
                 errors.append(f"{central_claim_id}: derived Result Unit {result_id} lacks formula or parent-result lineage")

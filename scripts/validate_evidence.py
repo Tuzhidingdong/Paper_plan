@@ -7,7 +7,17 @@ import json
 from pathlib import Path
 from typing import Any
 
-from era_core import atomic_write_json, load_evidence_bundle, load_json, sha256_file, workspace_paths
+from era_core import (
+    atomic_write_json,
+    load_evidence_bundle,
+    load_json,
+    observation_is_numeric,
+    parse_numeric_scalar,
+    result_has_machine_readable_number,
+    result_is_quantitative,
+    sha256_file,
+    workspace_paths,
+)
 
 VALID_ORIGINS = {"Exact_Text", "Exact_Table", "Vector_Extracted", "Visual_Estimate", "Qualitative_Observation", "Unavailable"}
 VALID_LEGIBILITY = {"High", "Medium", "Low", "Unassessable"}
@@ -120,14 +130,10 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
         if claim_role not in {"UNDECIDED", "CORE", "SUPPORTING", "NOT_USED"}:
             errors.append(f"{result_id}: invalid claim_role")
         definition = result.get("measurement_definition")
-        if claim_role == "CORE":
-            numeric_observations = [
-                item for item in result.get("observations", [])
-                if item.get("numeric_value") is not None
-            ]
-            if numeric_observations and not isinstance(definition, dict):
+        if claim_role == "CORE" and result_is_quantitative(result):
+            if not isinstance(definition, dict):
                 errors.append(f"{result_id}: CORE quantitative result requires a measurement_definition")
-            elif numeric_observations and isinstance(definition, dict):
+            elif isinstance(definition, dict):
                 if definition.get("status") != "VERIFIED":
                     errors.append(f"{result_id}: CORE quantitative result requires measurement_definition.status VERIFIED")
                 for field in ("measurand", "raw_signal", "method", "output_unit", "normalization_basis"):
@@ -172,11 +178,24 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             if sample_id in samples and samples[sample_id].get("identity_status") in {"AMBIGUOUS", "UNMAPPED"} and status == "CONFIRMED":
                 errors.append(f"{result_id}: association cannot be CONFIRMED when Sample Entity is unresolved")
         for observation in result.get("observations", []):
-            numeric = observation.get("numeric_value")
-            if numeric is not None and (permission != "Exact_Values" or (origin in {"Visual_Estimate", "Qualitative_Observation", "Unavailable"} and legibility in {"Low", "Unassessable"})):
+            if "numeric_value" in observation and observation["numeric_value"] is not None:
+                if parse_numeric_scalar(observation["numeric_value"]) is None:
+                    errors.append(f"{result_id}: numeric_value must be a finite number or numeric string")
+            for item in observation.get("numeric_values", []) or []:
+                if parse_numeric_scalar(item) is None:
+                    errors.append(f"{result_id}: numeric_values entries must be finite numbers or numeric strings")
+            if observation_is_numeric(observation) and (
+                permission != "Exact_Values"
+                or (origin in {"Visual_Estimate", "Qualitative_Observation", "Unavailable"} and legibility in {"Low", "Unassessable"})
+            ):
                 errors.append(f"{result_id}: numeric_value forbidden by quantitative_permission")
             if observation.get("sample_id") and observation["sample_id"] not in samples:
                 errors.append(f"{result_id}: observation references unknown sample {observation['sample_id']}")
+        if permission == "Exact_Values" and not result_has_machine_readable_number(result):
+            warnings.append(
+                f"{result_id}: Exact_Values result has no machine-readable numeric_value/numeric_values; "
+                "values transcribed only into description text are not machine-verifiable"
+            )
         checklist = result.get("instrument_checklist", {})
         for group in ("figure_status", "report_status"):
             for field, record in checklist.get(group, {}).items():
