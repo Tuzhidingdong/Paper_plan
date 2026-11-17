@@ -60,7 +60,7 @@ class PdfPipelineTests(unittest.TestCase):
             )
             self.assertEqual(ingest.returncode, 0, ingest.stdout + ingest.stderr)
 
-            manifest = json.loads((workspace / "state" / "manifest.json").read_text(encoding="utf-8"))
+            manifest = json.loads((workspace / "state" / "state_manifest.json").read_text(encoding="utf-8"))
             pages = manifest["pages"]
             self.assertEqual(len(pages), 3)
             self.assertGreater(pages[0]["embedded_image_count"], 0)
