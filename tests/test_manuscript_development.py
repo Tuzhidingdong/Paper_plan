@@ -270,6 +270,38 @@ class ManuscriptDevelopmentValidationTests(unittest.TestCase):
         result = validate_package(package, framework, literature, evidence)
         self.assertEqual(result["errors"], [], result["errors"])
 
+    def test_central_contribution_cannot_bypass_core_metric_definition(self):
+        package, framework, literature, evidence = valid_fixture()
+        evidence["result_units"]["R002"] = {
+            "result_id": "R002", "claim_role": "UNDECIDED",
+            "observations": [{"numeric_value": 4.2}],
+            "measurement_definition": {"status": "PARTIAL"},
+        }
+        framework["claims"]["C001"]["evidence_refs"] = [
+            {"kind": "result_unit", "id": "R002"}
+        ]
+        result = validate_package(package, framework, literature, evidence)
+        self.assertTrue(any("must be marked claim_role CORE" in item for item in result["errors"]))
+        self.assertTrue(any("lacks a VERIFIED measurement definition" in item for item in result["errors"]))
+
+    def test_verified_core_metric_can_support_central_contribution(self):
+        package, framework, literature, evidence = valid_fixture()
+        evidence["result_units"]["R002"] = {
+            "result_id": "R002", "claim_role": "CORE",
+            "observations": [{"numeric_value": 4.2}],
+            "measurement_definition": {
+                "status": "VERIFIED", "measurand": "Target measurand",
+                "raw_signal": "Instrument signal", "method": "Defined method",
+                "output_unit": "unit-A", "normalization_basis": "Per defined basis",
+                "is_derived_metric": False,
+            },
+        }
+        framework["claims"]["C001"]["evidence_refs"] = [
+            {"kind": "result_unit", "id": "R002"}
+        ]
+        result = validate_package(package, framework, literature, evidence)
+        self.assertEqual(result["errors"], [], result["errors"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -143,6 +143,39 @@ def validate_package(package: dict[str, Any],
     core = package.get("core_argument", {})
     _check_refs("core_argument", "contribution_claim_ids",
                 core.get("contribution_claim_ids", []), claim_ids, errors)
+    # Re-check quantitative measurement definitions at the point where evidence
+    # is promoted into the central contribution. This prevents a Result Unit
+    # from bypassing the Evidence Bundle's CORE-role gate by being left UNDECIDED.
+    evidence_findings = evidence.get("findings", {})
+    def claim_result_ids(claim: dict[str, Any]) -> set[str]:
+        found: set[str] = set()
+        for evidence_ref in claim.get("evidence_refs", []):
+            kind, ref_id = evidence_ref.get("kind"), evidence_ref.get("id")
+            if kind == "result_unit":
+                found.add(ref_id)
+            elif kind == "finding":
+                finding = evidence_findings.get(ref_id, {})
+                found.update(finding.get("supporting_result_ids", []))
+                found.update(finding.get("contradictory_result_ids", []))
+        return found
+
+    for central_claim_id in core.get("contribution_claim_ids", []):
+        central_claim = claims.get(central_claim_id, {})
+        for result_id in claim_result_ids(central_claim):
+            result = evidence.get("result_units", {}).get(result_id, {})
+            observations = result.get("observations", [])
+            is_numeric = any(item.get("numeric_value") is not None for item in observations)
+            if not is_numeric:
+                continue
+            if result.get("claim_role") != "CORE":
+                errors.append(f"{central_claim_id}: numeric Result Unit {result_id} supporting the central contribution must be marked claim_role CORE")
+            definition = result.get("measurement_definition", {})
+            if definition.get("status") != "VERIFIED":
+                errors.append(f"{central_claim_id}: numeric Result Unit {result_id} supporting the central contribution lacks a VERIFIED measurement definition")
+            elif definition.get("is_derived_metric") and (
+                not definition.get("formula") or not definition.get("parent_result_ids")
+            ):
+                errors.append(f"{central_claim_id}: derived Result Unit {result_id} lacks formula or parent-result lineage")
     if not core.get("novelty_boundaries"):
         warnings.append("core argument has no explicit novelty boundaries")
     if core.get("novelty_confidence") in {"MEDIUM", "HIGH"} and not core.get("contribution_claim_ids"):
