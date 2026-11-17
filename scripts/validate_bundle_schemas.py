@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate all persisted ERA HEAD bundles against Draft 2020-12 JSON Schemas."""
+"""Validate all persisted Paper_plan HEAD bundles against Draft 2020-12 JSON Schemas."""
 from __future__ import annotations
 
 import argparse
@@ -14,6 +14,7 @@ BUNDLES = {
     "literature_bundle.json": "literature_bundle.schema.json",
     "routes_bundle.json": "routes_bundle.schema.json",
     "framework_bundle.json": "framework_bundle.schema.json",
+    "manuscript_development_bundle.json": "manuscript_development_bundle.schema.json",
     "state_manifest.json": "state_manifest.schema.json",
 }
 

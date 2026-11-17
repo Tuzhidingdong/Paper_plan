@@ -16,7 +16,7 @@ def base_bundles():
         "samples": {"S001": {"sample_id": "S001"}},
     }
     literature = {
-        "search_scope": {"databases": ["Crossref"], "date_range": "2020-2026", "search_terms": ["gypsum"], "target_systems": ["gypsum"]},
+        "search_scope": {"databases": ["Crossref"], "date_range": "2020-2026", "search_terms": ["topic-A"], "target_systems": ["system-A"]},
         "literature_records": {
             "LIT001": {
                 "literature_id": "LIT001", "title": "Verified study", "access_level": "FULLTEXT_VERIFIED",
@@ -34,7 +34,7 @@ def base_bundles():
         "research_gaps": {
             "GAP001": {
                 "gap_id": "GAP001", "gap_statement": "A bounded unresolved comparison.",
-                "search_bounds": {"databases": ["Crossref"], "date_range": "2020-2026", "search_terms": ["gypsum"], "target_systems": ["gypsum"]},
+                "search_bounds": {"databases": ["Crossref"], "date_range": "2020-2026", "search_terms": ["topic-A"], "target_systems": ["system-A"]},
                 "supporting_literature_claim_ids": ["LC001"],
             }
         },

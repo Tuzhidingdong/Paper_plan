@@ -1,46 +1,43 @@
-# 03 — Three Distinct Research Routes and Provisional Recommendation
+# 03 — Candidate Research Directions and Provisional Recommendation
 
 ## Objective
 
-Generate three genuinely different scientific argument routes from validated Results/Findings and bounded literature gaps. Route differences must be scientific, not cosmetic changes in wording.
+Generate the number of genuinely different scientific directions justified by the validated Results/Findings and bounded literature gaps. The purpose is to discover a defensible contribution, not to fill a fixed route quota.
 
 ## Required route fields
 
 For every Python-issued ROUTE ID record:
 - central research question and target system;
-- candidate novelty and bounded Research Gap IDs;
+- candidate contribution and bounded Research Gap IDs;
 - supporting Result Unit and Finding IDs;
 - relevant literature-claim IDs and strongest competing literature records;
 - what is directly Observed versus Interpreted versus Hypothesized;
-- sample identity dependencies and unresolved associations;
+- sample identity and measurement dependencies;
 - alternative artifact, confounder and mechanism explanations;
-- Data Slot needs and what evidence would discriminate the alternatives;
+- Data Slot needs and evidence that would discriminate alternatives;
 - feasibility, prerequisite experiments, resource assumptions and novelty risk;
-- a route status (EXPLORATORY, CANDIDATE, APPROVED, REJECTED).
+- route status (EXPLORATORY, CANDIDATE, APPROVED, REJECTED).
 
 ## Route diversity
 
-The three candidates should differ in their central scientific question, mechanism/causal chain, or decisive evidence strategy. A common pattern may be:
-1. a route extending the strongest directly observed result;
-2. a route testing a mechanistic explanation or competing pathways;
-3. a route targeting a distinct application/process/material comparison.
+Directions must differ in their central scientific question, causal explanation, contribution type or decisive evidence strategy. A change in wording alone is not a distinct route.
 
-This pattern is illustrative, not mandatory. Derive the routes from the actual PDF and literature; do not force these exact categories.
+Derive candidate directions from the actual evidence and literature. Do not force a fixed number or reuse a universal set of route categories.
 
-If only one or two defensible routes exist, record the reason in route_generation_note and do not fabricate a third mature route. An exploratory route is acceptable when clearly labelled.
+If only one or two defensible directions exist, record the reason in route_generation_note. If no route is defensible, provide a bounded stop/redirect recommendation instead of fabricating novelty.
 
 ## Comparative evaluation
 
-Compare all routes on:
-- evidence fit (existing Result Units and sample confidence);
-- literature differentiation (verified competitor comparison);
+Compare defensible directions on:
+- evidence fit and sample confidence;
+- differentiation from closest verified competitors;
 - novelty confidence and counter-evidence;
-- decisive experiment burden and time/resource uncertainty;
+- decisive evidence burden and feasibility uncertainty;
 - dependence on missing raw data or unconfirmed sample mapping;
-- whether the route can support a coherent SCI paper rather than a collection of unrelated tests.
+- ability to support one coherent paper contribution.
 
-Use qualitative ranks or a transparent rubric. Do not imply numerical precision unsupported by the evidence. Recommend one route and explain trade-offs; retain the other two as alternatives.
+Use qualitative ranks or a transparent rubric. Do not imply numerical precision unsupported by evidence. Recommend a provisional direction where possible and explain the trade-offs.
 
 ## Gate A behavior for one-pass delivery
 
-Record approval_A.status = PENDING_HUMAN_REVIEW and include the provisional recommendation and rationale. Do not claim the user approved it. For a requested end-to-end deliverable, continue framework planning for the recommended provisional route while retaining the alternatives.
+Record approval_A.status = PENDING_HUMAN_REVIEW and include the provisional recommendation and rationale. Do not claim the user approved it. Continue framework planning against the provisional direction where this remains scientifically responsible.

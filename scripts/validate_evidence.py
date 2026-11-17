@@ -113,6 +113,40 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             errors.append(f"{result_id}: invalid epistemic_status")
         if bool(result.get("is_visual_estimate", False)) != (origin == "Visual_Estimate"):
             errors.append(f"{result_id}: is_visual_estimate disagrees with data_origin")
+
+        # A numeric result used for the central paper claim must have a verified
+        # measurement definition, not merely a display label or derived percentage.
+        claim_role = result.get("claim_role", "UNDECIDED")
+        if claim_role not in {"UNDECIDED", "CORE", "SUPPORTING", "NOT_USED"}:
+            errors.append(f"{result_id}: invalid claim_role")
+        definition = result.get("measurement_definition")
+        if claim_role == "CORE":
+            numeric_observations = [
+                item for item in result.get("observations", [])
+                if item.get("numeric_value") is not None
+            ]
+            if numeric_observations and not isinstance(definition, dict):
+                errors.append(f"{result_id}: CORE quantitative result requires a measurement_definition")
+            elif numeric_observations and isinstance(definition, dict):
+                if definition.get("status") != "VERIFIED":
+                    errors.append(f"{result_id}: CORE quantitative result requires measurement_definition.status VERIFIED")
+                for field in ("measurand", "raw_signal", "method", "output_unit", "normalization_basis"):
+                    if not definition.get(field):
+                        errors.append(f"{result_id}: CORE measurement definition is missing {field}")
+                if definition.get("is_derived_metric") and not definition.get("formula"):
+                    errors.append(f"{result_id}: derived CORE metric requires an explicit calculation formula")
+                if definition.get("is_derived_metric") and not definition.get("parent_result_ids"):
+                    errors.append(f"{result_id}: derived CORE metric requires parent_result_ids")
+        if isinstance(definition, dict):
+            if definition.get("status") == "VERIFIED":
+                for field in ("measurand", "raw_signal", "method", "output_unit", "normalization_basis"):
+                    if not definition.get(field):
+                        errors.append(f"{result_id}: VERIFIED measurement definition is missing {field}")
+                if definition.get("is_derived_metric") and not definition.get("formula"):
+                    errors.append(f"{result_id}: VERIFIED derived metric is missing formula")
+            for parent_id in definition.get("parent_result_ids", []):
+                if parent_id not in results:
+                    errors.append(f"{result_id}: measurement definition references unknown parent Result Unit {parent_id}")
         if origin in {"Visual_Estimate", "Qualitative_Observation", "Unavailable"} and legibility in {"Low", "Unassessable"} and permission == "Exact_Values":
             errors.append(f"{result_id}: low/unassessable image cannot grant Exact_Values permission")
         if origin in {"Visual_Estimate", "Qualitative_Observation"} and permission == "Exact_Values":

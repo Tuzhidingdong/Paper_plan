@@ -1,68 +1,66 @@
-# Paper_plan — Experiment Report Analyzer (ERA)
+# Paper_plan — Research-to-Manuscript Development Skill
 
-ERA is an evidence-driven Agent Skill that starts from one potentially unstructured experimental-report PDF and develops a traceable research opportunity, a data-centric SCI manuscript framework, and a prioritized experimental/analytical/computational execution plan.
+Paper_plan develops an evidence-grounded, target-journal-aware manuscript project package from a user's experimental report and associated research data.
 
-## Current capability
+Its deliverable is broader than a research-plan summary: it connects the existing evidence and literature frontier to one central contribution, an Introduction, a complete manuscript storyline, Figure/Panel and Supporting Information architecture, and assignable experiment/analysis/computation work packages.
 
-**ERA V3.3 — Evidence Mining + Agent-executable Research Planning**
+## V4 development line
 
-### Deterministic Python layer
+The V4 development branch preserves the V3.3 deterministic evidence engine and adds a structured Manuscript Development Bundle plus cross-package validation.
+
+### Existing deterministic layer
 - PDF fingerprint, page inventory and immutable source preservation.
-- Embedded raster-image Region extraction with stable Python-owned anchors.
-- Vector-figure candidate detection using page-body spatial clusters and primitive types; candidates still require human review.
-- Explicit PDF-coordinate BBox rendering for vector-only figures and explicit panel registration.
-- Repeated near-identical header/footer asset hints; these assets remain preserved but are excluded from default triage sheets.
-- Caption-blind task packs, inspection records and one-reinspection gate.
-- Sample entities, evidence provenance and numeric-permission validation.
-- Python-issued planning IDs for literature, gaps, routes, claims, Data Slots, Data Units and tasks.
-- Planning bundle initialization, cross-bundle provenance/dependency validation and JSON Schema validation.
-- Model capability profile recording and fail-closed checks for high-risk stages.
-- Markdown-to-PDF export through installed Edge/Chrome, with page/text verification.
+- Embedded raster-image Region extraction with stable anchors.
+- Vector-figure candidate detection and explicit vector BBox workflow.
+- Repeated-layout triage without deleting evidence.
+- Caption-blind task preparation, visual-inspection records and retry gate.
+- Python-issued IDs, evidence provenance, sample identity and quantitative-permission validation.
+- Literature, route, framework and Data Unit/task dependency bundles.
+- Markdown-to-PDF export and PDF page/text verification.
 
-### Agent-executed scientific layer
-- Three-stage literature frontier review: terminology, primary competitors, counter-evidence.
-- Three genuinely distinct research routes and a provisional recommendation.
-- Claim–Evidence graph, Data Slots, Data Units and conceptual figure/section architecture.
-- Prioritized experiment, analysis and conditional theory/computation plans.
-- English Introduction draft and student-facing self-check message.
-- Consolidated editable Markdown and verified PDF research plan.
+### V4 manuscript-development layer
+- Current target-journal and article-type profile with dated source references.
+- One central contribution, bounded novelty and complete manuscript storyline.
+- Introduction paragraph architecture linked to Claim and literature-claim IDs.
+- TOC/graphical abstract concept adapted to verified journal requirements.
+- Main Figure and Panel plans with scientific purpose, evidence, Data Slots and acceptance criteria.
+- Supporting Information items linked to main claims and Figures.
+- Work-package links to existing experiment/analysis/computation tasks.
+- Verified measurement-definition checks for central quantitative Result Units and condition-comparability assessments for cross-sample/condition Figure comparisons.
+- Cross-package validation of journal sources, manuscript references, Figure/SI placement, task coverage, dependency cycles and calculation blockers.
 
-The literature and scientific reasoning are executed by the host Agent using its available search/reasoning tools. Python validates provenance and structure; it does not independently prove novelty, causality or scientific mechanisms. Gate A and Gate B remain PENDING_HUMAN_REVIEW until a human actually decides.
+The V4 package schema is in schemas/manuscript_development_bundle.schema.json. The workspace bundle is initialized by scripts/init_planning_bundles.py and validated by scripts/validate_manuscript_development.py.
 
-## Quick start
+## Generality contract
+
+The Skill must remain domain-neutral. No project-specific material names, sample labels, values, equations, mechanisms, literature findings, journal requirements or Figure designs may be embedded in generic Skill instructions, references, schemas, templates or configuration. Those belong only in an isolated workspace. Figure count, route count and manuscript structure are determined at runtime.
+
+## Run
 
 Python 3.10+ is required.
 
     python -m pip install -r requirements.txt
     python -m unittest discover -s tests -v
 
-Run the full workflow from repository root:
+For a new project, follow workflows/07_full_run.md. Its stages use workflows/01–06 for evidence mining and literature/routes/framework preparation, then workflows/08–12 for journal profile, argument/storyline, Figure/SI design, handoff work packages and final audit.
 
-    python scripts/ingest_pdf.py path/to/report.pdf --workspace ERA_Workspace
-    python scripts/extract_regions.py --workspace ERA_Workspace
-    python scripts/build_contact_sheet.py --workspace ERA_Workspace
-    python scripts/validate_evidence.py --workspace ERA_Workspace
-    python scripts/validate_samples.py --workspace ERA_Workspace
-    python scripts/compile_prompt_context.py --workspace ERA_Workspace --output ERA_Workspace/cache/prompt_context/evidence_context.md
-    python scripts/init_planning_bundles.py --workspace ERA_Workspace
-    python scripts/validate_planning.py --workspace ERA_Workspace
-    python scripts/validate_bundle_schemas.py --workspace ERA_Workspace
-    python scripts/export_plan_pdf.py ERA_Workspace/deliverables/FINAL_RESEARCH_PLAN.md
+Run the V4 validator after creating the V4 bundle:
 
-Follow workflows/07_full_run.md for the complete Agent sequence, literature verification, route synthesis and final deliverables. Use scripts/assign_entity_ids.py and scripts/assign_planning_ids.py for all permanent IDs, then scripts/upsert_planning_entity.py to persist one entity with a JSONL revision event. For an existing same-hash workspace use scripts/refresh_vector_candidates.py; do not reset its evidence.
+    python scripts/validate_manuscript_development.py --workspace WORKSPACE --deliverables-dir WORKSPACE/deliverables
+
+Run the existing validators as well:
+
+    python scripts/validate_evidence.py --workspace WORKSPACE
+    python scripts/validate_samples.py --workspace WORKSPACE
+    python scripts/validate_planning.py --workspace WORKSPACE
+    python scripts/validate_bundle_schemas.py --workspace WORKSPACE
 
 ## Scientific boundaries
 
-- The original PDF and extracted source regions are immutable evidence.
-- A vector candidate flag is only a prompt for visual review, not automatic chart recognition.
-- Repeated layout images are never deleted or merged; triage hints only affect default Contact Sheets.
-- Low-resolution visual estimates are never represented as exact numeric measurements.
-- Missing information in the report does not prove that an experiment was not performed.
-- Unconfirmed sample mappings cannot support causal or structure–property claims.
-- The model must not invent instrument settings, sample identities, raw data, literature evidence, novelty or calculation inputs.
-- Literature access levels are explicit: metadata, abstract or full text actually inspected.
-- Derived views of one Result Unit are not independent experiments.
-- Computations requiring unavailable experimental structures/models are BLOCKED_BY_EXPERIMENT.
-- Student self-check messages must be gentle and non-accusatory.
+- Validators check structure, provenance, references and execution dependencies. They do not prove novelty, mechanisms, experimental validity or publication outcome.
+- Journal rules must be retrieved from current official sources and stored with dates.
+- Unresolved sample mappings or method details remain unresolved.
+- Computations with missing required inputs are blocked.
+- Human decisions remain explicit and are never silently approved.
 
-See docs/IMPLEMENTATION_STATUS.md for the boundary between deterministic code and Agent-executed scientific work.
+See docs/V4_PRODUCT_CONTRACT.md, docs/ARCHITECTURE.md and docs/IMPLEMENTATION_STATUS.md for the product boundary and development status.

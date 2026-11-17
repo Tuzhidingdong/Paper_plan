@@ -2,7 +2,7 @@
 
 ## Organizing principle
 
-Organize the paper around claims and evidence requirements, not around preassigned Figure numbers. Figure/panel numbering is assigned only after the Data Slots and evidence flow are stable.
+Organize the paper around claims and evidence requirements, not around preassigned Figure numbers. Figure/panel numbering is assigned only after Data Slots, central contribution and evidence flow are stable. The detailed visual architecture is completed in workflow 10 and persisted in the V4 Manuscript Development Bundle.
 
 ## Claim–Evidence graph
 
@@ -14,7 +14,7 @@ Every Python-issued Claim ID records:
 - contradictory evidence, alternative explanations, scope limits and confidence;
 - manuscript section where it belongs.
 
-Causal or Mechanistic claims need discriminating evidence and a careful alternative-explanation audit. A report-level trend is not automatically an intrinsic material property or mechanism.
+Causal or Mechanistic claims need discriminating evidence and a careful alternative-explanation audit. A report-level trend is not automatically an intrinsic property or mechanism.
 
 ## Data Slots
 
@@ -24,7 +24,7 @@ Each Python-issued Data Slot ID is a requirement attached to a target Claim and 
 - existing Result Unit/Data Unit links;
 - missing conditions, controls, statistics or raw data;
 - acceptance criteria for a sufficient data unit;
-- whether this is an essential, strengthening or optional slot.
+- whether the slot is ESSENTIAL, STRENGTHENING or OPTIONAL.
 
 A missing Data Slot is a planned requirement, never an existing result.
 
@@ -34,12 +34,18 @@ A Data Unit is a curated grouping or transformation of one or more Result Units.
 
 Keep source/raw, processed, selected-for-manuscript and unused/rejected data distinct. Never overwrite original data.
 
-## Figure and section architecture
+## Claim-to-manuscript integration
 
-After Data Slots are stable, group them into conceptual Figure/Panel slots. For each planned figure specify the scientific message, target Claim IDs, Data Slot IDs, required comparisons, sample/condition labels and whether it belongs in main text or Supporting Information. Do not invent Figure numbers before ordering is decided.
+Before long prose, establish:
+- the central contribution and its boundary;
+- the claims needed to support it;
+- evidence already available and missing Data Slots;
+- the manuscript sections that carry each claim;
+- the Figures/Panels and SI items that will present the evidence;
+- the work packages that close essential gaps.
 
-Map Introduction, Results/Discussion, Methods, Conclusions and Supporting Information to the evidence graph. State which claims are ready, conditional or blocked.
+The V4 Manuscript Development Bundle stores the journal profile, Introduction paragraph entities, storyline steps, Figure/SI entities and references to Claims, Data Slots and tasks. Do not duplicate a Claim or task as an unrelated new entity.
 
 ## Gate B skeleton
 
-Before long prose, produce a compact Claim–Citation skeleton and Data Slot table. The final draft may proceed for one-pass delivery, but approval_B remains PENDING_HUMAN_REVIEW until a human decision is supplied. Never silently approve the framework.
+Provide a compact Claim–Citation skeleton, Data Slot table and provisional manuscript storyline before full narrative. Gate B remains PENDING_HUMAN_REVIEW until a human decision is supplied. Never silently approve the framework.

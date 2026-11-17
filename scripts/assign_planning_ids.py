@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reserve permanent IDs for literature, route, claim, Data Slot, Data Unit and task entities."""
+"""Reserve permanent IDs for evidence, literature and manuscript-development entities."""
 from __future__ import annotations
 
 import argparse
@@ -19,6 +19,12 @@ KINDS = {
     "data-slot": ("DS", "data_slot"),
     "data-unit": ("DU", "data_unit"),
     "task": ("T", "execution_task"),
+    "journal-source": ("JS", "journal_source"),
+    "introduction-paragraph": ("IP", "introduction_paragraph"),
+    "story-step": ("STORY", "manuscript_story_step"),
+    "figure": ("FIG", "manuscript_figure"),
+    "si-item": ("SI", "supporting_information_item"),
+    "comparability": ("CMP", "comparability_assessment"),
 }
 
 
@@ -26,7 +32,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("kind", choices=sorted(KINDS))
-    parser.add_argument("--anchor-key", required=True, help="Stable semantic key, e.g. route:acid-conversion-mechanism")
+    parser.add_argument("--anchor-key", required=True, help="Stable semantic key within this workspace")
     parser.add_argument("--parent-id", help="Optional parent entity ID")
     args = parser.parse_args()
     if not args.anchor_key.strip():
