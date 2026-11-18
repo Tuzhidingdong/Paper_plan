@@ -54,3 +54,60 @@ Link each literature claim to its source and access tier. The closest-work compa
 
 ## 10. Required output
 Report search scope, routes, query families, dates, access limits, publication-status checks, closest-prior-art comparison, contradictions, bounded gaps/confidence and source locations.
+
+## 11. Resolve supplied references and literature leads explicitly
+
+Treat every paper, author/year clue, DOI fragment, title fragment, citation list, bibliography and "closest work" suggested by the user or found in project materials as a **search lead that must be resolved**, not as an optional hint. Do not silently omit an inconvenient or difficult-to-find lead.
+
+For each lead, maintain a resolution record with: original clue exactly as supplied; candidate title/authors/venue/year; DOI or stable identifier; publication/version status; discovery routes and exact queries attempted; identity confidence; access tier; and final disposition. Separate bibliographic identity resolution from verification of the scientific claims attributed to the paper.
+
+Use an escalating identity-resolution sequence as available:
+1. exact quoted title and title fragments;
+2. author surname(s) + year + journal/venue;
+3. DOI or DOI fragment through a resolver, Crossref and publisher record;
+4. alternate title wording, transliteration, abbreviations, conference/journal versions and preprint/accepted-manuscript variants;
+5. an independent scholarly index or repository;
+6. references/citations from a confirmed related paper.
+
+A single zero-result response, a search endpoint error, or one failed API query is not enough to classify a supplied lead as unlocated. If multiple candidates remain, preserve the ambiguity and compare identifiers; ask the user only when identity materially changes the decision. Use explicit states such as CONFIRMED, LIKELY_MATCH, AMBIGUOUS, NOT_LOCATED_AFTER_DOCUMENTED_SEARCH, and INVALID_OR_INCONSISTENT_CITATION. Never turn an unresolved clue into a cited finding.
+
+## 12. Stress-test each novelty claim against prior art
+
+Do not test novelty only at the level of a broad topic or the final one-sentence contribution. Decompose it into atomic novelty dimensions that actually matter to the project's claim. Depending on the field, these may include system/material, transformation or reaction direction, operating regime, boundary conditions, mechanism, causal coupling, measured quantity, analytical method, predictive capability, performance consequence or application.
+
+For each proposed novelty dimension:
+- state the exact proposition being claimed;
+- write at least one focused query family that could find a paper proving it is already known;
+- compare the closest primary study or studies, including inconvenient overlaps;
+- distinguish an established principle from a new system-specific application, a parameter extension, a new causal relation, a new measurement, or a genuinely new capability;
+- state what observable result would make the claimed distinction real rather than merely different wording;
+- classify the dimension as ALREADY_ESTABLISHED, INCREMENTAL_EXTENSION, POTENTIALLY_DISTINCT, or NOT_ASSESSABLE.
+
+A new combination of known materials, factors or methods is not automatically a new scientific contribution. Explain what non-trivial interaction, quantitative relation, predictive consequence or previously unresolved condition the combination establishes. Do not call a result novel merely because the exact combination of keywords has not been found.
+
+## 13. Apply a full-text priority rule to novelty-critical sources
+
+Prioritize full-text inspection for sources that could overturn the mainline, establish the closest transformation/mechanism, or directly overlap the proposed contribution. Inspect the relevant Methods, Results, figures/tables and limitations, and record exact source locations. Abstracts can establish only claims actually stated in the abstract; metadata can establish only bibliographic facts.
+
+If a novelty-critical source remains abstract-only or metadata-only, do not infer that it lacks a method, condition, control or result not mentioned in the available record. Keep the comparison incomplete and the gap provisional or not established. Where full text cannot be accessed, name the missing source locations/information needed to complete the comparison.
+
+## 14. Preserve a query and citation-trail audit
+
+The literature ledger must retain enough information for another researcher to understand how the frontier was searched. Record, at minimum: provider/database; exact query or query family; query date; field/filter/time range where available; result or retrieval status; closest candidates discovered; follow-up action; and known coverage limitations.
+
+For citation chasing, record the seed paper, whether backward references or forward citations were followed, how candidate papers were selected, and whether each closest candidate was inspected. Deduplicate DOI/version variants without losing links between preprint, accepted manuscript and version of record.
+
+Search breadth is demonstrated by coverage of material query facets and citation trails, not by an impressive bibliography count. Do not stop because a convenient number of papers has been collected.
+
+## 15. Frontier closure and decision gate
+
+Before calling the literature frontier complete, explicitly answer:
+- Have all user-supplied literature leads been resolved or transparently retained as unresolved?
+- Have exact-system and adjacent-mechanism queries both been attempted?
+- Have the nearest primary studies and material counter-evidence been inspected at the highest accessible tier?
+- Have backward and forward citation trails from the closest studies been followed?
+- Has every important novelty phrase been adversarially searched?
+- Are publication dates, versions, corrections/retractions and preprint status clear enough for the claims being made?
+- Which comparisons remain incomplete because of access or identity limits?
+
+If any novelty-critical lead remains unresolved, a direct competitor is represented only by metadata, or a major query facet/citation trail is unsearched, do not issue SUPPORTED_GAP. Use PROVISIONAL_GAP or NOT_ESTABLISHED and state the exact limitation. A literature frontier can still be useful before saturation, but its uncertainty must constrain the mainline recommendation and title/claim language.
