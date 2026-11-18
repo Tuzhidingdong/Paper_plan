@@ -95,3 +95,32 @@ List actual source records and literature used, with IDs, verified URLs/DOIs, ac
 ## Final consistency statement
 
 Explain how the central contribution is carried through Introduction, storyline, Figures, SI, work packages and priorities. Name any remaining break. Validator PASS is not proof of scientific validity.
+
+
+## Mandatory cross-section quality review
+
+Before delivery, add a concise, project-specific review record (do not leave these as empty form fields):
+
+### Novelty stress-test summary
+
+| Atomic contribution proposition | Closest prior work and access tier | What it already establishes | Exact remaining distinction | Status / missing verification |
+|---|---|---|---|---|
+
+Use the table only for propositions that genuinely matter to the selected contribution. Do not create cosmetic novelty dimensions.
+
+### Main-text versus SI allocation rationale
+
+Explain why each main-text Figure is necessary to carry the central argument. Identify diagnostic audits or QC content placed in SI and justify any exception where such material remains in the main text. State whether the Figure portfolio is consistent with the selected mainline.
+
+### Decision-critical task readiness
+
+For each highest-priority task, make clear the alternative explanation it discriminates, the controls/measurements that address it, any sample-state preservation issue, the outputs that will be returned and the result that changes the project decision. Keep the minimum discriminating test separate from the larger publication-strength program.
+
+### Final quality status
+
+- **PLAN_PRODUCT_STATUS:** PASS / PARTIAL / FAIL, with reasons by quality gate.
+- **SCIENTIFIC_READINESS:** READY / CONDITIONAL / NOT_READY / STOP_DEFER.
+- **BENCHMARK_COMPARISON:** COMPLETE / BLOCKED_REFERENCE_UNAVAILABLE / NOT_APPLICABLE.
+- **Blocking issues and exact next decisions:** state only material unresolved items.
+
+These statuses are independent. A conditional research project can have a product-quality PASS when the evidence-recovery plan is rigorous; an unavailable required benchmark cannot be represented as successfully compared.
