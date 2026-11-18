@@ -105,3 +105,8 @@ Confirm that the Markdown is complete, readable and not a bundle dump; that the 
 Record the findings by gate with PASS, PARTIAL or FAIL and a concise reason. Do not use pseudo-precise quality scores or allow a numeric aggregate to conceal a critical failure.
 
 A final review must state the three independent statuses from Section 1, material strengths, blocking/conditional issues, exact follow-up tasks and human decisions. Product QA is a human reasoning review; an automated checklist can prepare it but cannot certify scientific correctness.
+
+ 
+## 11. Hybrid and supporting-contribution gate
+
+A HYBRID recommendation must identify one shared central question and show why its components are necessary parts of the same inference. It is not a compromise between two preferred stories or a way to retain unrelated results. A method/measurement-validation task may support a scientific contribution, but must not become a second paper inside the same plan unless its independent contribution is explicitly selected and defended. Check that the distribution of Results/Discussion sections, main Figures and tasks reflects the declared central contribution.
