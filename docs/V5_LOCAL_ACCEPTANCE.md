@@ -52,7 +52,7 @@ Record branch commit, inputs/source hashes, model/provider, Markdown/PDF paths/h
 Before reporting acceptance, apply docs/V5_1_NARRATIVE_PRODUCT_QA.md to the actual Markdown and matching PDF. This review is mandatory and is distinct from the existing validator suite.
 
 In particular, verify:
-- all user-supplied literature leads and citation clues have documented resolution; do not accept "not found" based on one failed endpoint;
+- the populated literature-frontier audit ledger based on templates/V5_1_LITERATURE_FRONTIER_LEDGER.md is retained in the workspace, and all user-supplied literature leads and citation clues have documented resolution; do not accept "not found" based on one failed endpoint;
 - the closest primary studies have been compared at the highest accessible evidence tier and every novelty proposition has passed an adversarial search;
 - the main Figure portfolio advances the chosen scientific contribution; data transcription/fit/QC audits are in SI unless central to the contribution;
 - decision-critical experiments explicitly discriminate the leading alternatives and address relevant confounders;
