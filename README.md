@@ -80,3 +80,6 @@ These are generic engineering controls. They do not encode the scientific case t
 
 
 V4.3 also extends the original image-inspection record: each image-derived observation must capture acquisition and spatial metadata during the original-resolution blind-inspection pass. Unknown or illegible metadata is recorded explicitly; it is never guessed from captions. Cross-image comparisons reuse those source-linked records.
+
+
+V4.3 calculation audits now carry a declared reproduction status that is checked against the recomputed result. Statistical-quality/uncertainty assessment and validation scope are stored separately; a matching coefficient calculation does not imply adequate diagnostics or external validation.

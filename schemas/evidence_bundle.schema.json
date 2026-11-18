@@ -729,6 +729,7 @@
           "type": "object",
           "required": [
             "audit_type",
+            "reproduction_status",
             "x_source",
             "y_source",
             "reported_source",
@@ -965,6 +966,15 @@
                 }
               },
               "additionalProperties": true
+            },
+            "reproduction_status": {
+              "enum": [
+                "NOT_ASSESSED",
+                "REPRODUCED",
+                "NOT_REPRODUCED",
+                "NOT_ASSESSABLE",
+                "NOT_APPLICABLE"
+              ]
             }
           },
           "additionalProperties": false

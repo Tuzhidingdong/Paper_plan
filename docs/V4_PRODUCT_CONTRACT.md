@@ -74,3 +74,6 @@ These capabilities improve scientific decision traceability; they do not automat
 
 - Each image-derived Result Unit has a source-linked visual metadata assessment recorded during the original-resolution caption-blind inspection. It records modality, magnification/pixel size, scale/spatial calibration, specimen state/preparation, image processing/contrast and field selection/sampling, with explicit observed/not-present/not-legible/not-applicable/unknown states and reasons.
 - Later visual comparability checks reuse the captured metadata. Manual scale-bar reading is recorded as such; validators do not claim to read or verify pixel/image content automatically.
+
+
+- Every fitted Result Unit carries an explicit `reproduction_status` verified against its source-linked calculation and printed precision. Statistical-quality/uncertainty and validation-scope fields remain separate and independently checked.

@@ -138,3 +138,5 @@ Do not force exactly three routes, any fixed Figure/Panel count, a three-paragra
 Run all applicable validators, review every warning and verify the final PDF is generated from the final Markdown revision. The final report must state source hashes, project/Skill versions, literature access levels, journal profile status, central contribution confidence, Figure/SI coverage, work-package closure, blocked calculations, human decisions, validation outcome and available usage deltas.
 
 The result is a decision-ready manuscript-development package, not a guarantee of publishability or an automatically approved lab/computational protocol.
+
+46. Create each fitted Result Unit's source-linked calculation audit at the time the fit is extracted or calculated, not as a post hoc repair. Record an explicit `reproduction_status` (`REPRODUCED`, `NOT_REPRODUCED`, `NOT_ASSESSABLE` or `NOT_ASSESSED`) and require the deterministic validator to verify that label against recomputed coefficients and source precision. Keep statistical-quality diagnostics/uncertainty and internal/external/prospective validation in their separate fields; one status never substitutes for another.

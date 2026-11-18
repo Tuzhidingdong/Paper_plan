@@ -339,12 +339,16 @@ def validate_fit_reproducibility(bundle: dict[str, Any]) -> tuple[list[str], lis
             owner = f"{result_id} calculation_audits[{audit_index}]"
             if audit.get("audit_type") != "OLS_LINEAR_FIT":
                 errors.append(f"{owner}: unsupported audit_type; expected OLS_LINEAR_FIT")
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: unsupported audit requires reproduction_status NOT_ASSESSABLE")
                 continue
 
             x_ref, y_ref = audit.get("x_source", {}), audit.get("y_source", {})
             x_result_id, y_result_id = x_ref.get("result_id"), y_ref.get("result_id")
             if x_result_id not in results or y_result_id not in results:
                 errors.append(f"{owner}: x_source/y_source references an unknown Result Unit")
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: unresolved source reference requires reproduction_status NOT_ASSESSABLE")
                 continue
             x_values = _numeric_vector(results[x_result_id], x_ref.get("observation_index"))
             y_values = _numeric_vector(results[y_result_id], y_ref.get("observation_index"))
@@ -353,16 +357,22 @@ def validate_fit_reproducibility(bundle: dict[str, Any]) -> tuple[list[str], lis
                     f"{owner}: source references must resolve to numeric_values vectors "
                     "with at least three finite observations"
                 )
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: unavailable numeric vectors require reproduction_status NOT_ASSESSABLE")
                 continue
             computed = _ordinary_least_squares(x_values, y_values)
             if computed is None:
                 errors.append(f"{owner}: OLS cannot be computed (length mismatch or zero variance)")
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: uncomputable OLS requires reproduction_status NOT_ASSESSABLE")
                 continue
             slope, intercept, r_squared = computed
 
             reported_source = audit.get("reported_source", {})
             if reported_source.get("result_id", result_id) != result_id:
                 errors.append(f"{owner}: reported_source must point to the Result Unit being audited")
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: unresolved reported parameter source requires reproduction_status NOT_ASSESSABLE")
                 continue
             value_indices = reported_source.get("value_indices", {})
             precision = audit.get("displayed_precision", {})
@@ -412,8 +422,34 @@ def validate_fit_reproducibility(bundle: dict[str, Any]) -> tuple[list[str], lis
                         f"{parameter}: recomputed {computed_value:.12g} vs printed "
                         f"{reported_value:.12g} (rounding tolerance {tolerance:.3g})"
                     )
+            incomplete_printed_parameters = any(
+                reported_values[parameter] is None
+                or not isinstance(precision.get(parameter), int)
+                or isinstance(precision.get(parameter), bool)
+                or precision.get(parameter) < 0
+                or precision.get(parameter) > 12
+                for parameter in ("slope", "intercept", "r_squared")
+            )
+            if incomplete_printed_parameters:
+                computed_reproduction_status = "NOT_ASSESSABLE"
+            elif mismatches:
+                computed_reproduction_status = "NOT_REPRODUCED"
+            else:
+                computed_reproduction_status = "REPRODUCED"
+
+            if audit.get("reproduction_status") != computed_reproduction_status:
+                message = (
+                    f"{owner}: reproduction_status must be {computed_reproduction_status}; "
+                    f"recorded {audit.get('reproduction_status')!r}"
+                )
+                (errors if core else warnings).append(message)
             if mismatches:
-                message = f"{owner}: OLS fit is NOT_REPRODUCED; " + "; ".join(mismatches)
+                prefix = (
+                    "OLS fit reproduction is NOT_ASSESSABLE; "
+                    if computed_reproduction_status == "NOT_ASSESSABLE"
+                    else "OLS fit is NOT_REPRODUCED; "
+                )
+                message = f"{owner}: " + prefix + "; ".join(mismatches)
                 (errors if core else warnings).append(message)
 
             # Reproduction is not a statistical-quality assessment. Record the

@@ -86,3 +86,6 @@ V4.2 regression tests are in `tests/test_v4_2_scientific_integrity.py`. These ga
 | Validation scope | In-sample, internal resampling, independent external and prospective levels | Requires distinct data scope, independence unit and leakage controls where applicable |
 
 V4.3 tests use synthetic generic fixtures. The controls do not encode any specific sample, material system, measurement technique or experimental conclusion. This development remains subject to CI and local regression before merge.
+
+
+V4.3 fit audits now require a declared `reproduction_status` that the validator cross-checks against recomputed coefficients. The status is separate from statistical-quality diagnostics/uncertainty and from internal, external-independent or prospective validation scope.

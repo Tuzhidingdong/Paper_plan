@@ -67,6 +67,7 @@ Figure-level status and report-level status stay separate. NOT_SHOWN means not s
 - Capture Exact_Text/Exact_Table/Vector_Extracted separately from Visual_Estimate and Qualitative_Observation.
 - Never infer unreported batches, measurement runs, replicates, treatment conditions or raw data.
 - For every quantitative Result Unit that may support a central claim, create a measurement definition recording the measurand, raw signal, method, formula where derived, output unit, normalization basis, calibration/blank corrections, uncertainty and parent Result Unit IDs. Mark incomplete definitions PARTIAL or NOT_ASSESSED; do not promote them to a verified core metric.
+- When a fitted/derived relationship is extracted or calculated, create its source-linked calculation audit immediately. Record the input vectors, displayed parameter values/precision and an explicit reproduction_status. Separately assess statistical diagnostics/uncertainty and state whether validation is in-sample, internally resampled, externally independent or prospective. Never infer one status from another.
 - Mark each Result Unit's intended claim role as UNDECIDED, SUPPORTING, CORE or NOT_USED. A numeric CORE result must pass the measurement-definition checks before it can support a central quantitative claim.
 - Compare experimental conditions explicitly before combining or contrasting Result Units. Record matched, mismatched, unknown and not-applicable dimensions rather than assuming like-for-like comparability.
 

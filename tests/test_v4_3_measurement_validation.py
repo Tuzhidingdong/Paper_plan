@@ -397,6 +397,7 @@ class FitAssessmentSeparationTests(unittest.TestCase):
     def make_fit_bundle(self):
         audit = {
             "audit_type": "OLS_LINEAR_FIT",
+            "reproduction_status": "REPRODUCED",
             "x_source": {"result_id": "R001", "observation_index": 0},
             "y_source": {"result_id": "R001", "observation_index": 1},
             "reported_source": {
@@ -451,6 +452,13 @@ class FitAssessmentSeparationTests(unittest.TestCase):
         errors, warnings = validate_fit_reproducibility(self.make_fit_bundle())
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
+
+    def test_reproduction_status_must_match_the_recomputed_fit(self):
+        bundle = self.make_fit_bundle()
+        audit = bundle["result_units"]["R002"]["calculation_audits"][0]
+        audit["reproduction_status"] = "NOT_REPRODUCED"
+        errors, _ = validate_fit_reproducibility(bundle)
+        self.assertTrue(any("reproduction_status must be REPRODUCED" in item for item in errors), errors)
 
     def test_core_fit_requires_separate_statistical_quality_assessment(self):
         bundle = self.make_fit_bundle()

@@ -152,6 +152,7 @@ class FitReproducibilityTests(unittest.TestCase):
         if include_audit:
             result["calculation_audits"] = [{
                 "audit_type": "OLS_LINEAR_FIT",
+                "reproduction_status": "REPRODUCED" if tuple(reported) == (2.0, 1.0, 1.0) else "NOT_REPRODUCED",
                 "x_source": {"result_id": "R001", "observation_index": 0},
                 "y_source": {"result_id": "R001", "observation_index": 1},
                 "reported_source": {
@@ -218,6 +219,7 @@ class FitReproducibilityTests(unittest.TestCase):
     def test_mismatched_source_vector_lengths_are_rejected(self):
         bundle = self.make_bundle()
         bundle["result_units"]["R001"]["observations"][1]["numeric_values"] = [1, 2]
+        bundle["result_units"]["R002"]["calculation_audits"][0]["reproduction_status"] = "NOT_ASSESSABLE"
         errors, _ = validate_fit_reproducibility(bundle)
         self.assertTrue(any("at least three finite observations" in item for item in errors), errors)
 
