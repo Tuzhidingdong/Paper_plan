@@ -31,7 +31,7 @@ Reject cosmetic route variants, topic statements masquerading as contributions, 
 
 ## 3. Literature-frontier gate
 
-Inspect the search ledger and nearest-work comparison, not just the bibliography.
+Inspect the completed project-specific literature frontier audit ledger (based on templates/V5_1_LITERATURE_FRONTIER_LEDGER.md) and nearest-work comparison, not just the bibliography. The populated ledger must be retained under the isolated workspace and its path referenced from the plan; the final narrative should summarize the consequential search findings without becoming a raw query dump.
 
 - Every paper/author/year/DOI/title clue explicitly supplied by the user or found in project source materials has a resolution record and disposition.
 - Exact-system, transformation-direction, mechanism, condition, measurement and adjacent-system query facets are represented where relevant.
