@@ -166,3 +166,5 @@ The result is a complete, supervisor-reviewable and team-assignable manuscript-d
 54. Where relevant, distinguish the measurement scale and operational meaning (bulk, surface, pore/phase association, lattice or other levels); do not use evidence from one scale to claim another without an appropriate bridge.
 55. Separate the minimum discriminating test from the full publication-strength program. Prioritize the smallest feasible experiment/reanalysis/calculation that can change the mainline decision, then expand only for claims it unlocks.
 56. Apply docs/V5_1_NARRATIVE_PRODUCT_QA.md to the actual Markdown and same-revision PDF. Report product quality, scientific readiness and benchmark-comparison status separately; template completion, PDF length, tests and validators do not certify the narrative product.
+
+57. Select HYBRID only when its components form one logically interdependent scientific argument with a stated shared central question. Do not use HYBRID as a compromise between disconnected stories or as a way to retain unrelated results; distribute main-text sections, Figures and tasks in proportion to their role in the central contribution.
