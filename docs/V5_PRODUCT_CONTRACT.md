@@ -21,7 +21,7 @@ A complete schema, successful validator, list of task IDs or set of workflow fil
 The exact section count and depth depend on the project. Every full-paper plan must cover:
 
 1. **Research diagnosis and evidence readiness:** what is established, uncertain, decision-critical, suitable for a paper now, or requires further work.
-2. **Literature frontier and novelty boundary:** multi-route discovery and citation chasing; closest primary studies; comparison of actual systems, transformation pathways, methods, conditions, observables, conclusions and limitations; counter-evidence; bounded gap statements and search-saturation basis.
+2. **Literature frontier and novelty boundary:** multi-route discovery and citation chasing; a retained project-specific search/lead-resolution audit based on templates/V5_1_LITERATURE_FRONTIER_LEDGER.md; closest primary studies; comparison of actual systems, transformation pathways, methods, conditions, observables, conclusions and limitations; counter-evidence; bounded gap statements and search-saturation basis.
 3. **Scientific-mainline decision:** compare the user's original intended question/hypothesis with evidence-led alternatives, conditional/hybrid options and stop/defer; distinguish a scientific contribution from an audit/validation task; explain why the selected mainline is preferable and what evidence would change the choice.
 4. **One central contribution:** research question, proposed contribution and boundary; why it matters; difference from closest work; supporting/missing evidence; alternative explanations.
 4. **Introduction architecture:** actual paragraph sequence, each paragraph's role/message/literature support/transition/citation needs; draft prose when claims and references are sufficiently verified.
