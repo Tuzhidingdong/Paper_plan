@@ -6,6 +6,8 @@ Its deliverable is broader than a research-plan summary: it connects the existin
 
 ## V5.1 scientific-mainline and literature frontier
 
+V5.1 also includes a mandatory narrative-product quality review (docs/V5_1_NARRATIVE_PRODUCT_QA.md) and stricter citation-lead resolution, adversarial prior-art testing, Figure/SI allocation, sample-state integrity and decision-critical task design. Product quality, scientific readiness and benchmark comparison are reported as separate outcomes.
+
 V5.1 retains the V5 narrative-first product and V4.1–V4.3 scientific-integrity controls. It strengthens scientific-mainline selection (including explicit evaluation of the user's original hypothesis) and literature-frontier discovery/synthesis.
 
 The structured bundles remain the provenance/state layer. The final deliverable must be a standalone, reasoned narrative that a supervisor can review and a team can execute: research diagnosis, closest-literature comparison, bounded novelty, one central contribution, paragraph-level Introduction, connected Results/Discussion storyline, TOC and Figure/Panel design, SI map, actionable experiment/analysis/computation handoffs and a prioritized execution plan.
