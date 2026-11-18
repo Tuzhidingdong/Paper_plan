@@ -108,7 +108,7 @@ The Skill may identify that the available evidence does not yet support a defens
 
 ## Entry and commands
 
-For every full project, read workflows/13_v5_manuscript_development.md, docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md and docs/V5_1_NARRATIVE_PRODUCT_QA.md first; also follow docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md and docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md before completing their respective stages. workflows/07_full_run.md is a compatibility entry point to V5. Reuse workflows/01–06 and 08–12 as stage-specific technical procedures when the V5 runbook calls for them; do not treat their intermediate outputs as the final plan. Load only reference files needed for the current stage.
+For every full project, read workflows/13_v5_manuscript_development.md, docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md and docs/V5_1_NARRATIVE_PRODUCT_QA.md first; also follow docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md and docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md before completing their respective stages, using templates/V5_1_LITERATURE_FRONTIER_LEDGER.md for the project-specific search audit. workflows/07_full_run.md is a compatibility entry point to V5. Reuse workflows/01–06 and 08–12 as stage-specific technical procedures when the V5 runbook calls for them; do not treat their intermediate outputs as the final plan. Load only reference files needed for the current stage.
 
     python -m pip install -r requirements.txt
     python -m unittest discover -s tests -v
