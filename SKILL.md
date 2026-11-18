@@ -168,3 +168,6 @@ The result is a complete, supervisor-reviewable and team-assignable manuscript-d
 56. Apply docs/V5_1_NARRATIVE_PRODUCT_QA.md to the actual Markdown and same-revision PDF. Report product quality, scientific readiness and benchmark-comparison status separately; template completion, PDF length, tests and validators do not certify the narrative product.
 
 57. Select HYBRID only when its components form one logically interdependent scientific argument with a stated shared central question. Do not use HYBRID as a compromise between disconnected stories or as a way to retain unrelated results; distribute main-text sections, Figures and tasks in proportion to their role in the central contribution.
+
+
+58. When a project benchmark is required, extract its complete quality criteria and map each to the new plan; transfer only domain-neutral quality expectations, never its scientific facts or default settings. If the required benchmark is unavailable, do not claim complete comparison or overall product acceptance.
