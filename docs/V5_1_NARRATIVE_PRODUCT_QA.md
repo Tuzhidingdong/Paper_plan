@@ -16,7 +16,7 @@ Report these independently:
 
 A lack of decisive data does not automatically make the plan a product failure: an excellent plan may identify a conditional path or recommend stopping. Conversely, engineering PASS, a polished PDF or complete template headings do not make a plan PASS when the scientific reasoning or handoffs are inadequate.
 
-When a benchmark is explicitly required but unavailable, do not substitute a remembered summary, unrelated benchmark, generic journal style or the Agent's own checklist and claim a benchmark pass. State exactly which comparisons could not be made. The plan may still be reviewed against the general product contract, but BENCHMARK_COMPARISON remains BLOCKED_REFERENCE_UNAVAILABLE.
+When a benchmark is explicitly required but unavailable, do not substitute a remembered summary, unrelated benchmark, generic journal style or the Agent's own checklist and claim a benchmark pass. State exactly which comparisons could not be made. Continue the general product review, but mark PLAN_PRODUCT_STATUS PARTIAL at best while the required benchmark is unavailable; BENCHMARK_COMPARISON remains BLOCKED_REFERENCE_UNAVAILABLE. Do not report overall product acceptance until the required comparison can be completed.
 
 ## 2. Research question and contribution gate
 
@@ -110,3 +110,12 @@ A final review must state the three independent statuses from Section 1, materia
 ## 11. Hybrid and supporting-contribution gate
 
 A HYBRID recommendation must identify one shared central question and show why its components are necessary parts of the same inference. It is not a compromise between two preferred stories or a way to retain unrelated results. A method/measurement-validation task may support a scientific contribution, but must not become a second paper inside the same plan unless its independent contribution is explicitly selected and defended. Check that the distribution of Results/Discussion sections, main Figures and tasks reflects the declared central contribution.
+
+
+## 12. Extract and map benchmark requirements without copying its case
+
+When a benchmark is supplied and required, inspect its complete accessible content and extract a criterion matrix before judging the new plan. For each criterion record: the benchmark's quality expectation; whether it is transferable as a domain-neutral product requirement or is case-specific scientific content; the location in the new plan that satisfies it; and any gap or justified non-applicability.
+
+Transfer only the abstract quality expectation (for example, the required depth of a scientific argument or specificity of an execution handoff) into reusable product rules. Keep benchmark-specific materials, mechanisms, numerical results, references, journal settings, experimental decisions and storylines confined to that benchmark's isolated case. The benchmark is a quality reference, not evidence for the new project's claims and not a default template for its scientific story.
+
+Set BENCHMARK_COMPARISON to COMPLETE only when the benchmark content needed for comparison was actually available and the criterion-to-plan mapping was performed. A title, remembered description, partial excerpt or similar-looking report is not a substitute for the complete benchmark when complete comparison was requested.
