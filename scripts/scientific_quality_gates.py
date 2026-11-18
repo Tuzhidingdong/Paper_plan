@@ -79,11 +79,37 @@ def validate_evidence_integrity(bundle: dict[str, Any]) -> tuple[list[str], list
     regions = bundle.get("regions", {})
     panels = bundle.get("panels", {})
 
+    # Do not rely only on an Agent-authored triage label. Detect repeated
+    # header/footer crops from their physical layout and pixel fingerprints.
+    layout_occurrences: dict[tuple[str, str], list[str]] = {}
+    for region_id, region in regions.items():
+        bbox = region.get("bbox_normalized") or []
+        fingerprint = region.get("layout_fingerprint") or region.get("pixel_sha256")
+        if not fingerprint or len(bbox) != 4:
+            continue
+        zone = "header" if bbox[3] <= 0.24 else ("footer" if bbox[1] >= 0.76 else "body")
+        if zone in {"header", "footer"}:
+            layout_occurrences.setdefault((str(fingerprint), zone), []).append(region_id)
+    minimum_repeated_pages = max(
+        3, int(math.ceil((bundle.get("source", {}).get("page_count") or 0) * 0.15))
+    )
+    inferred_repeated_regions = set()
+    for region_ids_for_layout in layout_occurrences.values():
+        pages = {
+            regions[region_id].get("page_number")
+            for region_id in region_ids_for_layout
+        }
+        if len(pages) >= minimum_repeated_pages:
+            inferred_repeated_regions.update(region_ids_for_layout)
+
     for result_id, result in bundle.get("result_units", {}).items():
         region_ids = result.get("region_ids", [])
         linked_regions = [(rid, regions.get(rid)) for rid in region_ids if rid in regions]
         for region_id, region in linked_regions:
-            if region.get("triage_role") == "REPEATED_LAYOUT_ASSET":
+            if (
+                region.get("triage_role") == "REPEATED_LAYOUT_ASSET"
+                or region_id in inferred_repeated_regions
+            ):
                 errors.append(
                     f"{result_id}: Region {region_id} is a repeated header/footer layout asset "
                     "and cannot serve as a scientific evidence anchor"
