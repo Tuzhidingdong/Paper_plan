@@ -60,3 +60,15 @@ This branch develops the V4 manuscript-development product layer while preservin
 The V4.1 branch adds domain-neutral scientific decision controls: typed Claim evidence roles, a distinct NOT_ASSESSABLE state, Panel data-scope/reuse review, structured execution-design readiness, agreement/equivalence decision rules, classified task dependencies and validation fingerprints.
 
 These changes are development-candidate features until GitHub CI and local regression are complete. Existing project runs are not silently rewritten; older validation outputs remain historical and must be regenerated against the current Skill and bundle revisions before being described as current. No project-specific findings are included in generic Skill sources.
+
+## V4.2 evidence-integrity gates (development branch)
+
+| Gate | Implementation | Intended effect |
+|---|---|---|
+| Physical Region integrity | `scientific_quality_gates.py` wired into `validate_evidence.py` | Rejects repeated header/footer anchors and source-page/Region page mismatches |
+| Caption-blind visual provenance | Evidence validator checks linked visual-inspection history for image-derived Result Units | Prevents unsupported visual observations without an inspection record |
+| Multi-image visual comparability | Manuscript validator requires six acquisition/scale/specimen dimensions for multi-image claims | Detects magnification/scale-bar, modality, preparation and image-processing mismatches |
+| Statistical-fit reproduction | Evidence validator recomputes source-linked OLS linear fits at displayed precision | Separates method definition from actual coefficient reproduction |
+| Research-route decision audit | Planning validator requires selection criteria, evidence rationale and disposition of every alternative | Prevents an opaque preferred-route choice |
+
+V4.2 regression tests are in `tests/test_v4_2_scientific_integrity.py`. These gates are generic and contain no test-project/sample facts. CI and fresh local synchronization/acceptance are pending for this branch.
