@@ -29,7 +29,7 @@ Use the original research input package and the separately held project benchmar
 
 - Do not reuse old V4.3 deliverables as source evidence.
 - Reuse extraction only if source hashes and provenance match.
-- Do not modify/overwrite lsy_test, original files or prior human decisions.
+- Do not modify or overwrite the source project's existing directories, original files or prior human decisions.
 - Keep project-specific evidence, benchmark content, test-specific target journal and literature conclusions in the isolated workspace/test-run inputs, never generic Skill files. Verify generic sources remain domain- and journal-neutral.
 - Verify current official requirements for the target journal/article type.
 - Run SKILL.md with workflows/13_v5_manuscript_development.md. Supply the current project's target journal explicitly when selected; never infer it from a benchmark used for another project. Explicitly request the complete V5 integrated plan, not a validator report or direction shortlist.
