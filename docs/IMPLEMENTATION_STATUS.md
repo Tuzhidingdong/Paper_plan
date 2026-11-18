@@ -71,4 +71,4 @@ These changes are development-candidate features until GitHub CI and local regre
 | Statistical-fit reproduction | Evidence validator recomputes source-linked OLS linear fits at displayed precision | Separates method definition from actual coefficient reproduction |
 | Research-route decision audit | Planning validator requires selection criteria, evidence rationale and disposition of every alternative | Prevents an opaque preferred-route choice |
 
-V4.2 regression tests are in `tests/test_v4_2_scientific_integrity.py`. These gates are generic and contain no test-project/sample facts. CI and fresh local synchronization/acceptance are pending for this branch.
+V4.2 regression tests are in `tests/test_v4_2_scientific_integrity.py`. These gates are generic and contain no test-project/sample facts. GitHub Actions runs compileall and the complete unittest suite on Python 3.10, 3.11 and 3.12 for every PR head. Fresh local synchronization and regression remain to be completed after merge.
