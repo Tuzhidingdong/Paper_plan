@@ -6,7 +6,7 @@ Its deliverable is broader than a research-plan summary: it connects the existin
 
 ## V5.1 scientific-mainline and literature frontier
 
-V5.1 also includes a mandatory narrative-product quality review (docs/V5_1_NARRATIVE_PRODUCT_QA.md) and stricter citation-lead resolution, adversarial prior-art testing, Figure/SI allocation, sample-state integrity and decision-critical task design. Product quality, scientific readiness and benchmark comparison are reported as separate outcomes.
+V5.1 also includes a mandatory narrative-product quality review (docs/V5_1_NARRATIVE_PRODUCT_QA.md), a reusable literature-frontier audit ledger template (templates/V5_1_LITERATURE_FRONTIER_LEDGER.md), and stricter citation-lead resolution, adversarial prior-art testing, Figure/SI allocation, sample-state integrity and decision-critical task design. Product quality, scientific readiness and benchmark comparison are reported as separate outcomes.
 
 V5.1 retains the V5 narrative-first product and V4.1–V4.3 scientific-integrity controls. It strengthens scientific-mainline selection (including explicit evaluation of the user's original hypothesis) and literature-frontier discovery/synthesis.
 
