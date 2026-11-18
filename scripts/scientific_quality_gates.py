@@ -404,6 +404,24 @@ def validate_visual_claim_comparability(
                 )
                 continue
 
+            entity_ids = {
+                entity.get("entity_id")
+                for entity in assessment.get("comparison_entities", [])
+                if entity.get("entity_id")
+            }
+            for dimension_id in VISUAL_DIMENSIONS:
+                dimension = visual_dimensions[dimension_id]
+                values_by_entity = dimension.get("values_by_entity", {})
+                if not isinstance(values_by_entity, dict) or not entity_ids.issubset(set(values_by_entity)):
+                    errors.append(
+                        f"{assessment_id}: visual dimension {dimension_id} must record a value/status "
+                        "for every compared entity"
+                    )
+                if not isinstance(dimension.get("assessment_note"), str) or not dimension["assessment_note"].strip():
+                    errors.append(
+                        f"{assessment_id}: visual dimension {dimension_id} requires an assessment_note"
+                    )
+
             statuses = {
                 key: visual_dimensions[key].get("match_status")
                 for key in VISUAL_DIMENSIONS
