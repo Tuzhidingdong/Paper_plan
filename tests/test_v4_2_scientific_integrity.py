@@ -263,6 +263,28 @@ class VisualComparabilityTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
 
+    def test_nonvisual_comparison_can_coexist_with_visual_assessment(self):
+        package, framework, evidence = self.make_inputs()
+        package["comparability_assessments"]["CMP002"] = {
+            "assessment_id": "CMP002",
+            "comparison_purpose": "Compare non-image experimental conditions",
+            "comparison_entities": [
+                {"entity_id": "R001", "entity_type": "result_unit", "label": "Result A"},
+                {"entity_id": "R002", "entity_type": "result_unit", "label": "Result B"},
+            ],
+            "dimensions": [
+                {"dimension": "reaction_temperature", "match_status": "MATCHED",
+                 "values_by_entity": {"R001": 25, "R002": 25}, "assessment_note": "Same setpoint."}
+            ],
+            "assessment_status": "COMPARABLE",
+            "limitations": [],
+            "permitted_inference": "Temperature was matched.",
+            "claim_ids": ["C001"],
+        }
+        errors, warnings = validate_visual_claim_comparability(package, framework, evidence)
+        self.assertEqual(errors, [])
+        self.assertEqual(warnings, [])
+
     def test_missing_scale_or_acquisition_dimension_is_rejected(self):
         package, framework, evidence = self.make_inputs(missing_dimension="scale_bar_or_spatial_calibration")
         errors, _ = validate_visual_claim_comparability(package, framework, evidence)
