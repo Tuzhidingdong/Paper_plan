@@ -21,8 +21,9 @@ A complete schema, successful validator, list of task IDs or set of workflow fil
 The exact section count and depth depend on the project. Every full-paper plan must cover:
 
 1. **Research diagnosis and evidence readiness:** what is established, uncertain, decision-critical, suitable for a paper now, or requires further work.
-2. **Literature frontier and novelty boundary:** closest primary studies; comparison of systems, methods, conditions, observables, conclusions and limitations; relevant counter-evidence; bounded gap statements.
-3. **One central contribution:** research question, proposed contribution and boundary; why it matters; difference from closest work; supporting/missing evidence; alternative explanations.
+2. **Literature frontier and novelty boundary:** multi-route discovery and citation chasing; closest primary studies; comparison of actual systems, transformation pathways, methods, conditions, observables, conclusions and limitations; counter-evidence; bounded gap statements and search-saturation basis.
+3. **Scientific-mainline decision:** compare the user's original intended question/hypothesis with evidence-led alternatives, conditional/hybrid options and stop/defer; distinguish a scientific contribution from an audit/validation task; explain why the selected mainline is preferable and what evidence would change the choice.
+4. **One central contribution:** research question, proposed contribution and boundary; why it matters; difference from closest work; supporting/missing evidence; alternative explanations.
 4. **Introduction architecture:** actual paragraph sequence, each paragraph's role/message/literature support/transition/citation needs; draft prose when claims and references are sufficiently verified.
 5. **Complete storyline:** Results/Discussion as a connected sequence of questions, evidence, inference and transitions, not an instrument-by-instrument list.
 6. **TOC and main Figures/Panels:** journal-aware concept where relevant; exact content, purpose, evidence status, new/reprocessed data, comparison, intended inference and limitations for every proposed Panel.
@@ -34,7 +35,7 @@ The exact section count and depth depend on the project. Every full-paper plan m
 
 ## Required reasoning depth
 
-A recommendation is complete only when the plan explains why this question/contribution is defensible; how closest studies differ; which evidence supports each important statement and how reliable it is; what new/reprocessed evidence is required and why; what each Figure/Panel demonstrates and what alternative outcomes mean; how each task reduces a named uncertainty or tests a claim; where each task output goes; what would weaken/falsify/narrow the interpretation; and what the supervisor must decide.
+A recommendation is complete only when the plan explains why this scientific mainline/contribution is defensible; how the user's original scientific intent was evaluated; how closest studies differ; why a validation/audit-only fallback was selected or rejected where relevant; which evidence supports each important statement and how reliable it is; what new/reprocessed evidence is required and why; what each Figure/Panel demonstrates and what alternative outcomes mean; how each task reduces a named uncertainty or tests a claim; where each task output goes; what would weaken/falsify/narrow the interpretation; and what the supervisor must decide.
 
 For a substantive full-paper project, a one-page summary or short list of directions is presumptively insufficient. Do not chase a fixed page count; provide enough reasoning and task detail for review and assignment. A small/evidence-limited project may be shorter only with an explicit reason.
 
@@ -44,11 +45,13 @@ Distinguish existing source-verified evidence, extracted but unchecked evidence,
 
 Never describe planned results as observed. Never invent values, thresholds, sample identities, protocols, controls, replicates, parameters, references, journal requirements or outcomes. Preserve contradictory evidence and alternatives. If evidence is insufficient, narrow the claim, propose a decisive test or recommend stopping; do not manufacture a complete-looking story.
 
-Metadata is not full-text evidence. No search hit is not proof of novelty. Verify current journal requirements against official dated sources. Keep physical source anchors, visual provenance, comparison compatibility, measurement definitions, fit reproduction, proxy validation, uncertainty separation, task readiness and human approval gates.
+Metadata is not full-text evidence. A null result from one search provider is not proof of novelty or absence of prior art. Use alternative query formulations, independent discovery routes and citation chasing; stop on coverage/saturation, not a paper-count target. Verify current journal requirements against official dated sources. Keep physical source anchors, visual provenance, comparison compatibility, measurement definitions, fit reproduction, proxy validation, uncertainty separation, task readiness and human approval gates.
 
 ## Generality and isolation
 
-All Skills, workflows, schemas, templates, examples and configurations remain domain-neutral. Project-specific scientific content, names, sample labels, values, equations, mechanisms, literature conclusions, conditions and Figure designs belong only in the isolated workspace or separately maintained user benchmark. The benchmark teaches depth and reasoning, not a fixed scientific story or output shape.
+All Skills, workflows, schemas, templates, examples and configurations remain domain-neutral. Project-specific scientific content, names, sample labels, values, equations, mechanisms, literature conclusions, conditions and Figure designs belong only in the isolated workspace, test fixture or separately maintained user benchmark. The benchmark teaches depth and reasoning, not a fixed scientific story or output shape.
+
+The target journal is also a project-scoped runtime input, never a cross-project default. Use only the journal explicitly supplied or authorized for the current project. A benchmark journal applies only when the current test/run explicitly declares it as the target for that same case. Never inherit target journal, article type, format or publication rules from a different benchmark, prior project, previous run, memory or generic configuration. Verify the current project's selected journal independently.
 
 Do not impose fixed numbers of routes, paragraphs, Figures, Panels, SI items, tasks, controls, techniques or computational methods.
 
