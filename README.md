@@ -65,8 +65,15 @@ Run the existing validators as well:
 
 See docs/V4_PRODUCT_CONTRACT.md, docs/ARCHITECTURE.md and docs/IMPLEMENTATION_STATUS.md for the product boundary and development status.
 
-## V4.1 scientific decision controls
+## V4.1–V4.2 scientific decision and integrity controls
 
-V4.1 strengthens the manuscript-development layer with typed evidence-use roles and Claim assessment states; a strict distinction between lack of comparability and contradictory evidence; explicit Panel data-scope and Data Slot reuse review; structured work-package execution readiness and local approval gates; agreement/equivalence decision frameworks with predeclared, justified criteria; separate execution, interpretation and publication dependencies; and validation provenance fingerprints.
+V4.1 adds typed evidence-use roles, distinct evidence assessments and comparability states, Panel data scopes, execution-readiness gates, agreement/equivalence decision rules, classified task dependencies and validation fingerprints.
 
-These are general workflow and validation capabilities. The Skill remains domain-neutral and does not invent local protocols, thresholds or scientific conclusions.\n## Evidence roles and CORE semantics\n\nQuantitative measurements used as decision-bearing evidence either for or against a central claim must have a CORE role and a VERIFIED measurement definition. CORE denotes central relevance to the claim assessment, not support direction. A Result Unit classified as AUDIT_TARGET is the object of a validity assessment and is not automatically accepted as supporting or contradictory evidence. CONTEXT_ONLY records do not carry the central inference.
+V4.2 closes quality gaps exposed by a fresh original-PDF acceptance run:
+- Result Unit Region references must be physical, page-consistent evidence crops; repeated headers/footers cannot anchor scientific claims.
+- Image-derived evidence requires a linked caption-blind inspection record.
+- Claims combining multiple image-derived Result Units require acquisition/scale/specimen comparability dimensions and explicit inference limits.
+- Derived statistical fits require source-linked, deterministic coefficient reproduction against printed precision. Measurement-definition status is not treated as proof that a fitted model reproduces or is externally validated.
+- A nominated research route requires an auditable selection rationale and dispositions for all non-selected candidates.
+
+These are generic engineering controls. They do not encode the scientific case that exposed the defects, and do not replace expert review or human route approval.
