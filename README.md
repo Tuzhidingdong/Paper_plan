@@ -46,7 +46,7 @@ For a new project, follow workflows/07_full_run.md. Its stages use workflows/01â
 
 Run the V4 validator after creating the V4 bundle:
 
-    python scripts/validate_manuscript_development.py --workspace WORKSPACE --deliverables-dir WORKSPACE/deliverables
+    python scripts/validate_manuscript_development.py --workspace WORKSPACE --deliverables-dir WORKSPACE/deliverables --skill-commit <CURRENT_SKILL_COMMIT>
 
 Run the existing validators as well:
 
@@ -64,3 +64,9 @@ Run the existing validators as well:
 - Human decisions remain explicit and are never silently approved.
 
 See docs/V4_PRODUCT_CONTRACT.md, docs/ARCHITECTURE.md and docs/IMPLEMENTATION_STATUS.md for the product boundary and development status.
+
+## V4.1 scientific decision controls
+
+V4.1 strengthens the manuscript-development layer with typed evidence-use roles and Claim assessment states; a strict distinction between lack of comparability and contradictory evidence; explicit Panel data-scope and Data Slot reuse review; structured work-package execution readiness and local approval gates; agreement/equivalence decision frameworks with predeclared, justified criteria; separate execution, interpretation and publication dependencies; and validation provenance fingerprints.
+
+These are general workflow and validation capabilities. The Skill remains domain-neutral and does not invent local protocols, thresholds or scientific conclusions.

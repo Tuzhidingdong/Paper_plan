@@ -69,3 +69,20 @@ Critical evidence for the central claim must remain visible in the main paper. S
 ## 5. Cross-check
 
 Every main Figure must appear in the storyline. Every Panel must link to a claim or a Data Slot. Every comparative Panel must link to a comparability assessment or explicitly state that comparability is unresolved. Every essential missing Data Slot must be placed in a Figure or SI item and linked to a task, or have an explicit reason for exclusion. Every SI item must support a claim, Figure or reproducibility requirement.
+
+## 6. Data scope and reuse across Panels
+
+When a Data Slot or source dataset is reused in more than one Panel, describe the scope for each Panel so that the reader can tell whether the Panels show distinct slices or duplicate the same material. Record applicable dimensions such as specimen/group set, condition set, timepoint or process stage, analysis population, processing level and source dataset IDs. If the same data are intentionally shown more than once for different analytical purposes, state the reuse rationale.
+
+A reused Data Slot is not automatically a defect: a baseline and a derived analysis may legitimately use the same source measurements. However, identical or unspecified scope without a rationale must be flagged for human review.
+
+## 7. Comparability states and inference boundaries
+
+Use the states precisely:
+- `COMPARABLE`: all dimensions required for the stated comparison have been assessed and are matched or not applicable.
+- `CONDITIONALLY_COMPARABLE`: the comparison is limited by one or more known mismatches or unresolved dimensions; state the restricted inference.
+- `NOT_COMPARABLE`: one or more required dimensions are mismatched or unknown such that the intended direct comparison is invalid.
+- `NOT_ASSESSABLE`: available information is insufficient to judge the comparison itself; identify the missing information.
+- `UNASSESSED`: no comparison assessment has yet been performed.
+
+Do not turn NOT_COMPARABLE or NOT_ASSESSABLE into a claim of contradiction. State only what cannot be inferred. A contradiction requires independent, explicitly linked counter-evidence.

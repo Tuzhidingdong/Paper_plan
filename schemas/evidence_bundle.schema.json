@@ -765,6 +765,18 @@
           "items": {
             "type": "string"
           }
+        },
+        "audit_target_result_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "context_result_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": true

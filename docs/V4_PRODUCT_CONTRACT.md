@@ -49,3 +49,16 @@ A reviewer should be able to answer from the package alone:
 - Which decisions remain with the supervisor?
 
 A package that answers only "what research directions could be explored?" does not meet the product contract.
+
+## V4.1 scientific decision quality
+
+- Claim evidence references distinguish support, contradiction, audit target and context. Only actual supporting quantitative Result Units are subject to the central CORE/VERIFIED gate.
+- Evidence assessments distinguish supported, partially supported, not established, not assessable, contradicted and inconclusive. Contradiction requires explicit counter-evidence; comparison failure alone is not contradiction.
+- Comparability has separate NOT_COMPARABLE, NOT_ASSESSABLE and UNASSESSED states with declared dimensions and inference limits.
+- Panels sharing Data Slots specify data scope or explain reuse.
+- Work packages carry structured execution-design readiness, required-input availability, local feasibility, owner, outputs and QC.
+- Agreement/equivalence tasks require a suitable analysis design and predeclared, justified decision boundaries; correlation alone is insufficient.
+- Task dependencies distinguish execution, interpretation and publication gates.
+- Validation outputs are fingerprinted to the Skill commit, validator, schema and input bundles.
+
+These capabilities improve scientific decision traceability; they do not automate scientific sign-off or generate missing experimental facts.

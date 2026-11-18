@@ -59,3 +59,13 @@ Use this as a coverage guide, not a fixed chapter-count template. Adapt headings
 - Full bibliography with verification level.
 - Source inventory, Evidence IDs and calculation lineage.
 - Validation report and unresolved warnings.
+
+## Scientific decision-quality checks
+
+For every central Claim, distinguish evidence used to support it, evidence contradicting it, measurements being audited and context-only evidence. Do not equate NOT_ESTABLISHED or NOT_ASSESSABLE with CONTRADICTED; explicit counter-evidence is required.
+
+For every repeated Data Slot across Panels, state the specimen/condition/timepoint/analysis scope or justify reuse.
+
+For each work package, state readiness, required inputs, local feasibility, controls, measurements, native outputs, QC, replicate/statistical and uncertainty plan, responsible role and decision owner. For agreement/equivalence questions, specify a justified acceptance boundary and outcome rules; correlation alone is insufficient.
+
+Separate experiment-start prerequisites from interpretation and publication gates. Unknown local parameters remain TBD and cannot be represented as an approved protocol.

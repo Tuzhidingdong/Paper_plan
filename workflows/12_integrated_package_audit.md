@@ -53,3 +53,17 @@ Use:
 - BLOCKED: a central source, identity, measurement, literature or dependency issue prevents a responsible recommendation.
 
 Never describe the result as scientifically proven because Python validators passed. Preserve all warnings and the human decision status in the final report.
+
+## 7. Scientific decision semantics
+
+Check that the evidence-use role of each Claim reference is explicit where necessary; do not treat an audit target or contextual item as established support. A CONTRADICTED Claim must have an explicit contradictory evidence path. NOT_COMPARABLE, NOT_ASSESSABLE, missing metadata or an unavailable comparison are not counter-evidence.
+
+A comparison marked NOT_ASSESSABLE must state what prevents assessment; NOT_COMPARABLE must identify mismatched/unknown required dimensions. Reused Data Slots across Panels must have distinguishable data scope or an explicit reuse rationale; report ambiguous reuse as a review warning.
+
+Agreement/equivalence work packages must have predeclared estimands, methods, acceptance boundaries with a defensible basis and rules for supportive, contradictory and inconclusive outcomes. Execution readiness must not exceed locally confirmed inputs, safety and feasibility. Distinguish execution, interpretation and publication prerequisites.
+
+## 8. Validation provenance and currentness
+
+Every integrated validation report records UTC run time, the Skill commit supplied by the operator, validator and schema SHA-256, and hashes of the bundles actually validated. Run the validator against the current workspace revision and pass the checked-out Skill commit using `--skill-commit`.
+
+A prior PASS report is historical once any bundle, schema or validator changes. Do not cite it as the current package result. Re-run applicable validators after the final bundle changes and before emitting the consolidated verdict.

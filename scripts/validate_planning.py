@@ -271,6 +271,8 @@ def validate_bundles(evidence: dict[str, Any], literature: dict[str, Any],
 
     # Task prerequisite links must resolve and form an acyclic dependency graph.
     task_graph = {task_id: list(task.get("prerequisites", [])) for task_id, task in tasks.items()}
+    dependency_groups = ("execution_prerequisite_ids", "interpretation_prerequisite_ids", "publication_prerequisite_ids")
+    priority_rank = {"P0": 0, "P1": 1, "P2": 2}
     for task_id, task in tasks.items():
         for prerequisite_id in task_graph[task_id]:
             if prerequisite_id not in tasks:
@@ -281,11 +283,37 @@ def validate_bundles(evidence: dict[str, Any], literature: dict[str, Any],
                 errors.append(f"{task_id}: unknown blocked_by_experiment_id {prerequisite_id}")
             elif prerequisite.get("task_type") != "EXPERIMENT":
                 errors.append(f"{task_id}: blocked_by_experiment_id {prerequisite_id} is not an EXPERIMENT task")
-        if task.get("status") == "READY":
-            for prerequisite_id in task_graph[task_id]:
+        classified = any(field in task for field in dependency_groups)
+        if classified:
+            categorized = set().union(*(set(task.get(field, [])) for field in dependency_groups))
+            if categorized != set(task.get("prerequisites", [])):
+                errors.append(f"{task_id}: prerequisites must equal the union of execution, interpretation and publication prerequisite IDs")
+        for field in dependency_groups:
+            for prerequisite_id in task.get(field, []):
+                if prerequisite_id not in tasks:
+                    errors.append(f"{task_id}: unknown {field} task {prerequisite_id}")
                 prerequisite = tasks.get(prerequisite_id, {})
-                if prerequisite.get("status") != "DONE":
-                    warnings.append(f"{task_id}: prerequisite {prerequisite_id} is not DONE; verify this task is truly READY")
+                if (field == "execution_prerequisite_ids"
+                    and task.get("priority") in priority_rank
+                    and prerequisite.get("priority") in priority_rank
+                    and priority_rank[prerequisite["priority"]] > priority_rank[task["priority"]]):
+                    warnings.append(f"{task_id}: execution prerequisite {prerequisite_id} has lower priority ({prerequisite['priority']}) than dependent task ({task['priority']}); review sequencing")
+        design = task.get("execution_design", {})
+        if design.get("readiness") == "APPROVED_FOR_EXECUTION":
+            if task.get("status") != "READY":
+                errors.append(f"{task_id}: APPROVED_FOR_EXECUTION requires task status READY")
+            execution_dependencies = task.get(
+                "execution_prerequisite_ids",
+                [] if classified else task_graph[task_id]
+            )
+            for prerequisite_id in execution_dependencies:
+                if tasks.get(prerequisite_id, {}).get("status") != "DONE":
+                    errors.append(f"{task_id}: execution prerequisite {prerequisite_id} is not DONE")
+        if task.get("status") == "READY":
+            blocking = task.get("execution_prerequisite_ids", task_graph[task_id] if not classified else [])
+            for prerequisite_id in blocking:
+                if tasks.get(prerequisite_id, {}).get("status") != "DONE":
+                    warnings.append(f"{task_id}: execution prerequisite {prerequisite_id} is not DONE; verify execution readiness")
 
     visiting: set[str] = set()
     visited: set[str] = set()

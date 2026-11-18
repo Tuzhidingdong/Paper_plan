@@ -206,9 +206,10 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
         if finding.get("finding_id") != finding_id:
             errors.append(f"Finding key/id mismatch: {finding_id}")
         check_registry(finding_id, "F", "finding_slot")
-        for rid in finding.get("supporting_result_ids", []) + finding.get("contradictory_result_ids", []):
-            if rid not in results:
-                errors.append(f"{finding_id}: references unknown Result Unit {rid}")
+        for field in ("supporting_result_ids", "contradictory_result_ids", "audit_target_result_ids", "context_result_ids"):
+            for rid in finding.get(field, []):
+                if rid not in results:
+                    errors.append(f"{finding_id}: {field} references unknown Result Unit {rid}")
         if finding.get("epistemic_status") == "Interpreted" and not finding.get("alternative_explanations"):
             warnings.append(f"{finding_id}: interpreted finding has no alternative_explanations")
     return errors, warnings

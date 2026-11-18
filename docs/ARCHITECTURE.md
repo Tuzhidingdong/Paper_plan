@@ -57,3 +57,11 @@ The existing validators cover evidence/sample identity, literature provenance, r
 - quality-review state consistency.
 
 Structural validation does not establish scientific truth, research novelty or journal acceptance. Human decisions remain separate.
+
+## V4.1 semantic controls
+
+The framework Claim model distinguishes evidence-use roles and evidence assessments from epistemic status. Finding records can reference audit targets and contextual Result Units separately from supporting and contradictory observations. This prevents a measurement under examination from being mistaken for a verified result supporting the claim.
+
+The manuscript validator reviews comparability semantics, repeated Data Slot use across Panels, structured work-package execution readiness and decision criteria for agreement/equivalence questions. The planning validator distinguishes execution, interpretation and publication prerequisites while retaining the legacy union.
+
+Validation reports record currentness metadata (run time, Skill commit, validator/schema fingerprints and input-bundle hashes). A report is valid only for the exact versions it records.
