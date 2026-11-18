@@ -65,3 +65,6 @@ The framework Claim model distinguishes evidence-use roles and evidence assessme
 The manuscript validator reviews comparability semantics, repeated Data Slot use across Panels, structured work-package execution readiness and decision criteria for agreement/equivalence questions. The planning validator distinguishes execution, interpretation and publication prerequisites while retaining the legacy union.
 
 Validation reports record currentness metadata (run time, Skill commit, validator/schema fingerprints and input-bundle hashes). A report is valid only for the exact versions it records.
+
+
+V4.3 additionally extends visual-inspection cards with a contemporaneous metadata assessment for modality, spatial calibration, specimen preparation, processing and field sampling. The evidence validator requires an explicit state for each dimension on the linked source crop. This creates provenance for later visual comparability checks without claiming automatic recognition of scale bars or instrument metadata.

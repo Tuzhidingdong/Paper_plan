@@ -80,6 +80,18 @@ The Skill may identify that the available evidence does not yet support a defens
 36. Measurement-definition verification and calculation reproducibility are separate checks. A measurand/method/formula can be sufficiently defined while a fitted relationship still fails reproduction or external validation. Do not describe a fit as validated merely because its measurement definition is VERIFIED.
 37. When a preferred research route is nominated, record a structured route decision: selection criteria, evidence-based rationale, and a reasoned disposition for every non-selected candidate route. A route recommendation is not human approval; approval gates remain pending until a human decision is recorded.
 
+## V4.3 measurement-validity controls
+
+38. When a proxy, surrogate or indirect measurement is used as decision-bearing evidence for a target property, create an explicit proxy-to-reference validation design. Define candidate and reference measurands separately, including operational definition, method, units, reference basis and independence limitations.
+39. Record sampling unit, pairing/matching, condition/time alignment and the scope of inference. Method-agreement or calibration claims require an appropriate paired or matched basis; an unpaired design must be justified and must narrow the claim.
+40. For proxy validation, define the relationship type, primary estimand, analysis method, justified acceptance boundary and its basis, uncertainty approach, and explicit supportive, contradictory and inconclusive outcome rules. Never fabricate a decision margin.
+41. Assess controls against the specific plausible confounders and artefacts. Declare required control classes and map them to planned controls; explain when no control or a candidate control is not applicable. Do not impose a fixed cross-domain control checklist.
+42. Declare whether recovery, balance, conservation or another accounting-closure assessment is applicable. If required, specify inputs, outputs, residual method and justified acceptance basis; if not required, record why.
+43. Distinguish in-sample reproduction, statistical-quality assessment, internal resampling, external independent validation and prospective validation. An external-validation label requires a separate validation scope, validation data, independence unit and leakage controls. A future prospective dataset requires a documented collection and separation plan; it is not yet observed validation evidence.
+44. A deterministic gate can verify that a measurement-validation design is complete and internally consistent. It cannot prove the reference method is valid, the controls are sufficient, the acceptance boundary is appropriate, or the scientific relationship is true. Expert review and human approval remain required.
+
+45. For every image-derived Result Unit, record during the original-resolution CAPTION_BLIND inspection a structured visual metadata assessment for modality, magnification/pixel size, scale/spatial calibration, specimen state/preparation, image processing/contrast and field selection/sampling. Each dimension must contain an observed value with source location/method/confidence or an explicit NOT_PRESENT, NOT_LEGIBLE, NOT_APPLICABLE or UNKNOWN state with a reason. A scale-bar value read from the crop is a human visual read, not an automatic image-reading claim. Later comparability assessments must reuse this provenance; never infer missing metadata from captions or other panels.
+
 ## Entry and commands
 
 Read workflows/07_full_run.md first. Use workflows/01–06 for evidence and research-frontier stages, then workflows/08–12 for journal positioning, argument, Figure/SI design, work-package handoff and product audit. Load only stage-specific reference files.

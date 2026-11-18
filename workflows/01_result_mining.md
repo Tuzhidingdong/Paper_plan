@@ -42,9 +42,12 @@ Before opening page text, captions or narrative:
 1. Check scripts/check_capability.py --task visual_inspection.
 2. Inspect original-resolution images individually.
 3. Create a CAPTION_BLIND task pack and record visibility, axes/units, sample labels actually visible, legibility and confidence.
-4. Keep each panel, axis, unit, tick, legend and series association independent.
-5. Exact values require legible ticks, axis, units and series identity. Low-resolution plots never yield exact values.
-6. One targeted reinspection per Region/Panel is allowed, with a written reason.
+4. In the same inspection card, record a structured `visual_metadata_assessment` for every linked Region/Panel. Explicitly assess: imaging modality; magnification or pixel size; scale bar/spatial calibration; specimen state/preparation; image processing/contrast; and field selection/sampling.
+5. For each dimension, record OBSERVED with its value, unit where applicable, source location, recording method and confidence, or explicitly record NOT_PRESENT, NOT_LEGIBLE, NOT_APPLICABLE or UNKNOWN with a reason. Never fill a missing scale/calibration value from a caption, another panel or a guessed magnification.
+6. A scale-bar value read from the original-resolution crop must be marked `SCALE_BAR_READ`, linked to its location in that crop, and retain its unit and confidence. Distinguish this manual visual reading from a value copied from source or instrument metadata.
+7. Keep each panel, axis, unit, tick, legend and series association independent.
+8. Exact values require legible ticks, axis, units and series identity. Low-resolution plots never yield exact values.
+9. One targeted reinspection per Region/Panel is allowed, with a written reason.
 
 If the same Agent has already read the report text in the active context, set cognitive_blindness = NOT_GUARANTEED. The JSON task pack omitting captions does not erase context already seen by the model. Do not describe the inspection as fully independent.
 

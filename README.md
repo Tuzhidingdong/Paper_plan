@@ -77,3 +77,6 @@ V4.2 closes quality gaps exposed by a fresh original-PDF acceptance run:
 - A nominated research route requires an auditable selection rationale and dispositions for all non-selected candidates.
 
 These are generic engineering controls. They do not encode the scientific case that exposed the defects, and do not replace expert review or human route approval.
+
+
+V4.3 also extends the original image-inspection record: each image-derived observation must capture acquisition and spatial metadata during the original-resolution blind-inspection pass. Unknown or illegible metadata is recorded explicitly; it is never guessed from captions. Cross-image comparisons reuse those source-linked records.

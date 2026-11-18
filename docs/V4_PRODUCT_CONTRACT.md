@@ -70,3 +70,7 @@ These capabilities improve scientific decision traceability; they do not automat
 - A Claim combining multiple image-derived Result Units includes visual comparability for modality, magnification/pixel size, scale calibration, specimen state/preparation, image processing/contrast and field sampling.
 - Derived statistical fits are reproducible from source-linked numeric vectors at the precision displayed in the source. Measurement-definition verification is not conflated with fit reproduction or external validation.
 - If a preferred route is nominated, all alternative candidate routes have an explicit evidence-based disposition. A recommendation never substitutes for human Gate A approval.
+
+
+- Each image-derived Result Unit has a source-linked visual metadata assessment recorded during the original-resolution caption-blind inspection. It records modality, magnification/pixel size, scale/spatial calibration, specimen state/preparation, image processing/contrast and field selection/sampling, with explicit observed/not-present/not-legible/not-applicable/unknown states and reasons.
+- Later visual comparability checks reuse the captured metadata. Manual scale-bar reading is recorded as such; validators do not claim to read or verify pixel/image content automatically.

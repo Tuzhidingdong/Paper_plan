@@ -30,3 +30,14 @@ Quantitative Result Units used as decision-bearing evidence for or against a cen
 ## Comparability and evidence strength
 
 Distinguish COMPARABLE, CONDITIONALLY_COMPARABLE, NOT_COMPARABLE, NOT_ASSESSABLE and UNASSESSED. Record the intended comparison and required dimensions. Mismatched or unknown dimensions restrict or prevent the intended comparison; they do not establish the opposite result.
+
+
+## Proxy, surrogate and indirect measurements
+
+When a Claim relies on a proxy, surrogate or indirect measurement to represent a target measurand, name the target measurand and the candidate indicator separately. State the operational definition and measurement principle of each, and justify why the proposed reference is suitable and sufficiently independent. A shared signal, shared correction or shared preparation dependency can limit the apparent independence of the comparison.
+
+Keep the relationship being tested explicit: agreement, calibration, prediction, classification, ranking, monitoring, association or another defined relationship. Correlation or a shared trend alone does not establish agreement or interchangeability. Define a suitable estimand, analysis method, uncertainty approach, acceptance boundary with an independent rationale, and outcomes that support, contradict or leave the question inconclusive.
+
+Interpret a proxy only within the tested population, conditions, time alignment and unit of analysis. If candidate and reference measurements are not paired or defensibly matched, narrow the claim and explain the sampling limitation. The control design must address the plausible confounders and artefacts of the particular measurement system; no universal control list applies. If recovery or input-output closure is relevant, define what is accounted for and how residuals are judged. If it is not relevant, record why.
+
+Separate in-sample reproduction, statistical diagnostics, internal resampling, external independent validation and prospective validation. None is a substitute for another. A fitted relationship that reproduces its printed coefficients has not thereby established statistical adequacy, external transportability or causal validity.
