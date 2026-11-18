@@ -29,14 +29,14 @@ The Skill may identify that the available evidence does not yet support a defens
 
 ## V5 product rules — narrative plan is the product
 
-- The controlling product contract is docs/V5_PRODUCT_CONTRACT.md and the controlling full-run workflow is workflows/13_v5_manuscript_development.md. Read them before starting a full project.
+- The controlling product contract is docs/V5_PRODUCT_CONTRACT.md and the controlling full-run workflow is workflows/13_v5_manuscript_development.md. Also read docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md before a full project.
 - Maintain two synchronized representations: structured bundles for provenance, IDs and cross-reference integrity; and a complete narrative plan for the researcher. The narrative is the delivered product. Structured JSON, validator reports and workflow-stage notes are supporting state only.
 - Do not assemble the final plan by concatenating short bundle summaries. Explain scientific reasoning in connected prose, with detailed tables only where they help comparison or assignment.
 - For substantive projects, cover research diagnosis, closest-literature comparison and bounded novelty, one central contribution, paragraph-level Introduction design, complete Results/Discussion storyline, TOC and Figure/Panel architecture, SI architecture, actionable experiment/analysis packages, relevant collaborator-ready theory/computation briefs, priorities, risks and supervisor decisions.
 - Default to the user's language for the planning dossier. When the user works in Chinese, write the integrated plan in Chinese unless asked otherwise. Draft manuscript English only when sources support the claims and citations.
 - Read the whole Markdown as a supervisor would; judge reasoning, specificity, evidence grounding, connected logic and handoff readiness against the V5 contract and user's benchmark.
 - Keep every V4.1–V4.3 scientific-integrity gate active. Never weaken evidence requirements, turn planned work into observed results or invent missing literature, values, protocols, conditions or thresholds.
-- If evidence does not support a defensible central paper, recommend a narrower contribution or stop/defer decision with a decisive evidence-recovery plan.
+- Evaluate the user's original scientific hypothesis as an explicit candidate alongside evidence-led alternatives. Do not automatically replace a scientifically meaningful line with a measurement/audit paper because evidence is incomplete; test whether a finite, feasible evidence-recovery path exists. A validation route becomes the main contribution only if it independently passes novelty/significance review.
 - Never hard-code a project's scientific subject, samples, results, mechanisms, Figure scheme, literature or journal choices into reusable sources.
 
 ## Generality and project isolation
