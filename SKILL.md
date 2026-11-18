@@ -1,17 +1,19 @@
 ---
 name: experiment-report-analyzer
-description: Develop an evidence-grounded, target-journal-aware SCI manuscript project package from an experimental-report PDF and associated research data, including the core contribution, Introduction, manuscript storyline, Figure/Panel and SI architecture, and assignable experiment/computation work packages.
+description: Develop a complete V5 evidence-grounded, target-journal-aware manuscript-development dossier from existing research evidence, including a defensible contribution, connected manuscript argument, detailed Figure/Panel and SI architecture, and assignable experimental, analytical and computational work packages.
 ---
 
-# Paper_plan — Research-to-Manuscript Development
+# Paper_plan — V5 Research-to-Manuscript Development
 
 ## Product objective
 
 Paper_plan is a general Agent Skill for developing a research project into a coherent, reviewable manuscript-development package. It starts from the user's existing experimental report and associated data. It does not assume a scientific field, material, mechanism, instrument, journal, figure count or paper structure.
 
-The product is not merely a PDF extractor, a literature summary, a generic research plan or an automatic paper writer. It must connect:
+The product is not merely a PDF extractor, literature summary, validator report, structured bundle or automatic paper writer. It must connect:
 
-**existing evidence → research frontier → central contribution → target-journal positioning → Introduction → manuscript storyline → Figure/Panel and SI plan → experiment/analysis/computation work packages → integrated, validated project package.**
+**existing evidence → literature frontier → defensible central contribution → target-journal positioning → paragraph-level Introduction → connected manuscript storyline → TOC/Figure/Panel and SI architecture → assignable experiment/analysis/computation packages → prioritized integrated narrative plan.**
+
+The integrated narrative plan is the researcher-facing product. Structured bundles provide provenance and machine-checkable state; they do not replace the scientific explanation, decisions or execution detail in the plan.
 
 The Skill may identify that the available evidence does not yet support a defensible paper. In that case, it must explain the limitation and provide a bounded evidence-recovery or decision plan rather than manufacture novelty or a complete-looking story.
 
@@ -24,6 +26,18 @@ The Skill may identify that the available evidence does not yet support a defens
 - Use the active host model unless the user explicitly authorizes another worker/job. Do not start hidden Workers or billable external work.
 - A one-pass package may be provisional, but human approval fields remain pending until a human decision is actually recorded.
 - Do not claim that schema validation proves scientific truth, novelty, causality or journal acceptance.
+
+## V5 product rules — narrative plan is the product
+
+- The controlling product contract is docs/V5_PRODUCT_CONTRACT.md and the controlling full-run workflow is workflows/13_v5_manuscript_development.md. Read them before starting a full project.
+- Maintain two synchronized representations: structured bundles for provenance, IDs and cross-reference integrity; and a complete narrative plan for the researcher. The narrative is the delivered product. Structured JSON, validator reports and workflow-stage notes are supporting state only.
+- Do not assemble the final plan by concatenating short bundle summaries. Explain scientific reasoning in connected prose, with detailed tables only where they help comparison or assignment.
+- For substantive projects, cover research diagnosis, closest-literature comparison and bounded novelty, one central contribution, paragraph-level Introduction design, complete Results/Discussion storyline, TOC and Figure/Panel architecture, SI architecture, actionable experiment/analysis packages, relevant collaborator-ready theory/computation briefs, priorities, risks and supervisor decisions.
+- Default to the user's language for the planning dossier. When the user works in Chinese, write the integrated plan in Chinese unless asked otherwise. Draft manuscript English only when sources support the claims and citations.
+- Read the whole Markdown as a supervisor would; judge reasoning, specificity, evidence grounding, connected logic and handoff readiness against the V5 contract and user's benchmark.
+- Keep every V4.1–V4.3 scientific-integrity gate active. Never weaken evidence requirements, turn planned work into observed results or invent missing literature, values, protocols, conditions or thresholds.
+- If evidence does not support a defensible central paper, recommend a narrower contribution or stop/defer decision with a decisive evidence-recovery plan.
+- Never hard-code a project's scientific subject, samples, results, mechanisms, Figure scheme, literature or journal choices into reusable sources.
 
 ## Generality and project isolation
 
@@ -94,7 +108,7 @@ The Skill may identify that the available evidence does not yet support a defens
 
 ## Entry and commands
 
-Read workflows/07_full_run.md first. Use workflows/01–06 for evidence and research-frontier stages, then workflows/08–12 for journal positioning, argument, Figure/SI design, work-package handoff and product audit. Load only stage-specific reference files.
+For every full project, read workflows/13_v5_manuscript_development.md, docs/V5_PRODUCT_CONTRACT.md and templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md first. workflows/07_full_run.md is a compatibility entry point to V5. Reuse workflows/01–06 and 08–12 as stage-specific technical procedures when the V5 runbook calls for them; do not treat their intermediate outputs as the final plan. Load only reference files needed for the current stage.
 
     python -m pip install -r requirements.txt
     python -m unittest discover -s tests -v
@@ -115,7 +129,7 @@ For visual inspection, prepare image-only task packs and record structured cards
 
 ## Required product coverage
 
-Adapt the depth and exact file split to the project, but the integrated package must cover:
+Adapt the depth and exact file split to the project. The researcher-facing narrative must independently explain the scientific reasoning; do not satisfy this list by merely populating JSON fields. Use the V5 integrated-plan template. The package must cover:
 
 - evidence and source inventory, including uncertainty and calculation lineage;
 - literature frontier, closest competitors, counter-evidence and bounded novelty;
@@ -137,6 +151,6 @@ Do not force exactly three routes, any fixed Figure/Panel count, a three-paragra
 
 Run all applicable validators, review every warning and verify the final PDF is generated from the final Markdown revision. The final report must state source hashes, project/Skill versions, literature access levels, journal profile status, central contribution confidence, Figure/SI coverage, work-package closure, blocked calculations, human decisions, validation outcome and available usage deltas.
 
-The result is a decision-ready manuscript-development package, not a guarantee of publishability or an automatically approved lab/computational protocol.
+The result is a complete, supervisor-reviewable and team-assignable manuscript-development package. It is not a guarantee of publishability or an automatically approved lab/computational protocol. Product acceptance requires human inspection of the complete Markdown/PDF against the project benchmark; passing tests or validators alone is insufficient.
 
 46. Create each fitted Result Unit's source-linked calculation audit at the time the fit is extracted or calculated, not as a post hoc repair. Record an explicit `reproduction_status` (`REPRODUCED`, `NOT_REPRODUCED`, `NOT_ASSESSABLE` or `NOT_ASSESSED`) and require the deterministic validator to verify that label against recomputed coefficients and source precision. Keep statistical-quality diagnostics/uncertainty and internal/external/prospective validation in their separate fields; one status never substitutes for another.

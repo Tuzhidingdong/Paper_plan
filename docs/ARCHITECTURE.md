@@ -68,3 +68,12 @@ Validation reports record currentness metadata (run time, Skill commit, validato
 
 
 V4.3 additionally extends visual-inspection cards with a contemporaneous metadata assessment for modality, spatial calibration, specimen preparation, processing and field sampling. The evidence validator requires an explicit state for each dimension on the linked source crop. This creates provenance for later visual comparability checks without claiming automatic recognition of scale bars or instrument metadata.
+
+
+## V5 narrative composition and delivery layer
+
+V5 retains the evidence, research, manuscript-state and validation architecture above, but makes the integrated narrative plan a first-class product rather than treating it as a compact rendering of structured entities.
+
+The V5 controller (workflows/13_v5_manuscript_development.md) synthesizes the project state into a standalone dossier explaining research diagnosis, closest-work comparison, contribution, Introduction, connected Results/Discussion, Figure/Panel and SI architecture, handoff-ready work packages and execution priorities.
+
+Structured bundles preserve IDs, provenance, uncertainty, dependencies and machine-checkable relationships. The narrative dossier explains reasoning, decisions, trade-offs and actionable work to the supervisor and team. The Markdown is the source of truth for the human-readable dossier; the PDF is exported from that exact revision. Validators check structural/provenance constraints; they do not grade scientific reasoning, prove novelty or certify usability.

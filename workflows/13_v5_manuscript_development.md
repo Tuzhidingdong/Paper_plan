@@ -1,0 +1,102 @@
+# 13 — V5 Full Manuscript-Development Workflow
+
+## Authority
+
+This is the controlling V5 workflow for a full Paper_plan project. Workflows 01–06 and 08–12 remain reusable technical procedures. Existing Python tools and V4.1–V4.3 integrity gates remain active.
+
+The goal is one integrated, supervisor-reviewable and team-assignable manuscript-development plan grounded in the user's actual research. The narrative plan is the first-class deliverable; structured bundles are its traceability layer.
+
+Read docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, and docs/V4_PRODUCT_CONTRACT.md for retained integrity rules. Load only stage-specific procedures and references.
+
+## Stage 0 — Intake and workspace protection
+
+Confirm project objective, target journal/article type if supplied, scope and preferred plan language. Default to the user's language (Chinese where the user works in Chinese); write English manuscript prose only when evidence and citations support it. Inventory all supplied reports, SI, native data, images, methods, calculations and notes. Record hashes and paths where possible; preserve originals read-only. Use an isolated workspace. Do not overwrite old V4/V4.3 runs or human decisions. Reuse extraction only when source hashes and provenance match. Record Skill commit and known model/tool limitations. Do not start hidden Workers or billable jobs. Ask only essential questions; otherwise preserve unknowns explicitly.
+
+## Stage 1 — Scientific evidence base
+
+Follow workflow 01 and applicable visual/data procedures. Reuse exact-source extraction and run relevant existing evidence, sample, measurement and schema checks.
+
+Create a scientific evidence map of actual systems/samples/conditions; principal measured/derived quantities and definitions; strongest observations and source locations; uncertainty, inconsistent labels/values, missing controls, artifacts and comparability limits; hypotheses not yet established; and evidence essential to decide the central question.
+
+Explain what the evidence collectively says, what it does not say and why. Do not turn a list of Result Units into the scientific narrative. Keep all V4.1–V4.3 controls active; an audit target is not silently promoted to validated support.
+
+## Stage 2 — Literature frontier
+
+Follow workflow 02. Record databases/search systems, queries, date, access tier and inclusion boundaries. Prefer relevant primary studies. Build a closest-work comparison, not merely a broad bibliography. For each relevant competitor explain its system, method/conditions, key observable, conclusion actually supported, what it established, what it did not address, whether that limit is explicit or inferred, and how the user's evidence differs or does not differ.
+
+Include contradictory or inconvenient studies. Distinguish metadata-only, abstract-verified and full-text-verified sources. Link every gap statement to supporting/limiting literature records. If full text is unavailable, narrow the comparison and mark the gap provisional.
+
+## Stage 3 — Central contribution decision
+
+Follow workflow 03 where useful, but a route table cannot replace the scientific decision.
+
+Evaluate importance; difference from closest work; strength/independence of evidence; falsifiability; alternatives/confounders; missing decisive evidence; feasibility and value of required work.
+
+Choose one:
+A. one defensible central contribution and its boundary;
+B. a narrower contribution actually supported by the evidence;
+C. stop/defer because current evidence and feasible work do not justify a coherent paper.
+
+For A/B write the one-sentence contribution, research question, thesis/scope, strongest support, strongest weakness/counter-evidence, competing explanations, evidence that would strengthen/weaken/falsify the thesis, and side findings to defer/omit. Do not combine unrelated observations to create an impressive story. Human approval remains pending until recorded.
+
+## Stage 4 — Journal/article-type fit
+
+Follow workflow 08. Verify current official journal/publisher requirements and record URL, access date, source type and supported requirement. Assess audience/scope fit, contribution type, evidence maturity, article type, manuscript structure, Figure/TOC/SI restrictions, reference style and relevant data/reporting policies.
+
+Do not infer requirements from old papers or memory. Unknowns remain unresolved. Explain how journal fit affects the architecture. If no target journal is supplied, do not silently choose one.
+
+## Stage 5 — Introduction
+
+Design the actual paragraph sequence from the selected contribution and literature. Do not impose a fixed paragraph count.
+
+For every paragraph state rhetorical role, reader-facing message, factual premise and verified literature support, limitation/tension motivating the next paragraph, transition, project evidence/citation still needed and readiness. Draft coherent English prose when supported. Do not polish unverified technical claims; use explicit placeholders for inaccessible/unverified citations. Narrow from the real field problem to the closest literature limitation, precise unresolved question and bounded contribution.
+
+## Stage 6 — Complete storyline
+
+Create an ordered Results/Discussion sequence. For each section or major paragraph cluster state the scientific question; evidence/data and status; responsible observation; interpretation/inference strength; plausible alternative/limitation; role in the central thesis; and transition to the next section.
+
+Explain why each result is needed and why it appears there. Order by logic of proof and reader comprehension, not instrument or file order. Provide a working title, abstract argument map and conclusion architecture. Draft full text only when the evidence and claim boundaries are ready.
+
+## Stage 7 — TOC, Figures and Panels
+
+Follow workflow 10. Derive Figure number/order from the story; do not impose fixed counts.
+
+For every Figure specify its take-home message, argument role, manuscript destination and Panel sequence. For each Panel specify question; exact content; source files/Regions/Result Units/Data Slots and status; existing/reprocessed/new/blocked state; groups/conditions/controls/comparison basis; analysis/statistics/axes/units/annotations where known; intended and prohibited inferences; linked tasks/SI; and scientific acceptance criterion.
+
+A missing-data Panel may be PLANNED or BLOCKED, but its purpose and required evidence must be concrete. Never present an expected result as observed. Provide a TOC/graphical-abstract concept only when journal/story requires or benefits from it; label concept versus artwork accurately.
+
+## Stage 8 — Supporting Information
+
+For each SI Text/Table/Figure specify identifier/title, exact contents, source or producing task, current status, why it belongs in SI, related main-text claims/Figures/Panels and uncertainty/QC addressed.
+
+Do not fill a conventional count or move decisive evidence to SI to hide a main-text weakness.
+
+## Stage 9 — Work packages and handoffs
+
+Follow workflow 11. Derive tasks from claim risk, Data Slots, Figure needs and scientific decisions, not generic technique lists.
+
+For every experiment/reanalysis/data-audit task state question and rationale; claim/Figure/Panel/SI affected; exact inputs and missing requirements; variables/groups/conditions/comparison unit; design/method/controls and justified replicate/statistical considerations; raw/processed outputs; provenance/QC/uncertainty/completion criteria; interpretations under supportive, negative, mixed and inconclusive outcomes; dependencies/blockers/priority/role.
+
+For relevant theory/computation specify scientific question/inference; model/system construction and source structures/composition; required inputs; relevant states/charges/boundaries/conditions only where known; method/rationale; known settings versus TBD; convergence/sensitivity plan; physical observables/output files; controls/alternative models; experimental validation and limits; Figure/Panel/Claim/SI destinations; and prerequisites/blockers. A method name alone is not a handoff. Do not force DFT/MD or any method where it adds no decision value.
+
+## Stage 10 — Prioritize
+
+Order verification/reanalysis, experiments/controls, theory/computation, Figure/TOC/SI preparation and writing as appropriate. For every action state deliverable, priority reason, prerequisite, decision unlocked and completion/stop condition. Identify parallel tasks. Do not invent dates/durations.
+
+## Stage 11 — Write the narrative product
+
+Use templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md. Create WORKSPACE/deliverables/FINAL_MANUSCRIPT_DEVELOPMENT_PLAN.md and a same-basename PDF.
+
+Write an integrated document, not concatenated bundle summaries. Open with the project-specific recommendation and central contribution or stop decision. Explain the literature/evidence logic in prose. Tell the entire paper story. Specify every main Figure/Panel and SI item. Explain each proposed experiment/analysis/computation and its decision value. Connect task outputs to claims, Figures, SI and sections. Finish with priorities and supervisor decisions.
+
+Tables may summarize comparisons, Figures/Panels, SI and tasks; they must not replace the reasoning. Avoid filler/repetition. Use the user's preferred plan language. Include source-grounded English Introduction text as a separate subsection when useful.
+
+## Stage 12 — Product review and delivery
+
+Read the full Markdown as a supervisor would and compare it with docs/V5_PRODUCT_CONTRACT.md and the project benchmark. Do not infer quality from file presence, character count, schema completeness or validator status.
+
+Check consistency of the central contribution; Introduction gap/literature; story/evidence; Figure/Panel/claim links; SI purpose; closure of essential missing Data Slots; task outputs; dependency-aware priorities; counter-evidence, uncertainty and blockers.
+
+Then run relevant existing validators and report separately from the product judgment. Export PDF from the final Markdown revision using scripts/export_plan_pdf.py. Verify file existence, non-empty extracted text and multiple pages for a substantive full-paper project unless justified otherwise. Reopen/review the PDF for truncation.
+
+Do not claim acceptance solely from regression/validators. State Skill commit, inputs/source hashes, files inspected/output hashes, product strengths/gaps, literature/evidence limitations, unresolved tasks, validator results and human decisions pending. Link Markdown and PDF in the final response.

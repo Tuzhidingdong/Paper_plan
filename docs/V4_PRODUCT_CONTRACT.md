@@ -1,4 +1,6 @@
-# Paper_plan V4 product contract
+# V4 baseline product contract — retained invariants
+
+> For current product requirements, use docs/V5_PRODUCT_CONTRACT.md. This document records the V4 baseline contract and its V4.1–V4.3 scientific-integrity extensions. V5 extends the narrative-plan standard and does not weaken evidence or integrity requirements.
 
 ## Product definition
 

@@ -4,9 +4,17 @@ Paper_plan develops an evidence-grounded, target-journal-aware manuscript projec
 
 Its deliverable is broader than a research-plan summary: it connects the existing evidence and literature frontier to one central contribution, an Introduction, a complete manuscript storyline, Figure/Panel and Supporting Information architecture, and assignable experiment/analysis/computation work packages.
 
-## V4 development line
+## V5 manuscript-planning core
 
-The V4 development branch preserves the V3.3 deterministic evidence engine and adds a structured Manuscript Development Bundle plus cross-package validation.
+V5 retains the deterministic evidence engine and V4.1–V4.3 scientific-integrity controls, while making the integrated manuscript-development dossier the first-class product.
+
+The structured bundles remain the provenance/state layer. The final deliverable must be a standalone, reasoned narrative that a supervisor can review and a team can execute: research diagnosis, closest-literature comparison, bounded novelty, one central contribution, paragraph-level Introduction, connected Results/Discussion storyline, TOC and Figure/Panel design, SI map, actionable experiment/analysis/computation handoffs and a prioritized execution plan.
+
+The controlling workflow is workflows/13_v5_manuscript_development.md. Read docs/V5_PRODUCT_CONTRACT.md and templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md. Product acceptance requires inspection of the actual Markdown and PDF against the project benchmark; regression tests and structural validators are not substitutes.
+
+## V4 baseline retained under V5
+
+The V4 line preserves the V3.3 deterministic evidence engine and adds a structured Manuscript Development Bundle plus cross-package validation. V5 reuses these capabilities and adds narrative-first synthesis.
 
 ### Existing deterministic layer
 - PDF fingerprint, page inventory and immutable source preservation.

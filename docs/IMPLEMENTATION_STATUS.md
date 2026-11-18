@@ -1,3 +1,11 @@
+## V5 manuscript-planning core (development candidate)
+
+The V5 branch adds a narrative-first full-run controller, product contract, integrated-plan template and local product-acceptance procedure. It preserves the V4.3 evidence/reliability layer rather than treating those controls as the whole product.
+
+The intended behavior change is that the Agent synthesizes evidence and structured state into a complete, readable, assignable manuscript-development dossier. Bundle completeness and validator status remain supporting checks, not product acceptance.
+
+This branch remains a development candidate until the user completes one fresh local end-to-end run and inspects the actual Markdown/PDF against the separately held project benchmark. Do not mark product acceptance complete from documentation or unit-test results alone.
+
 # Implementation status — Paper_plan V4 development
 
 ## Branch scope

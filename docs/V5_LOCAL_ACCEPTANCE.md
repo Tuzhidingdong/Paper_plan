@@ -1,0 +1,47 @@
+# V5 Local Product Acceptance
+
+Passing unit tests or existing validators does not establish that the generated plan is usable.
+
+## Sync and inspect
+
+From the Paper_plan repository root, inspect the working tree first. Preserve uncommitted work and user data. Never reset, clean, force checkout or overwrite the existing test workspace.
+
+    git status --short
+    git fetch origin
+    git switch --track -c v5/manuscript-planning-core origin/v5/manuscript-planning-core
+    git rev-parse HEAD
+    git status --short
+
+If the local branch already exists, switch to it and fast-forward only. Do not merge V5 into main for this test.
+
+## Engineering regression
+
+Use Python 3.10 or later:
+
+    python -m pip install -r requirements.txt
+    python -m unittest discover -s tests -v
+
+Record the commit and test summary. Tests protect the deterministic layer and bundles; they do not test reasoning depth or narrative usability.
+
+## One meaningful end-to-end run
+
+Use the original research input package and the separately held project benchmark. Start a new isolated workspace.
+
+- Do not reuse old V4.3 deliverables as source evidence.
+- Reuse extraction only if source hashes and provenance match.
+- Do not modify/overwrite lsy_test, original files or prior human decisions.
+- Keep project-specific evidence and benchmark content in the isolated workspace, never generic Skill files.
+- Verify current official requirements for the target journal/article type.
+- Run SKILL.md with workflows/13_v5_manuscript_development.md. Explicitly request the complete V5 integrated plan, not a validator report or direction shortlist.
+
+## Inspect actual deliverables
+
+Read the whole FINAL_MANUSCRIPT_DEVELOPMENT_PLAN.md and its same-revision PDF. For a substantive full-paper project, confirm a multi-page PDF and check for truncation.
+
+Assess: one defensible contribution and novelty boundary; verified closest-work comparison; paragraph-level Introduction and draft where possible; connected Results/Discussion storyline; actionable Figure/Panel content, status, comparisons and inference limits; concrete SI items; assignable experiments/analyses with inputs, controls, outputs, QC and alternative outcomes; collaborator-ready or explicitly blocked computations; dependency-aware priorities; and supervisor/team usability without reconstructing reasoning from JSON.
+
+A short validator report, one-page PDF, bundle dump, generic directions or vague tasks fail this product test even if engineering tests pass.
+
+## Report once
+
+Record branch commit, inputs/source hashes, model/provider, Markdown/PDF paths/hashes, regression result, product review against the benchmark and the few material gaps. Do not repeat full runs for more scores/logs. Fix a specific root cause and rerun once only when it materially changes the product.

@@ -1,0 +1,70 @@
+# Paper_plan V5 — Product Contract
+
+## Product definition
+
+Paper_plan V5 turns a user's existing research evidence into a complete, evidence-grounded and target-journal-aware manuscript-development dossier. It must be reasoned enough for supervisor review and concrete enough for team assignment.
+
+V5 is not an automatic paper generator, generic literature review, JSON bundle, validator report or autonomous experiment/computation runner. It designs the paper and the work needed to make the paper defensible.
+
+**Structured project state is the evidence and traceability layer. The integrated narrative plan is the product delivered to the researcher.**
+
+A complete schema, successful validator, list of task IDs or set of workflow files cannot substitute for the integrated plan.
+
+## Two synchronized representations
+
+**Structured state:** retain the existing evidence, literature, routes, framework and manuscript-development bundles. They preserve permanent IDs, source links, measurement definitions, evidence-use roles, uncertainty, claims, Data Slots, comparison states, dependencies, journal-source provenance and machine-checkable consistency. Retain the V4.1–V4.3 scientific-integrity controls.
+
+**Narrative plan:** produce a standalone editable Markdown document and a verified PDF. The plan must explain the scientific reasoning in complete prose and use tables where they improve comparison or assignment. It must be understandable without opening JSON bundles. IDs are traceability links, not substitutes for explanation. Never paste a schema dump into the plan.
+
+## Required capabilities
+
+The exact section count and depth depend on the project. Every full-paper plan must cover:
+
+1. **Research diagnosis and evidence readiness:** what is established, uncertain, decision-critical, suitable for a paper now, or requires further work.
+2. **Literature frontier and novelty boundary:** closest primary studies; comparison of systems, methods, conditions, observables, conclusions and limitations; relevant counter-evidence; bounded gap statements.
+3. **One central contribution:** research question, proposed contribution and boundary; why it matters; difference from closest work; supporting/missing evidence; alternative explanations.
+4. **Introduction architecture:** actual paragraph sequence, each paragraph's role/message/literature support/transition/citation needs; draft prose when claims and references are sufficiently verified.
+5. **Complete storyline:** Results/Discussion as a connected sequence of questions, evidence, inference and transitions, not an instrument-by-instrument list.
+6. **TOC and main Figures/Panels:** journal-aware concept where relevant; exact content, purpose, evidence status, new/reprocessed data, comparison, intended inference and limitations for every proposed Panel.
+7. **Supporting Information:** concrete Text/Table/Figure items, content, source/status, purpose and links to main claims/Figures.
+8. **Experiment and analysis work packages:** question, rationale, inputs, variables, controls, design, outputs, QC, alternative outcomes, dependencies and measurable completion criteria.
+9. **Theory/computation handoff when relevant:** scientific question, model construction, inputs, assumptions, methods, observables, controls, convergence, validation, expected files and links to experimental claims/Figures. Block on missing inputs. Do not force DFT/MD or any method where it has no decision value.
+10. **Prioritized execution plan:** verification/reanalysis, experiments, computation, figure preparation and writing as appropriate; priority, dependencies, value and decision unlocked.
+11. **Integrated delivery:** consistent contribution, Introduction, storyline, Figures, SI, tasks and priorities; explicit supervisor decisions and assignable team outputs.
+
+## Required reasoning depth
+
+A recommendation is complete only when the plan explains why this question/contribution is defensible; how closest studies differ; which evidence supports each important statement and how reliable it is; what new/reprocessed evidence is required and why; what each Figure/Panel demonstrates and what alternative outcomes mean; how each task reduces a named uncertainty or tests a claim; where each task output goes; what would weaken/falsify/narrow the interpretation; and what the supervisor must decide.
+
+For a substantive full-paper project, a one-page summary or short list of directions is presumptively insufficient. Do not chase a fixed page count; provide enough reasoning and task detail for review and assignment. A small/evidence-limited project may be shorter only with an explicit reason.
+
+## Evidence and uncertainty rules
+
+Distinguish existing source-verified evidence, extracted but unchecked evidence, reprocessed/derived evidence, evidence requiring audit, planned work, hypotheses/interpretations and blocked/unavailable evidence.
+
+Never describe planned results as observed. Never invent values, thresholds, sample identities, protocols, controls, replicates, parameters, references, journal requirements or outcomes. Preserve contradictory evidence and alternatives. If evidence is insufficient, narrow the claim, propose a decisive test or recommend stopping; do not manufacture a complete-looking story.
+
+Metadata is not full-text evidence. No search hit is not proof of novelty. Verify current journal requirements against official dated sources. Keep physical source anchors, visual provenance, comparison compatibility, measurement definitions, fit reproduction, proxy validation, uncertainty separation, task readiness and human approval gates.
+
+## Generality and isolation
+
+All Skills, workflows, schemas, templates, examples and configurations remain domain-neutral. Project-specific scientific content, names, sample labels, values, equations, mechanisms, literature conclusions, conditions and Figure designs belong only in the isolated workspace or separately maintained user benchmark. The benchmark teaches depth and reasoning, not a fixed scientific story or output shape.
+
+Do not impose fixed numbers of routes, paragraphs, Figures, Panels, SI items, tasks, controls, techniques or computational methods.
+
+## Required deliverables
+
+At minimum:
+- integrated editable Markdown plan;
+- PDF exported from that exact Markdown revision and checked for text/page count;
+- structured project bundles and relevant source/audit records;
+- supervisor decision list and student/team execution list;
+- final status report separating product completeness, scientific issues, structural validation and human decisions.
+
+Recommended plan path: WORKSPACE/deliverables/FINAL_MANUSCRIPT_DEVELOPMENT_PLAN.md, with a same-basename PDF.
+
+## Product acceptance
+
+The supervisor must be able to answer from the narrative plan: What is the one-sentence contribution and boundary? Which closest studies define novelty? What is the whole argument from Introduction to conclusion? What is every Figure/Panel's exact role/content? What belongs in SI? What must be verified/reprocessed/measured and why? What must collaborators receive and return? Which outcomes support, weaken, contradict or leave the interpretation unresolved? What is the execution order and what decisions remain?
+
+A package that only passes schemas, lists directions or gives generic advice fails. Product acceptance is human inspection of the complete Markdown/PDF against the project benchmark. Engineering tests and validators support, but never substitute for, that review.
