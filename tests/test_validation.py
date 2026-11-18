@@ -55,7 +55,25 @@ def sample_bundle():
         "visual_inspections": {
             "REG001": {"initial": {
                 "inspection_mode": "CAPTION_BLIND", "caption_text_included": False,
-                "report_narrative_included": False, "visual_legibility": "Medium"
+                "report_narrative_included": False, "visual_legibility": "Medium",
+                "visual_metadata_assessment": {
+                    "status": "RECORDED",
+                    "assessment_note": "This synthetic plot fixture records visual metadata and explicitly marks microscopy-only dimensions not applicable.",
+                    "dimensions": [
+                        {"dimension": "imaging_modality", "status": "OBSERVED", "value": "2D plot image",
+                         "source_location": "Original figure crop", "recording_method": "VISUAL_REVIEW", "confidence": "HIGH"},
+                        {"dimension": "magnification_or_pixel_size", "status": "NOT_APPLICABLE", "reason": "The source is a plotted figure, not a micrograph.",
+                         "recording_method": "OTHER", "confidence": "HIGH"},
+                        {"dimension": "scale_bar_or_spatial_calibration", "status": "NOT_APPLICABLE", "reason": "The plotted axes define the data scale.",
+                         "recording_method": "OTHER", "confidence": "HIGH"},
+                        {"dimension": "specimen_state_and_preparation", "status": "NOT_APPLICABLE", "reason": "This visual record is a chart, not a specimen micrograph.",
+                         "recording_method": "OTHER", "confidence": "HIGH"},
+                        {"dimension": "image_processing_and_contrast", "status": "UNKNOWN", "reason": "The source does not document image processing.",
+                         "recording_method": "OTHER", "confidence": "UNASSESSABLE"},
+                        {"dimension": "field_selection_and_sampling", "status": "NOT_APPLICABLE", "reason": "Field-of-view sampling does not apply to this chart.",
+                         "recording_method": "OTHER", "confidence": "HIGH"}
+                    ]
+                }
             }, "reinspections": [], "locked": False}
         }
     }

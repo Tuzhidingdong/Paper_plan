@@ -1025,7 +1025,7 @@ def validate_proxy_measurement_design(
             if not _has_substantive_text(validation.get("limitations")):
                 _validation_issue(task_id, readiness, f"{validation_level} validation status requires an explicit limitation", errors, warnings)
             if validation_level == "IN_SAMPLE_ONLY":
-                warnings.append(f"{task_id}: proxy validation is in-sample only; do not describe it as independently validated")
+                warnings.append(f"{task_id}: IN_SAMPLE_ONLY proxy validation is in-sample only; do not describe it as independently validated")
 
         if readiness in {"READY_FOR_SUPERVISOR_APPROVAL", "APPROVED_FOR_EXECUTION"}:
             if control_status not in {"ASSESSED", "NOT_APPLICABLE"}:

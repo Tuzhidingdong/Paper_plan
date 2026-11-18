@@ -319,7 +319,7 @@ class ProxyMeasurementDesignTests(unittest.TestCase):
         framework = complete_proxy_framework()
         accounting = framework["tasks"]["T001"]["execution_design"]["measurement_validation"]["accounting_closure"]
         accounting["applicability"] = "REQUIRED"
-        accounting.pop("accounted_inputs")
+        accounting.pop("accounted_inputs", None)
         errors, _ = validate_proxy_measurement_design(framework)
         self.assertTrue(any("required accounting closure is missing" in item for item in errors), errors)
 
@@ -337,8 +337,8 @@ class ProxyMeasurementDesignTests(unittest.TestCase):
         validation["training_data_scope"] = "dataset-A"
         validation["validation_data_scope"] = "dataset-A"
         validation["validation_dataset_ids"] = []
-        validation.pop("independence_unit")
-        validation.pop("leakage_controls")
+        validation.pop("independence_unit", None)
+        validation.pop("leakage_controls", None)
         errors, _ = validate_proxy_measurement_design(framework)
         self.assertTrue(any("EXTERNAL_INDEPENDENT_DATA requires" in item for item in errors), errors)
 
