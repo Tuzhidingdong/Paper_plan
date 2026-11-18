@@ -6,7 +6,7 @@ Turn heterogeneous existing results into one coherent, evidence-bounded paper ar
 
 ## 1. Discover candidate contributions
 
-Start from the validated Result Units, Findings, sample relationships, calculation lineage, uncertainty and closest competing literature.
+Start from (a) the user's original scientific question/hypothesis/contribution when supplied, (b) validated Result Units and Findings, sample relationships, calculation lineage and uncertainty, and (c) the closest competing literature. Preserve original intent as a candidate to assess; do not treat it as proven or silently discard it because evidence is missing.
 
 For each candidate contribution state:
 - the scientific question;
@@ -17,7 +17,7 @@ For each candidate contribution state:
 - the decisive missing evidence;
 - the risk if the proposed explanation is wrong.
 
-Candidate directions may be merged, split, deferred or rejected. Do not require three routes or any fixed count.
+Candidate directions may be merged, split, deferred or rejected. Compare the original-intent candidate with materially different evidence-led candidates where they exist. Do not require three routes or any fixed count. Distinguish a central scientific contribution from a validation/audit task that merely supports a scientific claim. A measurement-validation route is not automatically the best paper when decisive scientific evidence is absent; first assess whether the original question has a feasible evidence-recovery path. Do not preserve an unsupported mechanism solely because it was the original intention.
 
 ## 2. Select one central contribution
 
@@ -30,7 +30,7 @@ Check whether the proposed contribution is:
 - specific enough to falsify;
 - not dependent on invented data, assumed mechanisms or unsupported "first" claims.
 
-If no defensible contribution can be selected, provide a diagnostic package explaining what is missing rather than manufacturing a paper story.
+If no defensible contribution can be selected, provide a diagnostic package explaining what is missing rather than manufacturing a paper story. State whether original intent is supported now, conditionally testable through finite feasible work, not distinguishable from prior art, or infeasible/should stop. Name the evidence or literature discovery that would change the status.
 
 ## 3. Build the argument spine
 
