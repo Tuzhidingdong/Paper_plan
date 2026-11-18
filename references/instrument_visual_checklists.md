@@ -64,3 +64,15 @@ For each field record one state: FOUND, NOT_SHOWN, NOT_LEGIBLE, UNCERTAIN or NOT
 - image_processing_or_contrast_note
 
 Checklist fields are prompts for inspection, not mandatory values. NOT_SHOWN means absent from the image only. Search the PDF text separately before claiming NOT_REPORTED.
+
+## Cross-image comparability (required when a claim combines image-derived Result Units)
+
+Record each dimension per compared entity, including explicit UNKNOWN values when metadata are absent:
+- `imaging_modality` — instrument/mode and acquisition configuration
+- `magnification_or_pixel_size` — nominal magnification, pixel size or calibrated spatial scale
+- `scale_bar_or_spatial_calibration` — scale-bar value/unit, calibration source and whether embedded scale bars are trustworthy
+- `specimen_state_and_preparation` — before/after/treatment state, coating, sectioning, drying and preparation
+- `image_processing_and_contrast` — contrast, filtering, thresholding, cropping and other processing
+- `field_selection_and_sampling` — field selection, number of fields, replicate specimens and sampling basis
+
+Do not infer particle-size or morphology changes from images acquired at different scales or modalities unless a valid scale-normalized comparison is available. Record the permissible observation (e.g. each image shows a morphology) separately from any prohibited between-image inference.
