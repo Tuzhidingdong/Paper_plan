@@ -52,6 +52,16 @@ def base_bundles():
             } for i in range(1, 4)
         },
         "recommended_route_id": "ROUTE001",
+        "recommendation_rationale": "Route 1 is preferred because it is testable from the available evidence, has bounded missing inputs, and resolves the central question more directly than the alternatives.",
+        "route_decision": {
+            "selected_route_id": "ROUTE001",
+            "selection_rationale": "Route 1 is preferred because it is testable from the available evidence and has a bounded next measurement that resolves the central question.",
+            "selection_criteria": ["Evidence adequacy and provenance", "Comparability and uncertainty limits", "Decisive missing evidence and feasibility"],
+            "alternatives_considered": [
+                {"route_id": "ROUTE002", "disposition": "DEFERRED", "rationale": "Route 2 depends on additional method data and cannot resolve the central comparison first."},
+                {"route_id": "ROUTE003", "disposition": "DEFERRED", "rationale": "Route 3 remains a useful extension but does not address the primary evidence gap as directly."}
+            ]
+        },
         "approval_A": {"status": "PENDING_HUMAN_REVIEW", "decision": None},
     }
     framework = {

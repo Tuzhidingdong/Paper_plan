@@ -62,3 +62,11 @@ A package that answers only "what research directions could be explored?" does n
 - Validation outputs are fingerprinted to the Skill commit, validator, schema and input bundles.
 
 These capabilities improve scientific decision traceability; they do not automate scientific sign-off or generate missing experimental facts.
+
+## V4.2 evidence-integrity and calculation-reproducibility acceptance
+
+- Result Unit source links identify physical evidence crops on the cited source page. Repeated layout assets cannot be used as direct scientific evidence.
+- Image-derived observations have linked caption-blind inspection records.
+- A Claim combining multiple image-derived Result Units includes visual comparability for modality, magnification/pixel size, scale calibration, specimen state/preparation, image processing/contrast and field sampling.
+- Derived statistical fits are reproducible from source-linked numeric vectors at the precision displayed in the source. Measurement-definition verification is not conflated with fit reproduction or external validation.
+- If a preferred route is nominated, all alternative candidate routes have an explicit evidence-based disposition. A recommendation never substitutes for human Gate A approval.

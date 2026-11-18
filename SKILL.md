@@ -71,6 +71,15 @@ The Skill may identify that the available evidence does not yet support a defens
 30. Classify task prerequisites as execution, interpretation and publication gates. Only execution prerequisites block task execution readiness; retain the legacy prerequisites list as their union.
 31. Fingerprint integrated validator reports with UTC run time, Skill commit, validator/schema SHA-256 and input bundle hashes. A prior PASS is historical after any relevant input or code changes.
 
+## V4.2 evidence-integrity and scientific reproducibility gates
+
+32. A Result Unit's Region links must point to a usable physical evidence crop on the page cited by its source location. A repeated header/footer or decorative layout asset is not a scientific evidence anchor; the validator rejects it even when its Region ID exists.
+33. Image-derived Result Units (`Visual_Estimate` and `Qualitative_Observation`) require a recorded caption-blind inspection linked to the actual Region or Panel. Inspection of a contact sheet or another page is not a substitute for a linked source crop.
+34. A Claim that combines multiple image-derived Result Units must link a structured visual comparability assessment. Assess modality/acquisition, magnification or pixel size, scale-bar/spatial calibration, specimen state/preparation, image processing/contrast, and field selection/sampling. Record values or explicit unknowns for every compared entity. A mismatched or unknown visual dimension prohibits an unqualified COMPARABLE status and requires explicit limitations and prohibited inferences.
+35. A derived Result Unit whose method is a fit/regression/least-squares model must include a source-linked calculation audit. For an OLS linear fit, link the x and y numeric observation vectors and the printed coefficient observation, then reproduce slope, intercept and R-squared. Tolerance is derived from the displayed decimal precision (half of the last printed unit), not chosen to make a result pass. A CORE statistical-fit result cannot pass without a reproducible audit; a failed or unavailable audit must remain non-core and explicitly qualified.
+36. Measurement-definition verification and calculation reproducibility are separate checks. A measurand/method/formula can be sufficiently defined while a fitted relationship still fails reproduction or external validation. Do not describe a fit as validated merely because its measurement definition is VERIFIED.
+37. When a preferred research route is nominated, record a structured route decision: selection criteria, evidence-based rationale, and a reasoned disposition for every non-selected candidate route. A route recommendation is not human approval; approval gates remain pending until a human decision is recorded.
+
 ## Entry and commands
 
 Read workflows/07_full_run.md first. Use workflows/01–06 for evidence and research-frontier stages, then workflows/08–12 for journal positioning, argument, Figure/SI design, work-package handoff and product audit. Load only stage-specific reference files.

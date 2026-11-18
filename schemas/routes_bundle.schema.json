@@ -102,6 +102,48 @@
         "additionalProperties": true
       }
     },
+    "route_decision": {
+      "type": "object",
+      "required": [
+        "selected_route_id",
+        "selection_rationale",
+        "selection_criteria",
+        "alternatives_considered"
+      ],
+      "properties": {
+        "selected_route_id": {
+          "type": "string"
+        },
+        "selection_rationale": {
+          "type": "string",
+          "minLength": 40
+        },
+        "selection_criteria": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "string",
+            "minLength": 8
+          }
+        },
+        "alternatives_considered": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["route_id", "disposition", "rationale"],
+            "properties": {
+              "route_id": {"type": "string"},
+              "disposition": {
+                "enum": ["DEFERRED", "REJECTED", "MERGED", "NOT_SELECTED"]
+              },
+              "rationale": {"type": "string", "minLength": 30}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "recommended_route_id": {
       "type": [
         "string",

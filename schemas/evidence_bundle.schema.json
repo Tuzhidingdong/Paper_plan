@@ -155,6 +155,13 @@
         "region_type": {
           "type": "string"
         },
+        "triage_role": {
+          "enum": [
+            "REVIEW_CANDIDATE",
+            "REPEATED_LAYOUT_ASSET",
+            "TRIAGE_ONLY"
+          ]
+        },
         "extractor_version": {
           "type": "string"
         },
@@ -716,6 +723,73 @@
           "additionalProperties": true
         }
       },
+
+        "calculation_audits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "audit_type",
+              "x_source",
+              "y_source",
+              "reported_source",
+              "displayed_precision"
+            ],
+            "properties": {
+              "audit_type": {
+                "const": "OLS_LINEAR_FIT"
+              },
+              "x_source": {
+                "type": "object",
+                "required": ["result_id", "observation_index"],
+                "properties": {
+                  "result_id": {"type": "string"},
+                  "observation_index": {"type": "integer", "minimum": 0}
+                },
+                "additionalProperties": false
+              },
+              "y_source": {
+                "type": "object",
+                "required": ["result_id", "observation_index"],
+                "properties": {
+                  "result_id": {"type": "string"},
+                  "observation_index": {"type": "integer", "minimum": 0}
+                },
+                "additionalProperties": false
+              },
+              "reported_source": {
+                "type": "object",
+                "required": ["observation_index", "value_indices"],
+                "properties": {
+                  "result_id": {"type": "string"},
+                  "observation_index": {"type": "integer", "minimum": 0},
+                  "value_indices": {
+                    "type": "object",
+                    "required": ["slope", "intercept", "r_squared"],
+                    "properties": {
+                      "slope": {"type": "integer", "minimum": 0},
+                      "intercept": {"type": "integer", "minimum": 0},
+                      "r_squared": {"type": "integer", "minimum": 0}
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "displayed_precision": {
+                "type": "object",
+                "required": ["slope", "intercept", "r_squared"],
+                "properties": {
+                  "slope": {"type": "integer", "minimum": 0, "maximum": 12},
+                  "intercept": {"type": "integer", "minimum": 0, "maximum": 12},
+                  "r_squared": {"type": "integer", "minimum": 0, "maximum": 12}
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
       "additionalProperties": true
     },
     "finding": {

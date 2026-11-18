@@ -12,6 +12,11 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 
 from era_core import atomic_write_json, result_is_quantitative, sha256_file, workspace_paths
+from scientific_quality_gates import (
+    validate_evidence_integrity,
+    validate_fit_reproducibility,
+    validate_visual_claim_comparability,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schemas" / "manuscript_development_bundle.schema.json"
@@ -494,6 +499,16 @@ def validate_package(package: dict[str, Any],
         errors.append("quality_review cannot be PASS while failed checks or critical open questions remain")
     if quality.get("status") == "PASS_WITH_WARNINGS" and "FAIL" in check_statuses:
         errors.append("quality_review cannot be PASS_WITH_WARNINGS while a check is FAIL")
+
+    region_errors, region_warnings = validate_evidence_integrity(evidence)
+    fit_errors, fit_warnings = validate_fit_reproducibility(evidence)
+    visual_errors, visual_warnings = validate_visual_claim_comparability(package, framework, evidence)
+    errors.extend(region_errors)
+    errors.extend(fit_errors)
+    errors.extend(visual_errors)
+    warnings.extend(region_warnings)
+    warnings.extend(fit_warnings)
+    warnings.extend(visual_warnings)
 
     counts = {
         "claims": len(claim_ids), "data_slots": len(slot_ids),

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from era_core import atomic_write_json, workspace_paths
+from scientific_quality_gates import validate_route_selection
 
 
 def _read(path: Path, errors: list[str]) -> dict[str, Any]:
@@ -160,11 +161,19 @@ def validate_bundles(evidence: dict[str, Any], literature: dict[str, Any],
         if not note:
             warnings.append("Fewer than three distinct research routes are present and no explanation is recorded; do not fabricate a weak third route.")
     recommended_route = routes_bundle.get("recommended_route_id")
+    framework_route = framework.get("recommended_route_id")
+    if recommended_route and not framework_route:
+        errors.append("framework recommended_route_id must be recorded when routes_bundle recommends a route")
+    elif recommended_route and framework_route != recommended_route:
+        errors.append("framework recommended_route_id must match routes_bundle recommended_route_id")
     if recommended_route and recommended_route not in routes:
         errors.append(f"recommended_route_id references unknown route {recommended_route}")
     approval_a = routes_bundle.get("approval_A", {})
     if approval_a.get("status") == "APPROVED" and not approval_a.get("decision"):
         errors.append("Gate A cannot be APPROVED without a recorded human decision")
+    route_errors, route_warnings = validate_route_selection(routes_bundle)
+    errors.extend(route_errors)
+    warnings.extend(route_warnings)
 
     # Manuscript Claims must point to traceable evidence or verified literature claims.
     valid_claim_types = {"Descriptive", "Comparative", "Associational", "Causal", "Mechanistic"}
