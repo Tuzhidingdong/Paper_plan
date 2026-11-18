@@ -5,7 +5,8 @@
 ## Project identity and recommendation
 
 **Working title:**  
-**Target journal / article type:**  
+**Target journal / article type (current project input + provenance):**  
+**Target provenance (current user instruction / project brief / explicit test-run configuration / authorized selection / unresolved):**  
 **Plan date and source revision:**  
 **Project workspace:**  
 
@@ -29,11 +30,13 @@ Provide an evidence map: central claim/question; supporting source IDs; contradi
 
 ## 2. Literature frontier and novelty boundary
 
-Compare the closest primary studies: source/access status, system, method/conditions, principal result, demonstrated boundary and relevance. Separate source statements from interpretation. Explain what is known, unresolved and genuinely different. Include counter-evidence, search date/scope/access limits and the evidence needed to strengthen or narrow novelty. Do not claim priority beyond the search.
+Record discovery routes, dates, representative query families, coverage of synonyms/formulas/mechanisms/adjacent systems and citation trails, plus search/access failures. Compare closest primary studies by actual system, transformation direction, medium/conditions, mechanism, impurity/structure role, measurands, demonstrated result and limitation. Separate source statements from interpretation. Include contradictory work and publication-status checks. Explain what is known, unresolved and genuinely different. Bound every gap statement by inspected evidence; a null search result is not a novelty claim. Do not claim priority beyond the search.
 
-## 3. Central research question and scientific argument
+## 3. Scientific-mainline decision, central question and contribution
 
-Develop the central question, thesis and contribution. Explain why this direction is preferable. Identify strongest evidence, weakest link, alternatives, assumptions and decisive falsification tests. Separate the central contribution from supporting findings and side stories.
+First state the user's original intended scientific question/hypothesis (or that none was supplied). Compare it with evidence-led candidates, any independently defensible method/measurement candidate, conditional/hybrid options and stop/defer. For each serious candidate state nearest prior art and exact distinction, strongest supporting and contradicting evidence, alternative explanations, decisive missing evidence, feasible recovery path, readiness and disposition. Explain why the selected mainline is preferable. Do not pivot automatically to an audit/validation paper merely because the current dataset is incomplete; do not preserve an unsupported mechanism merely because it was the original intent.
+
+Then state the selected central question, thesis and one-sentence contribution with boundaries. Explain strongest evidence, weakest link, alternatives, assumptions and decisive falsification tests. Distinguish the central contribution from supporting findings, validation tasks and side stories.
 
 ## 4. Introduction architecture and draft
 
