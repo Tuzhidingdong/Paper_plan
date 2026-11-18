@@ -47,6 +47,27 @@ class RegionIntegrityTests(unittest.TestCase):
         self.assertTrue(any("repeated header/footer" in item for item in errors), errors)
         self.assertTrue(any("no usable linked Region" in item for item in errors), errors)
 
+    def test_repeated_header_is_inferred_even_without_triage_label(self):
+        bundle = self.make_bundle()
+        bundle["regions"]["REG001"]["layout_fingerprint"] = "same-header"
+        bundle["regions"]["REG002"] = {
+            "region_id": "REG002", "page_number": 1,
+            "bbox_normalized": [0.1, 0.02, 0.9, 0.10],
+            "region_type": "embedded_image_block",
+            "triage_role": "REVIEW_CANDIDATE",
+            "layout_fingerprint": "same-header",
+        }
+        bundle["regions"]["REG003"] = {
+            "region_id": "REG003", "page_number": 3,
+            "bbox_normalized": [0.1, 0.02, 0.9, 0.10],
+            "region_type": "embedded_image_block",
+            "triage_role": "REVIEW_CANDIDATE",
+            "layout_fingerprint": "same-header",
+        }
+        bundle["source"] = {"page_count": 3}
+        errors, _ = validate_evidence_integrity(bundle)
+        self.assertTrue(any("repeated header/footer" in item for item in errors), errors)
+
     def test_source_page_must_match_linked_region_page(self):
         bundle = self.make_bundle()
         bundle["regions"]["REG001"]["page_number"] = 1
