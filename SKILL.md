@@ -59,6 +59,18 @@ The Skill may identify that the available evidence does not yet support a defens
 21. Never prescribe local protocols, equipment, parameters, sample amounts, replicate counts or timelines without source evidence and local confirmation.
 22. Student-facing messages must be supportive, concrete and non-accusatory.
 
+## V4.1 scientific decision-quality rules
+
+23. A Claim evidence reference distinguishes `SUPPORTS_CLAIM`, `CONTRADICTS_CLAIM`, `AUDIT_TARGET` and `CONTEXT_ONLY`. Legacy unlabelled direct Result Unit references default to supporting evidence. Finding-linked Result Units retain their typed list semantics.
+24. Keep evidence assessment separate from epistemic status. Supported, partially supported, not established, not assessable, contradicted and inconclusive are distinct. A claim is CONTRADICTED only with explicit contradictory evidence; NOT_COMPARABLE, NOT_ASSESSABLE or missing metadata do not establish contradiction.
+25. A quantitative Result Unit used as decision-bearing evidence for or against a central contribution must pass the CORE/VERIFIED gate. CORE means central to evaluating the claim, not necessarily favourable to it. AUDIT_TARGET and CONTEXT_ONLY remain distinct; a metric under audit may be essential to the research question without being treated as validated support or contradiction.
+26. Distinguish COMPARABLE, CONDITIONALLY_COMPARABLE, NOT_COMPARABLE, NOT_ASSESSABLE and UNASSESSED. Record dimensions and inference limits. A comparison failure is not a counter-result.
+27. Every Panel records applicable data scope (specimen/group set, condition, timepoint/stage, analysis population, processing level and source dataset IDs). Reuse of the same Data Slot is permitted when the scope differs or reuse is justified; ambiguous reuse is flagged for review.
+28. Work packages distinguish planning readiness from execution approval. A task cannot be APPROVED_FOR_EXECUTION without human approval, confirmed local feasibility, available required inputs and documented local safety/feasibility review.
+29. Agreement/equivalence questions require a suitable method, primary estimand, justified predeclared acceptance boundary, basis, assumptions and explicit supportive/contradictory/inconclusive outcome rules. Correlation alone is not agreement; never invent a threshold.
+30. Classify task prerequisites as execution, interpretation and publication gates. Only execution prerequisites block task execution readiness; retain the legacy prerequisites list as their union.
+31. Fingerprint integrated validator reports with UTC run time, Skill commit, validator/schema SHA-256 and input bundle hashes. A prior PASS is historical after any relevant input or code changes.
+
 ## Entry and commands
 
 Read workflows/07_full_run.md first. Use workflows/01–06 for evidence and research-frontier stages, then workflows/08–12 for journal positioning, argument, Figure/SI design, work-package handoff and product audit. Load only stage-specific reference files.
@@ -74,7 +86,7 @@ Read workflows/07_full_run.md first. Use workflows/01–06 for evidence and rese
     python scripts/init_planning_bundles.py --workspace "WORKSPACE"
     python scripts/validate_planning.py --workspace "WORKSPACE"
     python scripts/validate_bundle_schemas.py --workspace "WORKSPACE"
-    python scripts/validate_manuscript_development.py --workspace "WORKSPACE" --deliverables-dir "WORKSPACE/deliverables"
+    python scripts/validate_manuscript_development.py --workspace "WORKSPACE" --deliverables-dir "WORKSPACE/deliverables" --skill-commit "<CURRENT_SKILL_COMMIT>"
 
 For an existing workspace with the same source hash, refresh only the relevant diagnostics. Do not reset validated evidence or human decisions. Reserve IDs with assign_entity_ids.py / assign_planning_ids.py and persist entities through upsert_planning_entity.py. V4 manuscript entities include journal-source, introduction-paragraph, story-step, figure, si-item and comparability. Run the existing validators and the V4 manuscript-development validator after updating the package.
 

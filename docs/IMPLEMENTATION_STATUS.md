@@ -54,3 +54,9 @@ This branch develops the V4 manuscript-development product layer while preservin
 - Inspect generic Skill/workflow sources to ensure they contain no project-specific scientific content.
 - Run on a fresh report from a different research domain, without reusing prior project context or project data.
 - Evaluate the final package against the V4 product contract and user-provided quality benchmark. A generated PDF alone does not pass acceptance.
+
+## V4.1 development status
+
+The V4.1 branch adds domain-neutral scientific decision controls: typed Claim evidence roles, a distinct NOT_ASSESSABLE state, Panel data-scope/reuse review, structured execution-design readiness, agreement/equivalence decision rules, classified task dependencies and validation fingerprints.
+
+These changes are development-candidate features until GitHub CI and local regression are complete. Existing project runs are not silently rewritten; older validation outputs remain historical and must be regenerated against the current Skill and bundle revisions before being described as current. No project-specific findings are included in generic Skill sources.

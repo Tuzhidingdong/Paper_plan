@@ -18,3 +18,9 @@ Check the current article-type requirement first. Communicate the central contri
 
 ## Supporting Information
 SI supports reproducibility, extended evidence and secondary controls. Link every SI item to a claim, Figure or method. Do not hide evidence essential to the central contribution in SI.
+
+## Panel data scope and comparability
+
+For each Panel, record the relevant specimen/group set, condition set, timepoint or process stage, analysis population, processing level and source dataset IDs. When one Data Slot appears in multiple Panels, clarify how each Panel differs or explain intentional reuse. Unspecified same-scope reuse should be flagged for human review, not silently assumed to be distinct data.
+
+Use separate states for NOT_COMPARABLE (the intended comparison fails because required dimensions are mismatched or unknown), NOT_ASSESSABLE (information is insufficient to judge), and UNASSESSED (not yet reviewed). None of these states is contradictory evidence.

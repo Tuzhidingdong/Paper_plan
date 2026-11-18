@@ -84,3 +84,20 @@ Ask:
 - Can a reviewer state the paper's contribution in one sentence without relying on unsupported assumptions?
 
 Record rejected or deferred directions and why they were not included.
+
+## 7. Evidence-use roles and claim assessment
+
+A Result Unit linked to a Claim is not automatically evidence supporting that Claim. Record the role explicitly when the distinction matters:
+
+- `SUPPORTS_CLAIM`: evidence used in favour of the claim.
+- `CONTRADICTS_CLAIM`: evidence that conflicts with the claim under a valid comparison.
+- `AUDIT_TARGET`: a measurement, metric or method being examined; its values are not thereby accepted as support.
+- `CONTEXT_ONLY`: background or contextual information that does not carry the claim.
+
+For backward compatibility, an unlabelled direct Result Unit reference is interpreted as `SUPPORTS_CLAIM`. Finding links use their typed result lists: supporting, contradictory, audit-target and context Result Units retain those respective roles.
+
+Keep epistemic status (Observed / Interpreted / Hypothesized) separate from evidence assessment: `SUPPORTED`, `PARTIALLY_SUPPORTED`, `NOT_ESTABLISHED`, `NOT_ASSESSABLE`, `CONTRADICTED`, or `INCONCLUSIVE`.
+
+A claim may be NOT_ESTABLISHED because no adequate evidence exists, or NOT_ASSESSABLE because required comparisons or metadata are unavailable. Neither state means the claim is false. A NOT_COMPARABLE or NOT_ASSESSABLE comparison cannot, by itself, be used as contradictory evidence. Mark a claim CONTRADICTED only when an explicit contradictory evidence reference is documented and the comparison is sufficiently valid for that inference.
+
+The CORE quantitative measurement-definition gate applies to numerical Result Units used as decision-bearing evidence for a central contribution: both `SUPPORTS_CLAIM` and `CONTRADICTS_CLAIM` require `claim_role=CORE` and a VERIFIED measurement definition. Here CORE means central to assessing the claim, not that the result supports the claim's direction. `AUDIT_TARGET` and `CONTEXT_ONLY` remain distinct and are not promoted to CORE.

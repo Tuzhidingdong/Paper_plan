@@ -57,7 +57,23 @@
               "required": [
                 "kind",
                 "id"
-              ]
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "evidence_role": {
+                  "enum": [
+                    "SUPPORTS_CLAIM",
+                    "CONTRADICTS_CLAIM",
+                    "AUDIT_TARGET",
+                    "CONTEXT_ONLY"
+                  ]
+                }
+              }
             }
           },
           "alternative_explanations": {
@@ -71,6 +87,23 @@
               "string",
               "null"
             ]
+          },
+          "evidence_assessment": {
+            "enum": [
+              "SUPPORTED",
+              "PARTIALLY_SUPPORTED",
+              "NOT_ESTABLISHED",
+              "NOT_ASSESSABLE",
+              "CONTRADICTED",
+              "INCONCLUSIVE"
+            ]
+          },
+          "comparability_assessment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
           }
         },
         "additionalProperties": true
@@ -244,6 +277,223 @@
             "items": {
               "type": "string"
             }
+          },
+          "execution_prerequisite_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "interpretation_prerequisite_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "publication_prerequisite_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "execution_design": {
+            "type": "object",
+            "properties": {
+              "readiness": {
+                "enum": [
+                  "NOT_ASSESSED",
+                  "DRAFT",
+                  "BLOCKED",
+                  "READY_FOR_SUPERVISOR_APPROVAL",
+                  "APPROVED_FOR_EXECUTION"
+                ]
+              },
+              "local_feasibility_status": {
+                "enum": [
+                  "UNASSESSED",
+                  "CONFIRMED",
+                  "NOT_CONFIRMED",
+                  "BLOCKED",
+                  "NOT_APPLICABLE"
+                ]
+              },
+              "responsible_role": {
+                "type": "string"
+              },
+              "decision_owner": {
+                "type": "string"
+              },
+              "method_summary": {
+                "type": "string"
+              },
+              "independent_variables": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "controlled_variables": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "response_variables": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "groups_and_controls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "required_inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "input",
+                    "availability"
+                  ],
+                  "properties": {
+                    "input": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "availability": {
+                      "enum": [
+                        "AVAILABLE",
+                        "MISSING",
+                        "TO_BE_CONFIRMED"
+                      ]
+                    },
+                    "source_ref": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "notes": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "raw_outputs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "qc_acceptance_criteria": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "replicate_statistics_plan": {
+                "type": "string"
+              },
+              "uncertainty_plan": {
+                "type": "string"
+              },
+              "safety_and_feasibility_notes": {
+                "type": "string"
+              },
+              "decision_framework": {
+                "type": "object",
+                "properties": {
+                  "question_type": {
+                    "enum": [
+                      "DIFFERENCE",
+                      "ASSOCIATION",
+                      "AGREEMENT",
+                      "EQUIVALENCE",
+                      "PREDICTION",
+                      "CLASSIFICATION",
+                      "MECHANISTIC_DISCRIMINATION",
+                      "OTHER"
+                    ]
+                  },
+                  "primary_estimand": {
+                    "type": "string"
+                  },
+                  "analysis_method": {
+                    "type": "string"
+                  },
+                  "agreement_method": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "acceptance_boundary": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "acceptance_boundary_basis": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "assumptions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "outcome_rules": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "outcome",
+                        "criterion",
+                        "claim_implication"
+                      ],
+                      "properties": {
+                        "outcome": {
+                          "enum": [
+                            "SUPPORTS",
+                            "WEAKENS",
+                            "CONTRADICTS",
+                            "INCONCLUSIVE",
+                            "MIXED"
+                          ]
+                        },
+                        "criterion": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "claim_implication": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "risks_and_fallbacks": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
           }
         },
         "additionalProperties": true

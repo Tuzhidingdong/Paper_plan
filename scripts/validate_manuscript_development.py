@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime, timezone
 from collections import defaultdict
 from pathlib import Path, PureWindowsPath
 from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from era_core import atomic_write_json, result_is_quantitative, workspace_paths
+from era_core import atomic_write_json, result_is_quantitative, sha256_file, workspace_paths
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schemas" / "manuscript_development_bundle.schema.json"
@@ -147,26 +148,68 @@ def validate_package(package: dict[str, Any],
     # is promoted into the central contribution. This prevents a Result Unit
     # from bypassing the Evidence Bundle's CORE-role gate by being left UNDECIDED.
     evidence_findings = evidence.get("findings", {})
-    def claim_result_ids(claim: dict[str, Any]) -> set[str]:
-        found: set[str] = set()
+
+    def claim_evidence_roles(claim: dict[str, Any]) -> tuple[dict[str, set[str]], list[str]]:
+        """Resolve semantic roles for direct and Finding-linked evidence."""
+        result_roles: dict[str, set[str]] = defaultdict(set)
+        reference_roles: list[str] = []
         for evidence_ref in claim.get("evidence_refs", []):
             kind, ref_id = evidence_ref.get("kind"), evidence_ref.get("id")
+            role = evidence_ref.get("evidence_role", "SUPPORTS_CLAIM")
+            reference_roles.append(role)
             if kind == "result_unit":
-                found.add(ref_id)
+                result_roles[ref_id].add(role)
             elif kind == "finding":
                 finding = evidence_findings.get(ref_id, {})
-                found.update(finding.get("supporting_result_ids", []))
-                found.update(finding.get("contradictory_result_ids", []))
-        return found
+                finding_roles = {
+                    "supporting_result_ids": "SUPPORTS_CLAIM",
+                    "contradictory_result_ids": "CONTRADICTS_CLAIM",
+                    "audit_target_result_ids": "AUDIT_TARGET",
+                    "context_result_ids": "CONTEXT_ONLY",
+                }
+                if role == "SUPPORTS_CLAIM":
+                    for field, child_role in finding_roles.items():
+                        for rid in finding.get(field, []):
+                            result_roles[rid].add(child_role)
+                else:
+                    # An explicit role on the Finding reference classifies
+                    # the Finding as a whole and overrides its child-list role.
+                    for field in finding_roles:
+                        for rid in finding.get(field, []):
+                            result_roles[rid].add(role)
+        return result_roles, reference_roles
 
+    # Evidence assessment is distinct from epistemic status. Incomparability
+    # or missing information cannot by itself establish that a claim is false.
+    for claim_id, claim in claims.items():
+        _check_refs(claim_id, "comparability_assessment_ids",
+                    claim.get("comparability_assessment_ids", []), set(comparability), errors)
+        result_roles, reference_roles = claim_evidence_roles(claim)
+        if claim.get("evidence_assessment") == "CONTRADICTED":
+            has_contradiction = ("CONTRADICTS_CLAIM" in reference_roles
+                or any("CONTRADICTS_CLAIM" in roles for roles in result_roles.values()))
+            if not has_contradiction:
+                errors.append(
+                    f"{claim_id}: CONTRADICTED requires an explicit CONTRADICTS_CLAIM evidence reference; "
+                    "a NOT_COMPARABLE or NOT_ASSESSABLE comparison alone is not a contradiction"
+                )
+        if claim.get("evidence_assessment") == "NOT_ASSESSABLE" and not claim.get("limitations"):
+            warnings.append(f"{claim_id}: NOT_ASSESSABLE claim should state the missing assessment basis in limitations")
+
+    # CORE measurement-definition gate applies to quantitative Result Units used
+    # to support or contradict a central claim. Audit targets and context-only
+    # records are not promoted to decision-bearing evidence.
     for central_claim_id in core.get("contribution_claim_ids", []):
         central_claim = claims.get(central_claim_id, {})
-        for result_id in claim_result_ids(central_claim):
+        result_roles, _ = claim_evidence_roles(central_claim)
+        for result_id, roles in result_roles.items():
+            if not roles.intersection({"SUPPORTS_CLAIM", "CONTRADICTS_CLAIM"}):
+                continue
             result = evidence.get("result_units", {}).get(result_id, {})
             if not result_is_quantitative(result):
                 continue
             if result.get("claim_role") != "CORE":
-                errors.append(f"{central_claim_id}: numeric Result Unit {result_id} supporting the central contribution must be marked claim_role CORE")
+                errors.append(f"{central_claim_id}: numeric Result Unit {result_id} used as decision-bearing evidence for the central contribution must be marked claim_role CORE")
             definition = result.get("measurement_definition", {})
             if definition.get("status") != "VERIFIED":
                 errors.append(f"{central_claim_id}: numeric Result Unit {result_id} supporting the central contribution lacks a VERIFIED measurement definition")
@@ -196,6 +239,7 @@ def validate_package(package: dict[str, Any],
         errors.append("Introduction is marked DRAFT/REVIEWED but draft text is empty")
 
     panel_index: dict[str, str] = {}
+    slot_panel_uses: dict[str, list[tuple[str, dict[str, Any]]]] = defaultdict(list)
     figure_orders: dict[int, str] = {}
     for figure_id, figure in figures.items():
         _check_refs(figure_id, "claim_ids", figure.get("claim_ids", []),
@@ -221,6 +265,9 @@ def validate_package(package: dict[str, Any],
                         claim_ids, errors)
             _check_refs(panel_key, "data_slot_ids", panel.get("data_slot_ids", []),
                         slot_ids, errors)
+            data_scope = panel.get("data_scope", {}) or {}
+            for slot_id in panel.get("data_slot_ids", []):
+                slot_panel_uses[slot_id].append((panel_key, data_scope))
             _check_refs(panel_key, "comparability_assessment_ids",
                         panel.get("comparability_assessment_ids", []), set(comparability), errors)
             if not panel.get("claim_ids") and not panel.get("data_slot_ids"):
@@ -232,6 +279,28 @@ def validate_package(package: dict[str, Any],
                     errors.append(f"{panel_key}: unsupported existing evidence kind {kind!r}")
                 elif ref_id not in valid:
                     errors.append(f"{panel_key}: unknown existing evidence {kind}:{ref_id}")
+
+    # Reused Data Slots need distinguishable specimen/condition/timepoint scope
+    # or an explicit rationale; this is a review warning, not automatic rejection.
+    scope_fields = ("specimen_set", "condition_set", "timepoint_or_stage",
+                    "analysis_population", "processing_level", "source_dataset_ids")
+    for slot_id, uses in slot_panel_uses.items():
+        if len(uses) < 2:
+            continue
+        signatures, missing_scope, missing_rationale = [], False, False
+        for _, scope in uses:
+            signatures.append(tuple(
+                tuple(scope.get(field, [])) if field == "source_dataset_ids"
+                else str(scope.get(field) or "").strip().casefold()
+                for field in scope_fields
+            ))
+            if not any(bool(scope.get(field)) for field in scope_fields):
+                missing_scope = True
+            if not scope.get("reuse_rationale"):
+                missing_rationale = True
+        if missing_scope or (len(set(signatures)) == 1 and missing_rationale):
+            names = ", ".join(name for name, _ in uses)
+            warnings.append(f"{slot_id}: reused across Panels {names} without a distinguishing data_scope or explicit reuse_rationale; check for duplicated Figure content")
 
     for item_id, item in si_items.items():
         _check_refs(item_id, "claim_ids", item.get("claim_ids", []), claim_ids, errors)
@@ -265,8 +334,13 @@ def validate_package(package: dict[str, Any],
         if assessment.get("assessment_status") == "CONDITIONALLY_COMPARABLE":
             if not statuses.intersection({"MISMATCHED", "UNKNOWN"}):
                 warnings.append(f"{assessment_id}: conditionally comparable assessment has no explicit limitation dimension")
-        if assessment.get("assessment_status") == "NOT_COMPARABLE" and "MATCHED" in statuses and len(statuses) == 1:
-            warnings.append(f"{assessment_id}: all listed dimensions are matched although assessment is NOT_COMPARABLE")
+        if assessment.get("assessment_status") == "NOT_COMPARABLE" and not statuses.intersection({"MISMATCHED", "UNKNOWN"}):
+            warnings.append(f"{assessment_id}: NOT_COMPARABLE has no mismatched or unknown assessed dimension")
+        if assessment.get("assessment_status") == "NOT_ASSESSABLE":
+            if not assessment.get("limitations"):
+                warnings.append(f"{assessment_id}: NOT_ASSESSABLE should record why the comparison cannot be assessed")
+            if "UNKNOWN" not in statuses and statuses:
+                warnings.append(f"{assessment_id}: NOT_ASSESSABLE has no explicitly UNKNOWN comparison dimension")
 
     story_orders: dict[int, str] = {}
     story_figure_refs: set[str] = set()
@@ -314,6 +388,46 @@ def validate_package(package: dict[str, Any],
                 for field in ("controls", "measurements", "required_raw_data", "replicate_plan"):
                     if not task.get(field):
                         warnings.append(f"{task_id}: experiment handoff is missing {field}; request confirmation rather than inventing it")
+            execution_design = task.get("execution_design")
+            if not isinstance(execution_design, dict):
+                warnings.append(f"{task_id}: structured execution_design/readiness is not recorded; do not treat the work package as an executable protocol")
+            else:
+                readiness = execution_design.get("readiness", "NOT_ASSESSED")
+                required_fields = ["method_summary", "required_inputs", "raw_outputs",
+                                   "qc_acceptance_criteria", "responsible_role", "decision_owner"]
+                if task.get("task_type") == "EXPERIMENT":
+                    required_fields += ["independent_variables", "controlled_variables", "response_variables",
+                                        "groups_and_controls", "replicate_statistics_plan", "uncertainty_plan"]
+                if readiness in {"READY_FOR_SUPERVISOR_APPROVAL", "APPROVED_FOR_EXECUTION"}:
+                    missing = [field for field in required_fields if not execution_design.get(field)]
+                    if missing:
+                        errors.append(f"{task_id}: execution_design marked {readiness} but lacks: {', '.join(missing)}")
+                if readiness == "APPROVED_FOR_EXECUTION":
+                    if execution_design.get("local_feasibility_status") != "CONFIRMED":
+                        errors.append(f"{task_id}: APPROVED_FOR_EXECUTION requires local_feasibility_status CONFIRMED")
+                    unavailable = [item.get("input", "<unnamed>") for item in execution_design.get("required_inputs", [])
+                                   if item.get("availability") != "AVAILABLE"]
+                    if unavailable:
+                        errors.append(f"{task_id}: APPROVED_FOR_EXECUTION has unavailable inputs: {', '.join(unavailable)}")
+                    if not execution_design.get("safety_and_feasibility_notes"):
+                        errors.append(f"{task_id}: APPROVED_FOR_EXECUTION requires documented local safety/feasibility review")
+                decision = execution_design.get("decision_framework", {})
+                question_type = decision.get("question_type")
+                if question_type in {"AGREEMENT", "EQUIVALENCE"}:
+                    missing_decision = [field for field in ("primary_estimand", "analysis_method", "acceptance_boundary", "acceptance_boundary_basis")
+                                        if not decision.get(field)]
+                    if question_type == "AGREEMENT" and not decision.get("agreement_method"):
+                        missing_decision.append("agreement_method")
+                    outcomes = {item.get("outcome") for item in decision.get("outcome_rules", [])}
+                    for outcome in ("SUPPORTS", "CONTRADICTS", "INCONCLUSIVE"):
+                        if outcome not in outcomes:
+                            missing_decision.append(f"outcome_rule:{outcome}")
+                    if missing_decision:
+                        msg = f"{task_id}: {question_type} decision framework lacks " + ", ".join(missing_decision)
+                        if readiness in {"READY_FOR_SUPERVISOR_APPROVAL", "APPROVED_FOR_EXECUTION"}:
+                            errors.append(msg)
+                        else:
+                            warnings.append(msg)
             if task.get("task_type") in {"THEORY", "COMPUTATION"}:
                 design = task.get("design", {})
                 required = set(design.get("required_inputs", []))
@@ -399,6 +513,7 @@ def main() -> int:
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--deliverables-dir", type=Path)
     parser.add_argument("--report", type=Path)
+    parser.add_argument("--skill-commit", help="Git commit SHA of the Skill version being validated")
     args = parser.parse_args()
     workspace = args.workspace.expanduser().resolve()
     paths = workspace_paths(workspace)
@@ -431,6 +546,19 @@ def main() -> int:
     report["errors"] = errors + report["errors"]
     if report["errors"]:
         report["status"] = "ERROR"
+    bundle_names = ("manuscript_development_bundle.json", "framework_bundle.json",
+                    "literature_bundle.json", "evidence_bundle.json", "id_registry.json")
+    report["validation_metadata"] = {
+        "validated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "skill_commit": args.skill_commit,
+        "validator_sha256": sha256_file(Path(__file__)),
+        "schema_sha256": sha256_file(SCHEMA_PATH),
+        "bundle_sha256": {name: sha256_file(state / name) for name in bundle_names if (state / name).is_file()},
+    }
+    if not args.skill_commit:
+        report["warnings"].append("skill commit not supplied; report is fingerprinted by validator/schema and bundle hashes only")
+        if report["status"] == "PASS":
+            report["status"] = "WARNING"
     output = args.report or state / "manuscript_development_validation.json"
     atomic_write_json(output, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))

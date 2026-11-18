@@ -887,6 +887,54 @@
                   "type": "string"
                 },
                 "uniqueItems": true
+              },
+              "data_scope": {
+                "type": "object",
+                "properties": {
+                  "specimen_set": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "condition_set": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "timepoint_or_stage": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "analysis_population": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "processing_level": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "source_dataset_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reuse_rationale": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "additionalProperties": true
               }
             },
             "additionalProperties": true
@@ -1087,7 +1135,8 @@
             "COMPARABLE",
             "CONDITIONALLY_COMPARABLE",
             "NOT_COMPARABLE",
-            "UNASSESSED"
+            "UNASSESSED",
+            "NOT_ASSESSABLE"
           ]
         },
         "confounders": {
@@ -1111,6 +1160,13 @@
           "items": {
             "type": "string"
           }
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
         }
       },
       "additionalProperties": true
