@@ -196,19 +196,20 @@ def validate_package(package: dict[str, Any],
         if claim.get("evidence_assessment") == "NOT_ASSESSABLE" and not claim.get("limitations"):
             warnings.append(f"{claim_id}: NOT_ASSESSABLE claim should state the missing assessment basis in limitations")
 
-    # CORE measurement-definition gate applies only to Result Units used to
-    # SUPPORT the central contribution, not to audit targets or counter-evidence.
+    # CORE measurement-definition gate applies to quantitative Result Units used
+    # to support or contradict a central claim. Audit targets and context-only
+    # records are not promoted to decision-bearing evidence.
     for central_claim_id in core.get("contribution_claim_ids", []):
         central_claim = claims.get(central_claim_id, {})
         result_roles, _ = claim_evidence_roles(central_claim)
         for result_id, roles in result_roles.items():
-            if "SUPPORTS_CLAIM" not in roles:
+            if not roles.intersection({"SUPPORTS_CLAIM", "CONTRADICTS_CLAIM"}):
                 continue
             result = evidence.get("result_units", {}).get(result_id, {})
             if not result_is_quantitative(result):
                 continue
             if result.get("claim_role") != "CORE":
-                errors.append(f"{central_claim_id}: numeric Result Unit {result_id} supporting the central contribution must be marked claim_role CORE")
+                errors.append(f"{central_claim_id}: numeric Result Unit {result_id} used as decision-bearing evidence for the central contribution must be marked claim_role CORE")
             definition = result.get("measurement_definition", {})
             if definition.get("status") != "VERIFIED":
                 errors.append(f"{central_claim_id}: numeric Result Unit {result_id} supporting the central contribution lacks a VERIFIED measurement definition")

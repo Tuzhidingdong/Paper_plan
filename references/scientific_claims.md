@@ -25,7 +25,7 @@ A Claim reference may classify a Result Unit as `SUPPORTS_CLAIM`, `CONTRADICTS_C
 
 Keep evidence assessment distinct from epistemic status. `NOT_ESTABLISHED` and `NOT_ASSESSABLE` are not synonyms for `CONTRADICTED`. The latter requires explicit counter-evidence and a valid basis for contradiction. Comparability failure alone only restricts inference.
 
-Only quantitative Result Units actually used to support a central contribution must pass the CORE / VERIFIED measurement-definition gate. A numeric audit target can be central to a methods-validity investigation without being treated as a validated supporting measurement.
+Quantitative Result Units used as decision-bearing evidence for or against a central contribution must pass the CORE / VERIFIED measurement-definition gate. CORE means central to evaluating the claim, not necessarily favourable to it. A numeric AUDIT_TARGET can be essential to a methods-validity investigation without being treated as validated support or contradiction; its definition may remain PARTIAL while it is being audited.
 
 ## Comparability and evidence strength
 

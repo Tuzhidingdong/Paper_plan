@@ -47,14 +47,15 @@ class EvidenceUseRoleTests(unittest.TestCase):
         f["claims"]["C001"]["evidence_refs"]=[{"kind":"finding","id":"F001"}]
         out=validate_package(p,f,l,e)
         self.assertFalse(any("R002" in x and ("CORE" in x or "VERIFIED" in x) for x in out["errors"]),out["errors"])
-    def test_contradictory_result_not_subject_to_core_gate(self):
+    def test_contradictory_result_requires_verified_core_measurement(self):
         p,f,l,e=valid_fixture();add_numeric_ru(e)
         e["findings"]["F001"]={"finding_id":"F001","description":"Synthetic counter-evidence","epistemic_status":"Observed",
             "supporting_result_ids":[],"contradictory_result_ids":["R002"],"alternative_explanations":[]}
         f["claims"]["C001"]["evidence_refs"]=[{"kind":"finding","id":"F001"}]
         f["claims"]["C001"]["evidence_assessment"]="CONTRADICTED"
         out=validate_package(p,f,l,e)
-        self.assertFalse(any("R002" in x and "CORE" in x for x in out["errors"]),out["errors"])
+        self.assertTrue(any("R002" in x and "claim_role CORE" in x for x in out["errors"]),out["errors"])
+        self.assertTrue(any("R002" in x and "VERIFIED measurement definition" in x for x in out["errors"]),out["errors"])
         self.assertFalse(any("explicit CONTRADICTS_CLAIM" in x for x in out["errors"]),out["errors"])
     def test_incomparability_alone_cannot_mark_claim_contradicted(self):
         p,f,l,e=valid_fixture()

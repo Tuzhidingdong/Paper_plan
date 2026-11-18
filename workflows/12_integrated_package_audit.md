@@ -60,7 +60,7 @@ Check that the evidence-use role of each Claim reference is explicit where neces
 
 A comparison marked NOT_ASSESSABLE must state what prevents assessment; NOT_COMPARABLE must identify mismatched/unknown required dimensions. Reused Data Slots across Panels must have distinguishable data scope or an explicit reuse rationale; report ambiguous reuse as a review warning.
 
-Agreement/equivalence work packages must have predeclared estimands, methods, acceptance boundaries with a defensible basis and rules for supportive, contradictory and inconclusive outcomes. Execution readiness must not exceed locally confirmed inputs, safety and feasibility. Distinguish execution, interpretation and publication prerequisites.
+Agreement/equivalence work packages must have predeclared estimands, methods, acceptance boundaries with a defensible basis and rules for supportive, contradictory and inconclusive outcomes. Quantitative results used as either support or counter-evidence for a central Claim must have a VERIFIED measurement definition; CORE marks central relevance, not direction. An AUDIT_TARGET is not itself validated support. Execution readiness must not exceed locally confirmed inputs, safety and feasibility. Distinguish execution, interpretation and publication prerequisites.
 
 ## 8. Validation provenance and currentness
 

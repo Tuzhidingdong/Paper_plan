@@ -52,7 +52,7 @@ A package that answers only "what research directions could be explored?" does n
 
 ## V4.1 scientific decision quality
 
-- Claim evidence references distinguish support, contradiction, audit target and context. Only actual supporting quantitative Result Units are subject to the central CORE/VERIFIED gate.
+- Claim evidence references distinguish support, contradiction, audit target and context. Quantitative SUPPORTS_CLAIM and CONTRADICTS_CLAIM evidence used to assess a central claim must be CORE/VERIFIED; AUDIT_TARGET and CONTEXT_ONLY are not promoted into decision-bearing results.
 - Evidence assessments distinguish supported, partially supported, not established, not assessable, contradicted and inconclusive. Contradiction requires explicit counter-evidence; comparison failure alone is not contradiction.
 - Comparability has separate NOT_COMPARABLE, NOT_ASSESSABLE and UNASSESSED states with declared dimensions and inference limits.
 - Panels sharing Data Slots specify data scope or explain reuse.
