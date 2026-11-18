@@ -45,3 +45,19 @@ A short validator report, one-page PDF, bundle dump, generic directions or vague
 ## Report once
 
 Record branch commit, inputs/source hashes, model/provider, Markdown/PDF paths/hashes, regression result, product review against the benchmark and the few material gaps. Do not repeat full runs for more scores/logs. Fix a specific root cause and rerun once only when it materially changes the product.
+
+
+## Additional V5.1 product-quality review
+
+Before reporting acceptance, apply docs/V5_1_NARRATIVE_PRODUCT_QA.md to the actual Markdown and matching PDF. This review is mandatory and is distinct from the existing validator suite.
+
+In particular, verify:
+- all user-supplied literature leads and citation clues have documented resolution; do not accept "not found" based on one failed endpoint;
+- the closest primary studies have been compared at the highest accessible evidence tier and every novelty proposition has passed an adversarial search;
+- the main Figure portfolio advances the chosen scientific contribution; data transcription/fit/QC audits are in SI unless central to the contribution;
+- decision-critical experiments explicitly discriminate the leading alternatives and address relevant confounders;
+- sample handling preserves the state being claimed, or the preservation issue remains a blocker;
+- title, abstract map, Figure messages and conclusion are no stronger than the evidence;
+- the Markdown and same-revision PDF are coherent, complete and readable.
+
+Report PLAN_PRODUCT_STATUS, SCIENTIFIC_READINESS and BENCHMARK_COMPARISON separately. If the requested benchmark is absent, mark comparison BLOCKED_REFERENCE_UNAVAILABLE; do not replace it with memory or a generic substitute and claim completion. Do not convert missing experimental evidence into a product failure when the plan gives a rigorous bounded recovery/stop decision.
