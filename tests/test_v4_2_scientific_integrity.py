@@ -50,6 +50,7 @@ class RegionIntegrityTests(unittest.TestCase):
     def test_repeated_header_is_inferred_even_without_triage_label(self):
         bundle = self.make_bundle()
         bundle["regions"]["REG001"]["layout_fingerprint"] = "same-header"
+        bundle["regions"]["REG001"]["bbox_normalized"] = [0.1, 0.02, 0.9, 0.10]
         bundle["regions"]["REG002"] = {
             "region_id": "REG002", "page_number": 1,
             "bbox_normalized": [0.1, 0.02, 0.9, 0.10],
