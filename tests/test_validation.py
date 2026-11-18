@@ -20,6 +20,7 @@ def sample_bundle():
                 "region_id": "REG001", "anchor_key": "region-x", "page_number": 1,
                 "bbox_normalized": [0.1, 0.1, 0.9, 0.9],
                 "image_path": "extracted/regions/REG001.png", "pixel_sha256": "b" * 64,
+                "region_type": "embedded_image_block", "triage_role": "REVIEW_CANDIDATE",
             }
         },
         "panels": {},
@@ -50,7 +51,13 @@ def sample_bundle():
                 "uncertainty_note": "[Visual Estimate - Raw Data Required]", "artifact_audit_ids": []
             }
         },
-        "findings": {}, "audit_records": [], "discrepancies": []
+        "findings": {}, "audit_records": [], "discrepancies": [],
+        "visual_inspections": {
+            "REG001": {"initial": {
+                "inspection_mode": "CAPTION_BLIND", "caption_text_included": False,
+                "report_narrative_included": False, "visual_legibility": "Medium"
+            }, "reinspections": [], "locked": False}
+        }
     }
 
 
