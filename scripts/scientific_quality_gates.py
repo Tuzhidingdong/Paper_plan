@@ -10,9 +10,9 @@ import math
 import re
 from typing import Any
 
-PAGE_PATTERN = re.compile(r"\b(?:pdf\s*)?p(?:age)?\.?\s*(\d+)\b", re.IGNORECASE)
+PAGE_PATTERN = re.compile(r"\b(?:pdf\s*)?pp?\.?\s*(\d+)\b", re.IGNORECASE)
 FIT_METHOD_PATTERN = re.compile(
-    r"\b(?:least[\s-]*squares|linear\s+fit|regression|curve\s+fit|fitting\s+model)\b",
+    r"\b(?:ols|ordinary\s+least\s+squares|least[\s-]*squares|linear\s+(?:fit|fitting|fitted)|regression|curve\s+(?:fit|fitting)|fitting\s+model)\b",
     re.IGNORECASE,
 )
 IMAGE_PATTERN = re.compile(
