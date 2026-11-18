@@ -100,6 +100,27 @@ class RegionIntegrityTests(unittest.TestCase):
         errors, _ = validate_evidence_integrity(bundle)
         self.assertTrue(any("requires a recorded CAPTION_BLIND" in item for item in errors), errors)
 
+    def make_visual_metadata(self):
+        dimensions = [
+            {"dimension": "imaging_modality", "status": "OBSERVED", "value": "SEM",
+             "source_location": "Image metadata", "recording_method": "SOURCE_METADATA", "confidence": "HIGH"},
+            {"dimension": "magnification_or_pixel_size", "status": "UNKNOWN", "reason": "No calibration metadata is available.",
+             "recording_method": "OTHER", "confidence": "UNASSESSABLE"},
+            {"dimension": "scale_bar_or_spatial_calibration", "status": "OBSERVED", "value": "50",
+             "unit": "μm", "source_location": "Scale bar within the original crop", "recording_method": "SCALE_BAR_READ", "confidence": "HIGH"},
+            {"dimension": "specimen_state_and_preparation", "status": "UNKNOWN", "reason": "The inspection pack does not include preparation metadata.",
+             "recording_method": "OTHER", "confidence": "UNASSESSABLE"},
+            {"dimension": "image_processing_and_contrast", "status": "UNKNOWN", "reason": "Processing history is not supplied.",
+             "recording_method": "OTHER", "confidence": "UNASSESSABLE"},
+            {"dimension": "field_selection_and_sampling", "status": "UNKNOWN", "reason": "Field-selection metadata are not supplied.",
+             "recording_method": "OTHER", "confidence": "UNASSESSABLE"},
+        ]
+        return {
+            "status": "RECORDED",
+            "dimensions": dimensions,
+            "assessment_note": "All required visual metadata dimensions were recorded; unavailable items are explicitly marked.",
+        }
+
     def test_linked_caption_blind_inspection_is_accepted(self):
         bundle = self.make_bundle()
         bundle["result_units"]["R001"]["data_origin"] = "Qualitative_Observation"
@@ -109,6 +130,7 @@ class RegionIntegrityTests(unittest.TestCase):
                 "caption_text_included": False,
                 "report_narrative_included": False,
                 "visual_legibility": "High",
+                "visual_metadata_assessment": self.make_visual_metadata(),
             }
         }
         errors, _ = validate_evidence_integrity(bundle)
@@ -130,6 +152,7 @@ class FitReproducibilityTests(unittest.TestCase):
         if include_audit:
             result["calculation_audits"] = [{
                 "audit_type": "OLS_LINEAR_FIT",
+                "reproduction_status": "REPRODUCED" if tuple(reported) == (2.0, 1.0, 1.0) else "NOT_REPRODUCED",
                 "x_source": {"result_id": "R001", "observation_index": 0},
                 "y_source": {"result_id": "R001", "observation_index": 1},
                 "reported_source": {
@@ -138,6 +161,24 @@ class FitReproducibilityTests(unittest.TestCase):
                     "value_indices": {"intercept": 1, "slope": 0, "r_squared": 2},
                 },
                 "displayed_precision": {"slope": 3, "intercept": 3, "r_squared": 3},
+                "statistical_quality_assessment": {
+                    "status": "ASSESSED",
+                    "diagnostics": [{
+                        "diagnostic": "residual pattern",
+                        "method": "residual plot review",
+                        "result": "No material structure observed in this synthetic fixture.",
+                    }],
+                    "uncertainty_status": "QUALITATIVELY_ADDRESSED",
+                    "uncertainty_note": "The synthetic residual spread was discussed qualitatively; no interval was available.",
+                    "assessment_note": "The synthetic regression fixture records a separate quality review.",
+                },
+                "validation_assessment": {
+                    "level": "INTERNAL_RESAMPLING",
+                    "resampling_method": "five-fold cross-validation",
+                    "split_unit": "independent observation unit",
+                    "leakage_controls": ["All transformations are fitted within each training fold."],
+                    "limitations": ["Synthetic fixture does not establish external transportability."],
+                },
             }]
         return {
             "result_units": {
@@ -178,6 +219,7 @@ class FitReproducibilityTests(unittest.TestCase):
     def test_mismatched_source_vector_lengths_are_rejected(self):
         bundle = self.make_bundle()
         bundle["result_units"]["R001"]["observations"][1]["numeric_values"] = [1, 2]
+        bundle["result_units"]["R002"]["calculation_audits"][0]["reproduction_status"] = "NOT_ASSESSABLE"
         errors, _ = validate_fit_reproducibility(bundle)
         self.assertTrue(any("at least three finite observations" in item for item in errors), errors)
 

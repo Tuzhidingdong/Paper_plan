@@ -85,7 +85,23 @@ When the scientific question asks whether two methods or endpoints agree, or whe
 
 Do not invent an acceptance margin or interpret a merely intermediate result as evidence for a specific mechanism or confounder. If the boundary cannot yet be justified, record it as unresolved and keep the task at DRAFT/BLOCKED rather than marking the decision framework ready.
 
-## 9. Dependency classes
+## 9. Proxy and indirect-measurement validation
+
+When a candidate indicator, surrogate, proxy or indirect method is used to stand in for a target measurand, make that relationship an explicit testable work package. Do not assume that correlation, a shared trend or a convenient signal proves that the candidate measures the target quantity.
+
+Record in the structured measurement-validation design:
+
+- **Candidate measurement:** name, measurand, operational definition, method, units and source/result links.
+- **Reference measurement:** target measurand, operational definition, method and the basis for treating it as a reference (direct measurement, reference standard, orthogonal method, composite reference or another justified basis). Disclose shared-method dependencies and limitations.
+- **Sampling alignment:** unit of analysis, pairing or matching strategy, factors used for matching, condition/time alignment and the scope to which the comparison applies. A method-agreement or calibration claim normally needs measurements linked to the same unit or defensibly matched units; an unpaired design needs an explicit rationale and a narrower claim.
+- **Relationship and decision rule:** state whether the intended relationship is agreement, calibration, prediction, classification, ranking, monitoring, association or another defined relationship. Specify the primary estimand, analysis method, justified acceptance boundary and its basis, uncertainty treatment, and explicit SUPPORTS / CONTRADICTS / INCONCLUSIVE outcome rules. Do not invent a margin to complete the template.
+- **Control coverage:** identify plausible confounders, artefacts and background contributions for this specific design; declare which control classes are needed and map each to a planned control and purpose. If no control is needed, or a candidate control is not applicable, record the rationale. There is no universal mandatory control list.
+- **Accounting/closure:** assess whether a recovery, balance, conservation or other input-output closure is relevant. If required, identify accounted inputs/outputs, residual method and a justified acceptance basis. If not required, explain why; do not force a mass-balance section onto unrelated study designs.
+- **Validation strategy:** distinguish in-sample fit reproduction, internal resampling, independent external data and prospective validation. State the independent unit, data scope, leakage controls and limitations. Prospective data need a documented collection/split plan; do not claim external validation before independent data exist.
+
+A work package can remain DRAFT while these design choices are unresolved. It cannot be represented as ready for supervisor approval or execution while essential measurement definitions, sampling alignment, decision rules, control applicability or validation scope remain unassessed. A structural gate checks completeness and consistency; it does not prove that the selected reference, controls, statistical method or acceptance boundary are scientifically appropriate. That judgment remains with the researcher and supervisor.
+
+## 10. Dependency classes
 
 Where different stages have different gates, distinguish `execution_prerequisite_ids` (must be complete before work can start), `interpretation_prerequisite_ids` (needed before a result can be interpreted or a claim assessed), and `publication_prerequisite_ids` (needed for journal positioning, manuscript finalization or submission).
 

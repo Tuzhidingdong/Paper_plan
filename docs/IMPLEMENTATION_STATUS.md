@@ -61,7 +61,7 @@ The V4.1 branch adds domain-neutral scientific decision controls: typed Claim ev
 
 These changes are development-candidate features until GitHub CI and local regression are complete. Existing project runs are not silently rewritten; older validation outputs remain historical and must be regenerated against the current Skill and bundle revisions before being described as current. No project-specific findings are included in generic Skill sources.
 
-## V4.2 evidence-integrity gates (development branch)
+## V4.2 evidence-integrity gates (merged to main)
 
 | Gate | Implementation | Intended effect |
 |---|---|---|
@@ -71,4 +71,21 @@ These changes are development-candidate features until GitHub CI and local regre
 | Statistical-fit reproduction | Evidence validator recomputes source-linked OLS linear fits at displayed precision | Separates method definition from actual coefficient reproduction |
 | Research-route decision audit | Planning validator requires selection criteria, evidence rationale and disposition of every alternative | Prevents an opaque preferred-route choice |
 
-V4.2 regression tests are in `tests/test_v4_2_scientific_integrity.py`. These gates are generic and contain no test-project/sample facts. GitHub Actions runs compileall and the complete unittest suite on Python 3.10, 3.11 and 3.12 for every PR head. Fresh local synchronization and regression remain to be completed after merge.
+V4.2 regression tests are in `tests/test_v4_2_scientific_integrity.py`. These gates are generic and contain no test-project/sample facts. GitHub Actions runs compileall and the complete unittest suite on Python 3.10, 3.11 and 3.12 for every PR head. V4.2 was merged to `main`. The V4.2 targeted functional acceptance report identifies the tested Skill commit and confirms that its project inputs and prior outputs were preserved; this focused round did not rerun the full regression suite.
+
+
+## V4.3 measurement-validity controls (development branch)
+
+| Gate | Implementation | Intended effect |
+|---|---|---|
+| Inspection-time visual metadata | Extended caption-blind inspection cards plus evidence-integrity validation | Requires source-linked modality, spatial calibration, specimen state, processing and field-sampling states to be recorded at original-resolution inspection |
+| Proxy-to-reference design | `validate_proxy_measurement_design()` wired into planning validation | Requires separate candidate/reference measurands, justified reference basis, sampling alignment, relationship and outcome rules |
+| Control coverage | Structured, case-specific required control classes and planned controls | Requires confounder-driven control review and explicit rationale for omissions; no universal controls |
+| Accounting closure | Explicit REQUIRED / NOT_REQUIRED / NOT_ASSESSED decision | Requires inputs, outputs, residual method and basis only when closure is relevant |
+| Fit-quality separation | Statistical-quality diagnostics and uncertainty status on calculation audits | Prevents coefficient reproduction or R-squared from being treated as a complete quality assessment |
+| Validation scope | In-sample, internal resampling, independent external and prospective levels | Requires distinct data scope, independence unit and leakage controls where applicable |
+
+V4.3 tests use synthetic generic fixtures. The controls do not encode any specific sample, material system, measurement technique or experimental conclusion. This development remains subject to CI and local regression before merge.
+
+
+V4.3 fit audits now require a declared `reproduction_status` that the validator cross-checks against recomputed coefficients. The status is separate from statistical-quality diagnostics/uncertainty and from internal, external-independent or prospective validation scope.

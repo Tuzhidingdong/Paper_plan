@@ -723,73 +723,263 @@
           "additionalProperties": true
         }
       },
-
-        "calculation_audits": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "audit_type",
-              "x_source",
-              "y_source",
-              "reported_source",
-              "displayed_precision"
-            ],
-            "properties": {
-              "audit_type": {
-                "const": "OLS_LINEAR_FIT"
-              },
-              "x_source": {
-                "type": "object",
-                "required": ["result_id", "observation_index"],
-                "properties": {
-                  "result_id": {"type": "string"},
-                  "observation_index": {"type": "integer", "minimum": 0}
+      "calculation_audits": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "audit_type",
+            "reproduction_status",
+            "x_source",
+            "y_source",
+            "reported_source",
+            "displayed_precision"
+          ],
+          "properties": {
+            "audit_type": {
+              "const": "OLS_LINEAR_FIT"
+            },
+            "x_source": {
+              "type": "object",
+              "required": [
+                "result_id",
+                "observation_index"
+              ],
+              "properties": {
+                "result_id": {
+                  "type": "string"
                 },
-                "additionalProperties": false
+                "observation_index": {
+                  "type": "integer",
+                  "minimum": 0
+                }
               },
-              "y_source": {
-                "type": "object",
-                "required": ["result_id", "observation_index"],
-                "properties": {
-                  "result_id": {"type": "string"},
-                  "observation_index": {"type": "integer", "minimum": 0}
+              "additionalProperties": false
+            },
+            "y_source": {
+              "type": "object",
+              "required": [
+                "result_id",
+                "observation_index"
+              ],
+              "properties": {
+                "result_id": {
+                  "type": "string"
                 },
-                "additionalProperties": false
+                "observation_index": {
+                  "type": "integer",
+                  "minimum": 0
+                }
               },
-              "reported_source": {
-                "type": "object",
-                "required": ["observation_index", "value_indices"],
-                "properties": {
-                  "result_id": {"type": "string"},
-                  "observation_index": {"type": "integer", "minimum": 0},
-                  "value_indices": {
-                    "type": "object",
-                    "required": ["slope", "intercept", "r_squared"],
-                    "properties": {
-                      "slope": {"type": "integer", "minimum": 0},
-                      "intercept": {"type": "integer", "minimum": 0},
-                      "r_squared": {"type": "integer", "minimum": 0}
+              "additionalProperties": false
+            },
+            "reported_source": {
+              "type": "object",
+              "required": [
+                "observation_index",
+                "value_indices"
+              ],
+              "properties": {
+                "result_id": {
+                  "type": "string"
+                },
+                "observation_index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "value_indices": {
+                  "type": "object",
+                  "required": [
+                    "slope",
+                    "intercept",
+                    "r_squared"
+                  ],
+                  "properties": {
+                    "slope": {
+                      "type": "integer",
+                      "minimum": 0
                     },
-                    "additionalProperties": false
+                    "intercept": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "r_squared": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "displayed_precision": {
+              "type": "object",
+              "required": [
+                "slope",
+                "intercept",
+                "r_squared"
+              ],
+              "properties": {
+                "slope": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 12
+                },
+                "intercept": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 12
+                },
+                "r_squared": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 12
+                }
+              },
+              "additionalProperties": false
+            },
+            "statistical_quality_assessment": {
+              "type": "object",
+              "required": [
+                "status",
+                "diagnostics",
+                "uncertainty_status",
+                "assessment_note"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ASSESSED",
+                    "PARTIALLY_ASSESSED",
+                    "NOT_ASSESSED",
+                    "NOT_APPLICABLE"
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "diagnostic",
+                      "method",
+                      "result"
+                    ],
+                    "properties": {
+                      "diagnostic": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "method": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "result": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "interpretation_limit": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": true
                   }
                 },
-                "additionalProperties": false
-              },
-              "displayed_precision": {
-                "type": "object",
-                "required": ["slope", "intercept", "r_squared"],
-                "properties": {
-                  "slope": {"type": "integer", "minimum": 0, "maximum": 12},
-                  "intercept": {"type": "integer", "minimum": 0, "maximum": 12},
-                  "r_squared": {"type": "integer", "minimum": 0, "maximum": 12}
+                "uncertainty_status": {
+                  "enum": [
+                    "QUANTIFIED",
+                    "QUALITATIVELY_ADDRESSED",
+                    "NOT_REPORTED",
+                    "NOT_ASSESSED",
+                    "NOT_APPLICABLE"
+                  ]
                 },
-                "additionalProperties": false
-              }
+                "uncertainty_note": {
+                  "type": "string"
+                },
+                "assessment_note": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": true
             },
-            "additionalProperties": false
-          }
-        },
+            "validation_assessment": {
+              "type": "object",
+              "required": [
+                "level",
+                "limitations"
+              ],
+              "properties": {
+                "level": {
+                  "enum": [
+                    "IN_SAMPLE_ONLY",
+                    "INTERNAL_RESAMPLING",
+                    "EXTERNAL_INDEPENDENT_DATA",
+                    "PROSPECTIVE",
+                    "NOT_ASSESSED",
+                    "NOT_APPLICABLE"
+                  ]
+                },
+                "training_data_scope": {
+                  "type": "string"
+                },
+                "validation_data_scope": {
+                  "type": "string"
+                },
+                "training_dataset_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "validation_dataset_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "independence_unit": {
+                  "type": "string"
+                },
+                "leakage_controls": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "resampling_method": {
+                  "type": "string"
+                },
+                "split_unit": {
+                  "type": "string"
+                },
+                "planned_validation_source": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "limitations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": true
+            },
+            "reproduction_status": {
+              "enum": [
+                "NOT_ASSESSED",
+                "REPRODUCED",
+                "NOT_REPRODUCED",
+                "NOT_ASSESSABLE",
+                "NOT_APPLICABLE"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "additionalProperties": true
     },
     "finding": {
@@ -911,6 +1101,105 @@
         },
         "recorded_at": {
           "type": "string"
+        },
+        "visual_metadata_assessment": {
+          "type": "object",
+          "required": [
+            "status",
+            "dimensions",
+            "assessment_note"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "RECORDED",
+                "PARTIAL",
+                "NOT_ASSESSED"
+              ]
+            },
+            "dimensions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "dimension",
+                  "status",
+                  "recording_method",
+                  "confidence"
+                ],
+                "properties": {
+                  "dimension": {
+                    "enum": [
+                      "imaging_modality",
+                      "magnification_or_pixel_size",
+                      "scale_bar_or_spatial_calibration",
+                      "specimen_state_and_preparation",
+                      "image_processing_and_contrast",
+                      "field_selection_and_sampling"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "OBSERVED",
+                      "NOT_PRESENT",
+                      "NOT_LEGIBLE",
+                      "NOT_APPLICABLE",
+                      "UNKNOWN"
+                    ]
+                  },
+                  "value": {
+                    "type": [
+                      "string",
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "unit": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "source_location": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "recording_method": {
+                    "enum": [
+                      "SOURCE_METADATA",
+                      "INSTRUMENT_METADATA",
+                      "SCALE_BAR_READ",
+                      "VISUAL_REVIEW",
+                      "USER_CONFIRMED",
+                      "OTHER"
+                    ]
+                  },
+                  "confidence": {
+                    "enum": [
+                      "HIGH",
+                      "MEDIUM",
+                      "LOW",
+                      "UNASSESSABLE"
+                    ]
+                  },
+                  "reason": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "assessment_note": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
         }
       },
       "additionalProperties": true

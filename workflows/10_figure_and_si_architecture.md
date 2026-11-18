@@ -86,3 +86,6 @@ Use the states precisely:
 - `UNASSESSED`: no comparison assessment has yet been performed.
 
 Do not turn NOT_COMPARABLE or NOT_ASSESSABLE into a claim of contradiction. State only what cannot be inferred. A contradiction requires independent, explicitly linked counter-evidence.
+
+
+Use the visual metadata recorded during the original-resolution extraction/inspection pass as the source for later cross-image comparability. Do not reconstruct a missing scale bar, acquisition setting or preparation detail from a caption or memory. If a required dimension was not present, not legible or unknown, preserve that state and restrict the panel's inference accordingly. Reinspection should only resolve a documented evidence gap.

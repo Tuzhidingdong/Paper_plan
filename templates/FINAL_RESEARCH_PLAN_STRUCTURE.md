@@ -69,3 +69,8 @@ For every repeated Data Slot across Panels, state the specimen/condition/timepoi
 For each work package, state readiness, required inputs, local feasibility, controls, measurements, native outputs, QC, replicate/statistical and uncertainty plan, responsible role and decision owner. For agreement/equivalence questions, specify a justified acceptance boundary and outcome rules; correlation alone is insufficient.
 
 Separate experiment-start prerequisites from interpretation and publication gates. Unknown local parameters remain TBD and cannot be represented as an approved protocol.
+
+
+## Image-derived evidence metadata (when applicable)
+
+For each image-derived Result Unit, record the inspection-time state of imaging modality, magnification/pixel size, scale bar/spatial calibration, specimen state/preparation, image processing/contrast, and field selection/sampling. Preserve source location, method, unit and confidence for observed values. Use explicit NOT_PRESENT, NOT_LEGIBLE, NOT_APPLICABLE or UNKNOWN states with reasons; never infer missing visual metadata.

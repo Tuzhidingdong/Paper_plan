@@ -42,9 +42,12 @@ Before opening page text, captions or narrative:
 1. Check scripts/check_capability.py --task visual_inspection.
 2. Inspect original-resolution images individually.
 3. Create a CAPTION_BLIND task pack and record visibility, axes/units, sample labels actually visible, legibility and confidence.
-4. Keep each panel, axis, unit, tick, legend and series association independent.
-5. Exact values require legible ticks, axis, units and series identity. Low-resolution plots never yield exact values.
-6. One targeted reinspection per Region/Panel is allowed, with a written reason.
+4. In the same inspection card, record a structured `visual_metadata_assessment` for every linked Region/Panel. Explicitly assess: imaging modality; magnification or pixel size; scale bar/spatial calibration; specimen state/preparation; image processing/contrast; and field selection/sampling.
+5. For each dimension, record OBSERVED with its value, unit where applicable, source location, recording method and confidence, or explicitly record NOT_PRESENT, NOT_LEGIBLE, NOT_APPLICABLE or UNKNOWN with a reason. Never fill a missing scale/calibration value from a caption, another panel or a guessed magnification.
+6. A scale-bar value read from the original-resolution crop must be marked `SCALE_BAR_READ`, linked to its location in that crop, and retain its unit and confidence. Distinguish this manual visual reading from a value copied from source or instrument metadata.
+7. Keep each panel, axis, unit, tick, legend and series association independent.
+8. Exact values require legible ticks, axis, units and series identity. Low-resolution plots never yield exact values.
+9. One targeted reinspection per Region/Panel is allowed, with a written reason.
 
 If the same Agent has already read the report text in the active context, set cognitive_blindness = NOT_GUARANTEED. The JSON task pack omitting captions does not erase context already seen by the model. Do not describe the inspection as fully independent.
 
@@ -64,6 +67,7 @@ Figure-level status and report-level status stay separate. NOT_SHOWN means not s
 - Capture Exact_Text/Exact_Table/Vector_Extracted separately from Visual_Estimate and Qualitative_Observation.
 - Never infer unreported batches, measurement runs, replicates, treatment conditions or raw data.
 - For every quantitative Result Unit that may support a central claim, create a measurement definition recording the measurand, raw signal, method, formula where derived, output unit, normalization basis, calibration/blank corrections, uncertainty and parent Result Unit IDs. Mark incomplete definitions PARTIAL or NOT_ASSESSED; do not promote them to a verified core metric.
+- When a fitted/derived relationship is extracted or calculated, create its source-linked calculation audit immediately. Record the input vectors, displayed parameter values/precision and an explicit reproduction_status. Separately assess statistical diagnostics/uncertainty and state whether validation is in-sample, internally resampled, externally independent or prospective. Never infer one status from another.
 - Mark each Result Unit's intended claim role as UNDECIDED, SUPPORTING, CORE or NOT_USED. A numeric CORE result must pass the measurement-definition checks before it can support a central quantitative claim.
 - Compare experimental conditions explicitly before combining or contrasting Result Units. Record matched, mismatched, unknown and not-applicable dimensions rather than assuming like-for-like comparability.
 

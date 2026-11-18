@@ -54,13 +54,7 @@ def _page_numbers(source_location: Any) -> set[int]:
 
 
 def _has_caption_blind_inspection(bundle: dict[str, Any], entity_id: str) -> bool:
-    history = bundle.get("visual_inspections", {}).get(entity_id, {})
-    if not isinstance(history, dict):
-        return False
-    cards = []
-    if isinstance(history.get("initial"), dict):
-        cards.append(history["initial"])
-    cards.extend(item for item in history.get("reinspections", []) if isinstance(item, dict))
+    cards = _inspection_cards(bundle, entity_id)
     for card in cards:
         if (
             card.get("inspection_mode") == "CAPTION_BLIND"
@@ -70,6 +64,88 @@ def _has_caption_blind_inspection(bundle: dict[str, Any], entity_id: str) -> boo
         ):
             return True
     return False
+
+
+def _inspection_cards(bundle: dict[str, Any], entity_id: str) -> list[dict[str, Any]]:
+    history = bundle.get("visual_inspections", {}).get(entity_id, {})
+    if not isinstance(history, dict):
+        return []
+    cards = []
+    if isinstance(history.get("initial"), dict):
+        cards.append(history["initial"])
+    cards.extend(item for item in history.get("reinspections", []) if isinstance(item, dict))
+    return cards
+
+
+def _visual_metadata_errors(bundle: dict[str, Any], entity_id: str) -> list[str]:
+    """Require contemporaneous, explicit visual-acquisition metadata for a linked crop."""
+    errors: list[str] = []
+    cards = _inspection_cards(bundle, entity_id)
+    valid_cards = [
+        card for card in cards
+        if card.get("inspection_mode") == "CAPTION_BLIND"
+        and card.get("caption_text_included") is False
+        and card.get("report_narrative_included") is False
+    ]
+    if not valid_cards:
+        return [f"{entity_id}: visual metadata must be recorded in a linked CAPTION_BLIND inspection card"]
+
+    required = set(VISUAL_DIMENSIONS)
+    assessed = False
+    recorded_status = False
+    for card in valid_cards:
+        metadata = card.get("visual_metadata_assessment")
+        if not isinstance(metadata, dict):
+            continue
+        assessed = True
+        if metadata.get("status") != "RECORDED":
+            continue
+        recorded_status = True
+        dimensions = metadata.get("dimensions", [])
+        by_dimension: dict[str, dict[str, Any]] = {}
+        for item in dimensions if isinstance(dimensions, list) else []:
+            if not isinstance(item, dict):
+                continue
+            dimension_id = _visual_dimension_id(item.get("dimension"))
+            if not dimension_id:
+                continue
+            if dimension_id in by_dimension:
+                errors.append(f"{entity_id}: visual metadata dimension {dimension_id} is recorded more than once")
+            by_dimension[dimension_id] = item
+        missing = sorted(required - set(by_dimension))
+        if missing:
+            errors.append(f"{entity_id}: visual metadata record lacks explicit states for: " + ", ".join(missing))
+            continue
+        for dimension_id in required:
+            item = by_dimension[dimension_id]
+            status = item.get("status")
+            if status not in {"OBSERVED", "NOT_PRESENT", "NOT_LEGIBLE", "NOT_APPLICABLE", "UNKNOWN"}:
+                errors.append(f"{entity_id}: visual metadata {dimension_id} has a missing/invalid status")
+                continue
+            if item.get("recording_method") not in {
+                "SOURCE_METADATA", "INSTRUMENT_METADATA", "SCALE_BAR_READ",
+                "VISUAL_REVIEW", "USER_CONFIRMED", "OTHER"
+            }:
+                errors.append(f"{entity_id}: visual metadata {dimension_id} needs a recording_method")
+            if item.get("confidence") not in {"HIGH", "MEDIUM", "LOW", "UNASSESSABLE"}:
+                errors.append(f"{entity_id}: visual metadata {dimension_id} needs a confidence level")
+            if status == "OBSERVED":
+                if item.get("value") is None or not _has_substantive_text(str(item.get("value"))):
+                    errors.append(f"{entity_id}: observed visual metadata {dimension_id} requires a value")
+                if not _has_substantive_text(item.get("source_location")):
+                    errors.append(f"{entity_id}: observed visual metadata {dimension_id} requires a source_location")
+                if dimension_id == "scale_bar_or_spatial_calibration" and not _has_substantive_text(item.get("unit")):
+                    errors.append(f"{entity_id}: observed spatial calibration requires an explicit unit")
+            elif not _has_substantive_text(item.get("reason")):
+                errors.append(f"{entity_id}: {status} visual metadata {dimension_id} requires a reason")
+        if not _has_substantive_text(metadata.get("assessment_note")):
+            errors.append(f"{entity_id}: visual_metadata_assessment requires an assessment_note")
+        return errors
+    if not assessed:
+        return [f"{entity_id}: linked CAPTION_BLIND inspection lacks a visual_metadata_assessment"]
+    if not recorded_status:
+        return [f"{entity_id}: visual_metadata_assessment must have status RECORDED"]
+    return errors
 
 
 def validate_evidence_integrity(bundle: dict[str, Any]) -> tuple[list[str], list[str]]:
@@ -158,6 +234,8 @@ def validate_evidence_integrity(bundle: dict[str, Any]) -> tuple[list[str], list
                     f"{result_id}: image-derived {result.get('data_origin')} evidence "
                     "requires a recorded CAPTION_BLIND visual inspection of a linked Region or Panel"
                 )
+            for entity_id in sorted(inspection_entities):
+                errors.extend(_visual_metadata_errors(bundle, entity_id))
 
     return errors, warnings
 
@@ -261,12 +339,16 @@ def validate_fit_reproducibility(bundle: dict[str, Any]) -> tuple[list[str], lis
             owner = f"{result_id} calculation_audits[{audit_index}]"
             if audit.get("audit_type") != "OLS_LINEAR_FIT":
                 errors.append(f"{owner}: unsupported audit_type; expected OLS_LINEAR_FIT")
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: unsupported audit requires reproduction_status NOT_ASSESSABLE")
                 continue
 
             x_ref, y_ref = audit.get("x_source", {}), audit.get("y_source", {})
             x_result_id, y_result_id = x_ref.get("result_id"), y_ref.get("result_id")
             if x_result_id not in results or y_result_id not in results:
                 errors.append(f"{owner}: x_source/y_source references an unknown Result Unit")
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: unresolved source reference requires reproduction_status NOT_ASSESSABLE")
                 continue
             x_values = _numeric_vector(results[x_result_id], x_ref.get("observation_index"))
             y_values = _numeric_vector(results[y_result_id], y_ref.get("observation_index"))
@@ -275,16 +357,22 @@ def validate_fit_reproducibility(bundle: dict[str, Any]) -> tuple[list[str], lis
                     f"{owner}: source references must resolve to numeric_values vectors "
                     "with at least three finite observations"
                 )
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: unavailable numeric vectors require reproduction_status NOT_ASSESSABLE")
                 continue
             computed = _ordinary_least_squares(x_values, y_values)
             if computed is None:
                 errors.append(f"{owner}: OLS cannot be computed (length mismatch or zero variance)")
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: uncomputable OLS requires reproduction_status NOT_ASSESSABLE")
                 continue
             slope, intercept, r_squared = computed
 
             reported_source = audit.get("reported_source", {})
             if reported_source.get("result_id", result_id) != result_id:
                 errors.append(f"{owner}: reported_source must point to the Result Unit being audited")
+                if audit.get("reproduction_status") != "NOT_ASSESSABLE":
+                    (errors if core else warnings).append(f"{owner}: unresolved reported parameter source requires reproduction_status NOT_ASSESSABLE")
                 continue
             value_indices = reported_source.get("value_indices", {})
             precision = audit.get("displayed_precision", {})
@@ -334,9 +422,145 @@ def validate_fit_reproducibility(bundle: dict[str, Any]) -> tuple[list[str], lis
                         f"{parameter}: recomputed {computed_value:.12g} vs printed "
                         f"{reported_value:.12g} (rounding tolerance {tolerance:.3g})"
                     )
-            if mismatches:
-                message = f"{owner}: OLS fit is NOT_REPRODUCED; " + "; ".join(mismatches)
+            incomplete_printed_parameters = any(
+                reported_values[parameter] is None
+                or not isinstance(precision.get(parameter), int)
+                or isinstance(precision.get(parameter), bool)
+                or precision.get(parameter) < 0
+                or precision.get(parameter) > 12
+                for parameter in ("slope", "intercept", "r_squared")
+            )
+            if incomplete_printed_parameters:
+                computed_reproduction_status = "NOT_ASSESSABLE"
+            elif mismatches:
+                computed_reproduction_status = "NOT_REPRODUCED"
+            else:
+                computed_reproduction_status = "REPRODUCED"
+
+            if audit.get("reproduction_status") != computed_reproduction_status:
+                message = (
+                    f"{owner}: reproduction_status must be {computed_reproduction_status}; "
+                    f"recorded {audit.get('reproduction_status')!r}"
+                )
                 (errors if core else warnings).append(message)
+            if mismatches:
+                prefix = (
+                    "OLS fit reproduction is NOT_ASSESSABLE; "
+                    if computed_reproduction_status == "NOT_ASSESSABLE"
+                    else "OLS fit is NOT_REPRODUCED; "
+                )
+                message = f"{owner}: " + prefix + "; ".join(mismatches)
+                (errors if core else warnings).append(message)
+
+            # Reproduction is not a statistical-quality assessment. Record the
+            # latter explicitly rather than inferring quality from R-squared.
+            quality = audit.get("statistical_quality_assessment")
+            if not isinstance(quality, dict):
+                message = f"{owner}: statistical_quality_assessment must separately record model diagnostics and uncertainty"
+                (errors if core else warnings).append(message)
+            else:
+                quality_status = quality.get("status")
+                diagnostics = quality.get("diagnostics", [])
+                uncertainty_status = quality.get("uncertainty_status")
+                if quality_status not in {"ASSESSED", "PARTIALLY_ASSESSED", "NOT_ASSESSED", "NOT_APPLICABLE"}:
+                    message = f"{owner}: statistical_quality_assessment.status is missing or invalid"
+                    (errors if core else warnings).append(message)
+                elif core and quality_status != "ASSESSED":
+                    errors.append(f"{owner}: CORE fit requires a completed statistical-quality assessment; found {quality_status}")
+                elif quality_status == "PARTIALLY_ASSESSED":
+                    warnings.append(f"{owner}: statistical-quality assessment is partial")
+                if quality_status == "ASSESSED" and not diagnostics:
+                    message = f"{owner}: an ASSESSED fit requires at least one recorded diagnostic"
+                    (errors if core else warnings).append(message)
+                elif quality_status == "ASSESSED":
+                    meaningful_diagnostics = [
+                        item for item in diagnostics if isinstance(item, dict)
+                        and all(_has_substantive_text(item.get(field)) for field in ("diagnostic", "method", "result"))
+                    ]
+                    if not meaningful_diagnostics:
+                        message = f"{owner}: an ASSESSED fit requires a diagnostic with a defined check, method and result"
+                        (errors if core else warnings).append(message)
+                if not _has_substantive_text(quality.get("assessment_note")):
+                    message = f"{owner}: statistical-quality assessment requires a substantive assessment_note"
+                    (errors if core else warnings).append(message)
+                if uncertainty_status not in {
+                    "QUANTIFIED", "QUALITATIVELY_ADDRESSED", "NOT_REPORTED",
+                    "NOT_ASSESSED", "NOT_APPLICABLE"
+                }:
+                    message = f"{owner}: uncertainty_status must be explicitly recorded"
+                    (errors if core else warnings).append(message)
+                if uncertainty_status in {"NOT_REPORTED", "NOT_ASSESSED"} and not _has_substantive_text(quality.get("uncertainty_note")):
+                    message = f"{owner}: unavailable/unreported uncertainty requires an explanatory uncertainty_note"
+                    (errors if core else warnings).append(message)
+                if uncertainty_status == "QUANTIFIED" and not _has_substantive_text(quality.get("uncertainty_note")):
+                    message = f"{owner}: quantified uncertainty requires the method or interval to be recorded in uncertainty_note"
+                    (errors if core else warnings).append(message)
+                if uncertainty_status == "QUALITATIVELY_ADDRESSED" and not _has_substantive_text(quality.get("uncertainty_note")):
+                    message = f"{owner}: qualitatively addressed uncertainty requires the approach and its limitations in uncertainty_note"
+                    (errors if core else warnings).append(message)
+                if uncertainty_status == "NOT_APPLICABLE" and not _has_substantive_text(quality.get("uncertainty_note")):
+                    message = f"{owner}: NOT_APPLICABLE uncertainty requires a rationale in uncertainty_note"
+                    (errors if core else warnings).append(message)
+
+            # Validation scope is distinct from in-sample coefficient
+            # reproduction. An external-validation label needs an explicit
+            # independent data scope and leakage controls.
+            validation = audit.get("validation_assessment")
+            if not isinstance(validation, dict):
+                message = f"{owner}: validation_assessment must distinguish in-sample, internal and external validation"
+                (errors if core else warnings).append(message)
+            else:
+                level = validation.get("level")
+                valid_levels = {
+                    "IN_SAMPLE_ONLY", "INTERNAL_RESAMPLING",
+                    "EXTERNAL_INDEPENDENT_DATA", "PROSPECTIVE",
+                    "NOT_ASSESSED", "NOT_APPLICABLE"
+                }
+                if level not in valid_levels:
+                    message = f"{owner}: validation_assessment.level is missing or invalid"
+                    (errors if core else warnings).append(message)
+                elif core and level == "NOT_ASSESSED":
+                    errors.append(f"{owner}: CORE fit must explicitly state a validation level; NOT_ASSESSED is not decision-ready")
+                elif level == "IN_SAMPLE_ONLY":
+                    warnings.append(f"{owner}: fit reproduction is in-sample only; do not describe it as externally validated")
+                elif level in {"EXTERNAL_INDEPENDENT_DATA", "PROSPECTIVE"}:
+                    training_scope = str(validation.get("training_data_scope") or "").strip()
+                    validation_scope = str(validation.get("validation_data_scope") or "").strip()
+                    required = {
+                        "training_dataset_ids": validation.get("training_dataset_ids"),
+                        "independence_unit": validation.get("independence_unit"),
+                        "leakage_controls": validation.get("leakage_controls"),
+                    }
+                    if level == "EXTERNAL_INDEPENDENT_DATA":
+                        required["validation_dataset_ids"] = validation.get("validation_dataset_ids")
+                    else:
+                        required["planned_validation_source"] = validation.get("planned_validation_source")
+                    missing = [
+                        name for name, value in required.items()
+                        if not (_has_substantive_items(value) if isinstance(value, list) else _has_substantive_text(value))
+                    ]
+                    if not _has_substantive_text(training_scope) or not _has_substantive_text(validation_scope) or training_scope == validation_scope:
+                        missing.append("distinct training_data_scope and validation_data_scope")
+                    overlap = set(validation.get("training_dataset_ids") or []) & set(validation.get("validation_dataset_ids") or [])
+                    if level == "EXTERNAL_INDEPENDENT_DATA" and overlap:
+                        missing.append("disjoint training/validation dataset IDs (overlap: " + ", ".join(sorted(overlap)) + ")")
+                    if missing:
+                        message = f"{owner}: {level} requires " + ", ".join(missing)
+                        (errors if core else warnings).append(message)
+                elif level == "INTERNAL_RESAMPLING":
+                    missing = [
+                        name for name, value in {
+                            "resampling_method": validation.get("resampling_method"),
+                            "split_unit": validation.get("split_unit"),
+                            "leakage_controls": validation.get("leakage_controls"),
+                        }.items() if not value
+                    ]
+                    if missing:
+                        message = f"{owner}: INTERNAL_RESAMPLING requires " + ", ".join(missing)
+                        (errors if core else warnings).append(message)
+                if not isinstance(validation.get("limitations"), list) or not _has_substantive_items(validation.get("limitations")):
+                    message = f"{owner}: validation_assessment must record substantive limitations as a non-empty list"
+                    (errors if core else warnings).append(message)
 
     return errors, warnings
 
@@ -559,4 +783,256 @@ def validate_evidence_quality(bundle: dict[str, Any]) -> tuple[list[str], list[s
     fit_errors, fit_warnings = validate_fit_reproducibility(bundle)
     errors.extend(fit_errors)
     warnings.extend(fit_warnings)
+    return errors, warnings
+
+
+def _has_substantive_text(value: Any) -> bool:
+    """Reject empty and unresolved placeholders from decision-ready fields."""
+    if not isinstance(value, str):
+        return False
+    normalized = re.sub(r"\s+", " ", value.strip().casefold())
+    if not normalized:
+        return False
+    unresolved_prefix = re.match(
+        r"^(?:tbd|todo|unknown|not assessed|not specified|to be determined|to be confirmed|to be justified|pending|n/?a|not applicable)(?:\b|$)",
+        normalized,
+    )
+    return unresolved_prefix is None
+
+
+def _has_substantive_items(values: Any) -> bool:
+    return isinstance(values, list) and bool(values) and all(
+        _has_substantive_text(value) for value in values
+    )
+
+
+def _validation_issue(
+    task_id: str,
+    readiness: str,
+    message: str,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    """Keep incomplete designs visible while reserving hard errors for execution-ready tasks."""
+    target = errors if readiness in {"READY_FOR_SUPERVISOR_APPROVAL", "APPROVED_FOR_EXECUTION"} else warnings
+    target.append(f"{task_id}: {message}")
+
+
+def validate_proxy_measurement_design(
+    framework: dict[str, Any],
+    evidence: dict[str, Any] | None = None,
+) -> tuple[list[str], list[str]]:
+    """Validate a declared proxy-to-reference measurement study without prescribing domain protocols.
+
+    The gate checks that the relationship, sampling alignment, controls, accounting
+    closure decision, validation level and outcome rules are explicit. It does not
+    decide which controls or acceptance margins are scientifically appropriate.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    valid_result_ids = set((evidence or {}).get("result_units", {}))
+    for task_id, task in framework.get("tasks", {}).items():
+        execution = task.get("execution_design") or {}
+        decision = execution.get("decision_framework") or {}
+        measurement = execution.get("measurement_validation")
+        question_type = decision.get("question_type")
+        readiness = execution.get("readiness", "NOT_ASSESSED")
+        is_proxy_question = question_type == "PROXY_VALIDATION"
+        is_proxy_design = isinstance(measurement, dict) and measurement.get("validation_type") == "PROXY_TO_REFERENCE"
+        if not is_proxy_question and not is_proxy_design:
+            continue
+
+        if not isinstance(measurement, dict):
+            _validation_issue(
+                task_id, readiness,
+                "PROXY_VALIDATION requires a structured execution_design.measurement_validation record",
+                errors, warnings,
+            )
+            continue
+
+        if question_type == "PROXY_VALIDATION" and measurement.get("validation_type") != "PROXY_TO_REFERENCE":
+            _validation_issue(task_id, readiness, "question_type PROXY_VALIDATION requires validation_type PROXY_TO_REFERENCE", errors, warnings)
+
+        candidate = measurement.get("candidate_measurement")
+        reference = measurement.get("reference_measurement")
+        for label, record in (("candidate_measurement", candidate), ("reference_measurement", reference)):
+            if not isinstance(record, dict):
+                _validation_issue(task_id, readiness, f"measurement_validation.{label} must define a separate measurement", errors, warnings)
+                continue
+            missing = [
+                field for field in ("name", "measurand", "operational_definition", "method")
+                if not _has_substantive_text(record.get(field))
+            ]
+            if missing:
+                _validation_issue(task_id, readiness, f"{label} is missing " + ", ".join(missing), errors, warnings)
+
+        if isinstance(reference, dict):
+            if reference.get("reference_basis") not in {
+                "DIRECT_MEASUREMENT", "REFERENCE_STANDARD", "ORTHOGONAL_METHOD",
+                "COMPOSITE_REFERENCE", "OTHER"
+            }:
+                _validation_issue(task_id, readiness, "reference_measurement.reference_basis must state the basis of the reference", errors, warnings)
+            if not _has_substantive_text(reference.get("independence_rationale")):
+                _validation_issue(task_id, readiness, "reference_measurement requires an independence_rationale and must disclose shared-method limitations", errors, warnings)
+
+        # Optional prior/pilot Result Unit links must resolve. Future planned
+        # measurements need not have Result Unit IDs before they are acquired.
+        for label, record in (("candidate_measurement", candidate), ("reference_measurement", reference)):
+            if not isinstance(record, dict):
+                continue
+            for result_id in record.get("result_ids", []):
+                if evidence is not None and result_id not in valid_result_ids:
+                    _validation_issue(task_id, readiness, f"{label}.result_ids references unknown Result Unit {result_id}", errors, warnings)
+            for source_ref in record.get("source_refs", []):
+                if not isinstance(source_ref, dict):
+                    _validation_issue(task_id, readiness, f"{label}.source_refs entries must be structured references", errors, warnings)
+                elif source_ref.get("kind") == "result_unit" and evidence is not None and source_ref.get("id") not in valid_result_ids:
+                    _validation_issue(task_id, readiness, f"{label}.source_refs references unknown Result Unit {source_ref.get('id')}", errors, warnings)
+
+        sampling = measurement.get("sampling_design") or {}
+        pairing = sampling.get("pairing_strategy")
+        valid_pairing = {"WITHIN_UNIT_PAIRED", "MATCHED_UNITS", "GROUP_LEVEL", "UNPAIRED", "UNKNOWN"}
+        if not _has_substantive_text(sampling.get("unit_of_analysis")):
+            _validation_issue(task_id, readiness, "sampling_design.unit_of_analysis must be explicit", errors, warnings)
+        if pairing not in valid_pairing:
+            _validation_issue(task_id, readiness, "sampling_design.pairing_strategy must be explicit", errors, warnings)
+        if pairing == "MATCHED_UNITS" and not _has_substantive_items(sampling.get("matching_factors")):
+            _validation_issue(task_id, readiness, "MATCHED_UNITS requires explicit matching_factors", errors, warnings)
+        if pairing == "UNPAIRED" and not _has_substantive_text(sampling.get("unpaired_design_rationale")):
+            _validation_issue(task_id, readiness, "UNPAIRED design requires an unpaired_design_rationale", errors, warnings)
+        if pairing == "UNKNOWN":
+            _validation_issue(task_id, readiness, "pairing strategy is UNKNOWN; state the limitation and keep the design from execution approval", errors, warnings)
+        alignment = sampling.get("condition_alignment")
+        if alignment not in {"MATCHED", "CONDITIONALLY_MATCHED", "MISMATCHED", "UNKNOWN"}:
+            _validation_issue(task_id, readiness, "sampling_design.condition_alignment must explicitly classify condition alignment", errors, warnings)
+        if alignment in {"MISMATCHED", "UNKNOWN"} and not _has_substantive_items(sampling.get("limitations")):
+            _validation_issue(task_id, readiness, "mismatched/unknown condition alignment requires explicit limitations", errors, warnings)
+        if alignment == "CONDITIONALLY_MATCHED" and not _has_substantive_items(sampling.get("limitations")):
+            _validation_issue(task_id, readiness, "CONDITIONALLY_MATCHED conditions require explicit residual mismatch/limitation notes", errors, warnings)
+        relationship = decision.get("relationship_type")
+        valid_relationships = {
+            "AGREEMENT", "CALIBRATION", "PREDICTION", "CLASSIFICATION",
+            "RANKING", "MONITORING", "ASSOCIATION", "OTHER"
+        }
+        if relationship not in valid_relationships:
+            _validation_issue(task_id, readiness, "decision_framework.relationship_type must state what relationship is being validated", errors, warnings)
+        if relationship == "OTHER" and not _has_substantive_text(decision.get("relationship_other_description")):
+            _validation_issue(task_id, readiness, "relationship_type OTHER requires relationship_other_description", errors, warnings)
+        if relationship in {"AGREEMENT", "CALIBRATION"} and pairing in {"UNPAIRED", "GROUP_LEVEL", "UNKNOWN"}:
+            _validation_issue(task_id, readiness, f"{relationship} between candidate and reference measurements requires a paired or matched sampling design", errors, warnings)
+        if relationship in {"AGREEMENT", "CALIBRATION"} and alignment in {"MISMATCHED", "UNKNOWN"}:
+            _validation_issue(task_id, readiness, f"{relationship} cannot be execution-ready with MISMATCHED/UNKNOWN condition alignment", errors, warnings)
+
+        missing_decision = [
+            field for field in ("primary_estimand", "analysis_method", "acceptance_boundary", "acceptance_boundary_basis")
+            if not _has_substantive_text(decision.get(field))
+        ]
+        outcome_rules = decision.get("outcome_rules", [])
+        outcomes = {
+            item.get("outcome") for item in outcome_rules if isinstance(item, dict)
+            and _has_substantive_text(item.get("criterion"))
+            and _has_substantive_text(item.get("claim_implication"))
+        }
+        for outcome in ("SUPPORTS", "CONTRADICTS", "INCONCLUSIVE"):
+            if outcome not in outcomes:
+                missing_decision.append(f"outcome_rule:{outcome}")
+        if missing_decision:
+            _validation_issue(task_id, readiness, "proxy-validation decision_framework lacks " + ", ".join(missing_decision), errors, warnings)
+
+        control = measurement.get("control_coverage") or {}
+        control_status = control.get("review_status")
+        planned_controls = control.get("planned_controls", [])
+        planned_classes = {
+            item.get("control_class") for item in planned_controls if isinstance(item, dict)
+        }
+        required_classes = set(control.get("required_control_classes", []))
+        uncovered = sorted(required_classes - planned_classes)
+        if control_status not in {"ASSESSED", "PARTIALLY_ASSESSED", "NOT_ASSESSED", "NOT_APPLICABLE"}:
+            _validation_issue(task_id, readiness, "control_coverage.review_status must be explicit", errors, warnings)
+        if uncovered:
+            _validation_issue(task_id, readiness, "required control classes have no planned control: " + ", ".join(uncovered), errors, warnings)
+        for control_index, planned in enumerate(planned_controls, start=1):
+            if not isinstance(planned, dict) or not _has_substantive_text(planned.get("purpose")) or not _has_substantive_text(planned.get("rationale")):
+                _validation_issue(task_id, readiness, f"planned control {control_index} requires a substantive purpose and rationale", errors, warnings)
+        if control_status == "NOT_APPLICABLE" and not _has_substantive_text(control.get("no_control_rationale")):
+            _validation_issue(task_id, readiness, "NOT_APPLICABLE controls require no_control_rationale", errors, warnings)
+        if not planned_controls and not required_classes and not _has_substantive_text(control.get("no_control_rationale")):
+            _validation_issue(task_id, readiness, "an empty control plan requires a rationale explaining why no control is needed", errors, warnings)
+        if control_status == "NOT_ASSESSED":
+            _validation_issue(task_id, readiness, "control coverage remains NOT_ASSESSED", errors, warnings)
+        if control_status == "PARTIALLY_ASSESSED":
+            warnings.append(f"{task_id}: control coverage is only partially assessed")
+
+        accounting = measurement.get("accounting_closure") or {}
+        accounting_status = accounting.get("applicability")
+        if accounting_status not in {"REQUIRED", "NOT_REQUIRED", "NOT_ASSESSED"}:
+            _validation_issue(task_id, readiness, "accounting_closure.applicability must explicitly state whether closure/recovery accounting is required", errors, warnings)
+        elif accounting_status == "REQUIRED":
+            missing = [
+                field for field in ("accounted_inputs", "accounted_outputs")
+                if not _has_substantive_items(accounting.get(field))
+            ]
+            missing.extend(
+                field for field in ("residual_method", "acceptance_basis")
+                if not _has_substantive_text(accounting.get(field))
+            )
+            if missing:
+                _validation_issue(task_id, readiness, "required accounting closure is missing " + ", ".join(missing), errors, warnings)
+        elif accounting_status == "NOT_REQUIRED" and not _has_substantive_text(accounting.get("rationale")):
+            _validation_issue(task_id, readiness, "NOT_REQUIRED accounting closure requires a rationale", errors, warnings)
+        elif accounting_status == "NOT_ASSESSED":
+            _validation_issue(task_id, readiness, "accounting/recovery closure remains NOT_ASSESSED", errors, warnings)
+
+        validation = measurement.get("validation_strategy") or {}
+        validation_level = validation.get("level")
+        valid_validation_levels = {
+            "IN_SAMPLE_ONLY", "INTERNAL_RESAMPLING",
+            "EXTERNAL_INDEPENDENT_DATA", "PROSPECTIVE", "NOT_ASSESSED"
+        }
+        if validation_level not in valid_validation_levels:
+            _validation_issue(task_id, readiness, "validation_strategy.level must distinguish in-sample, internal and independent validation", errors, warnings)
+        elif validation_level in {"EXTERNAL_INDEPENDENT_DATA", "PROSPECTIVE"}:
+            training_scope = str(validation.get("training_data_scope") or "").strip()
+            validation_scope = str(validation.get("validation_data_scope") or "").strip()
+            required = {
+                "training_dataset_ids": validation.get("training_dataset_ids"),
+                "independence_unit": validation.get("independence_unit"),
+                "leakage_controls": validation.get("leakage_controls"),
+            }
+            if validation_level == "EXTERNAL_INDEPENDENT_DATA":
+                required["validation_dataset_ids"] = validation.get("validation_dataset_ids")
+            else:
+                required["planned_validation_source"] = validation.get("planned_validation_source")
+            missing = [
+                field for field, value in required.items()
+                if not (_has_substantive_items(value) if isinstance(value, list) else _has_substantive_text(value))
+            ]
+            if not _has_substantive_text(training_scope) or not _has_substantive_text(validation_scope) or training_scope == validation_scope:
+                missing.append("distinct training_data_scope and validation_data_scope")
+            overlap = set(validation.get("training_dataset_ids") or []) & set(validation.get("validation_dataset_ids") or [])
+            if validation_level == "EXTERNAL_INDEPENDENT_DATA" and overlap:
+                missing.append("disjoint training/validation dataset IDs (overlap: " + ", ".join(sorted(overlap)) + ")")
+            if missing:
+                _validation_issue(task_id, readiness, f"{validation_level} requires " + ", ".join(missing), errors, warnings)
+        elif validation_level == "INTERNAL_RESAMPLING":
+            missing = [
+                field for field in ("resampling_method", "split_unit", "leakage_controls")
+                if not validation.get(field)
+            ]
+            if missing:
+                _validation_issue(task_id, readiness, "INTERNAL_RESAMPLING requires " + ", ".join(missing), errors, warnings)
+        elif validation_level in {"IN_SAMPLE_ONLY", "NOT_ASSESSED"}:
+            if not _has_substantive_text(validation.get("limitations")):
+                _validation_issue(task_id, readiness, f"{validation_level} validation status requires an explicit limitation", errors, warnings)
+            if validation_level == "IN_SAMPLE_ONLY":
+                warnings.append(f"{task_id}: IN_SAMPLE_ONLY proxy validation is in-sample only; do not describe it as independently validated")
+
+        if readiness in {"READY_FOR_SUPERVISOR_APPROVAL", "APPROVED_FOR_EXECUTION"}:
+            if control_status not in {"ASSESSED", "NOT_APPLICABLE"}:
+                errors.append(f"{task_id}: execution-ready proxy validation requires assessed control coverage")
+            if accounting_status == "NOT_ASSESSED":
+                errors.append(f"{task_id}: execution-ready proxy validation cannot leave accounting-closure applicability unassessed")
+            if validation_level == "NOT_ASSESSED":
+                errors.append(f"{task_id}: execution-ready proxy validation cannot leave validation strategy unassessed")
+
     return errors, warnings

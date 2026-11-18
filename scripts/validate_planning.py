@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from era_core import atomic_write_json, workspace_paths
-from scientific_quality_gates import validate_route_selection
+from scientific_quality_gates import validate_route_selection, validate_proxy_measurement_design
 
 
 def _read(path: Path, errors: list[str]) -> dict[str, Any]:
@@ -174,6 +174,10 @@ def validate_bundles(evidence: dict[str, Any], literature: dict[str, Any],
     route_errors, route_warnings = validate_route_selection(routes_bundle)
     errors.extend(route_errors)
     warnings.extend(route_warnings)
+
+    proxy_errors, proxy_warnings = validate_proxy_measurement_design(framework, evidence)
+    errors.extend(proxy_errors)
+    warnings.extend(proxy_warnings)
 
     # Manuscript Claims must point to traceable evidence or verified literature claims.
     valid_claim_types = {"Descriptive", "Comparative", "Associational", "Causal", "Mechanistic"}
