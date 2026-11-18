@@ -162,7 +162,9 @@ def validate_bundles(evidence: dict[str, Any], literature: dict[str, Any],
             warnings.append("Fewer than three distinct research routes are present and no explanation is recorded; do not fabricate a weak third route.")
     recommended_route = routes_bundle.get("recommended_route_id")
     framework_route = framework.get("recommended_route_id")
-    if recommended_route and framework_route and recommended_route != framework_route:
+    if recommended_route and not framework_route:
+        errors.append("framework recommended_route_id must be recorded when routes_bundle recommends a route")
+    elif recommended_route and framework_route != recommended_route:
         errors.append("framework recommended_route_id must match routes_bundle recommended_route_id")
     if recommended_route and recommended_route not in routes:
         errors.append(f"recommended_route_id references unknown route {recommended_route}")
