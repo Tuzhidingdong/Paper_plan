@@ -81,3 +81,10 @@ Do not call an evidence path finite or feasible until essential samples, metadat
 The title, one-sentence contribution, abstract argument map, Introduction gap, Figure take-home messages and conclusion must make claims at the same epistemic strength. A working title must not state a product purity, phase identity, mechanism, causal effect, lattice incorporation/removal or performance improvement that has not been established. Use neutral/question-oriented wording or mark the phrase as a provisional hypothesis when necessary.
 
 A hypothesis can remain the preferred candidate without being described as demonstrated. If evidence supports only a bounded association, do not upgrade it to causation or mechanism in the title or Figure labels. If literature comparison shows the broad mechanism is known, state the narrower remaining contribution rather than repeating the broad claim.
+
+ 
+## 11. Hybrid is a single scientific argument, not a compromise
+
+Choose HYBRID only when its components are logically interdependent parts of one central contribution. State the shared central question and explain why each component is necessary to answer it. A measurement-validation component may establish that the endpoint used to test a scientific hypothesis is trustworthy; a mechanism study may explain a result already established by the core experiment. These are coherent supporting relationships only when the link is explicit.
+
+Do not choose HYBRID to avoid rejecting either of two disconnected stories, to retain every attractive result, or to make a weak route appear stronger by association. If two components have separate questions, separate novelty claims, separate decisive evidence and no necessary inferential link, select the stronger one, defer the other, or present separately scoped paper options. A supporting component must not consume a disproportionate share of the main-text storyline or Figures unless its result is itself essential to the central contribution.
