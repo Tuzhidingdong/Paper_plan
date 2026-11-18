@@ -1,4 +1,4 @@
-# V5 Local Product Acceptance
+# V5.1 Local Product Acceptance
 
 Passing unit tests or existing validators does not establish that the generated plan is usable.
 
@@ -8,7 +8,7 @@ From the Paper_plan repository root, inspect the working tree first. Preserve un
 
     git status --short
     git fetch origin
-    git switch --track -c v5/manuscript-planning-core origin/v5/manuscript-planning-core
+    git switch --track -c v5.1/scientific-mainline-literature origin/v5.1/scientific-mainline-literature
     git rev-parse HEAD
     git status --short
 
@@ -30,15 +30,15 @@ Use the original research input package and the separately held project benchmar
 - Do not reuse old V4.3 deliverables as source evidence.
 - Reuse extraction only if source hashes and provenance match.
 - Do not modify/overwrite lsy_test, original files or prior human decisions.
-- Keep project-specific evidence and benchmark content in the isolated workspace, never generic Skill files.
+- Keep project-specific evidence, benchmark content, test-specific target journal and literature conclusions in the isolated workspace/test-run inputs, never generic Skill files. Verify generic sources remain domain- and journal-neutral.
 - Verify current official requirements for the target journal/article type.
-- Run SKILL.md with workflows/13_v5_manuscript_development.md. Explicitly request the complete V5 integrated plan, not a validator report or direction shortlist.
+- Run SKILL.md with workflows/13_v5_manuscript_development.md. Supply the current project's target journal explicitly when selected; never infer it from a benchmark used for another project. Explicitly request the complete V5 integrated plan, not a validator report or direction shortlist.
 
 ## Inspect actual deliverables
 
 Read the whole FINAL_MANUSCRIPT_DEVELOPMENT_PLAN.md and its same-revision PDF. For a substantive full-paper project, confirm a multi-page PDF and check for truncation.
 
-Assess: one defensible contribution and novelty boundary; verified closest-work comparison; paragraph-level Introduction and draft where possible; connected Results/Discussion storyline; actionable Figure/Panel content, status, comparisons and inference limits; concrete SI items; assignable experiments/analyses with inputs, controls, outputs, QC and alternative outcomes; collaborator-ready or explicitly blocked computations; dependency-aware priorities; and supervisor/team usability without reconstructing reasoning from JSON.
+Assess: recovery of the user's original scientific intent; comparison against materially different candidate mainlines (including but not defaulting to an audit/validation route); explicit selection rationale; multi-route discovery and citation chasing; verified closest-work comparison; paragraph-level Introduction and draft where possible; connected Results/Discussion storyline; actionable Figure/Panel content, status, comparisons and inference limits; concrete SI items; assignable experiments/analyses with inputs, controls, outputs, QC and alternative outcomes; collaborator-ready or explicitly blocked computations; dependency-aware priorities; and supervisor/team usability without reconstructing reasoning from JSON.
 
 A short validator report, one-page PDF, bundle dump, generic directions or vague tasks fail this product test even if engineering tests pass.
 
