@@ -67,3 +67,27 @@ Agreement/equivalence work packages must have predeclared estimands, methods, ac
 Every integrated validation report records UTC run time, the Skill commit supplied by the operator, validator and schema SHA-256, and hashes of the bundles actually validated. Run the validator against the current workspace revision and pass the checked-out Skill commit using `--skill-commit`.
 
 A prior PASS report is historical once any bundle, schema or validator changes. Do not cite it as the current package result. Re-run applicable validators after the final bundle changes and before emitting the consolidated verdict.
+
+## 9. V4.2 source-anchor and visual-evidence integrity
+
+- Every Result Unit must cite a physical, usable Region on the page stated in its source location. A repeated header/footer, logo, page number or decorative asset is never a direct evidence anchor.
+- Before assigning a Region, inspect its page number, bounding box, triage role and image content. When one page contains several figures/tables, use the correct crop or Panel rather than the page's repeated layout image.
+- Every image-derived Result Unit must link to a recorded CAPTION_BLIND inspection of the same Region or a Panel whose parent is that Region. Record state-label, scale, modality and legibility observations separately from interpretation.
+- When one Claim combines two or more image-derived Result Units, create and link a visual comparability assessment. The assessment must include these stable dimension IDs: `imaging_modality`, `magnification_or_pixel_size`, `scale_bar_or_spatial_calibration`, `specimen_state_and_preparation`, `image_processing_and_contrast`, and `field_selection_and_sampling`.
+- For every required visual dimension, record a per-entity value or an explicit unknown and a short assessment note. A scale/magnification mismatch is not silently treated as matched. Mismatched/unknown dimensions require limitations and prohibited inferences; they cannot support an unqualified COMPARABLE status.
+
+## 10. V4.2 derived-fit reproducibility
+
+- Distinguish a verified measurement definition from a reproduced calculation and from external/independent validation.
+- Any derived Result Unit whose method identifies a statistical fit (e.g. least-squares linear fit or regression) must provide a `calculation_audits` record.
+- For an OLS linear fit, the record points to numeric x/y observation vectors in source Result Units and to the observation containing the printed slope/intercept/R-squared. The validator independently recomputes the coefficients.
+- Compare each recomputed parameter against the printed value using half of the last displayed decimal place as the tolerance. Do not introduce a discretionary tolerance to force a match.
+- A CORE fit with missing source vectors, missing precision metadata or a non-reproduced coefficient is an error. Downgrade the result to an audit/supporting role and state the unresolved discrepancy; never call it decision-ready.
+
+## 11. V4.2 research-route decision audit
+
+When a recommended route is nominated:
+- Record the selected route ID and a substantive evidence-based rationale.
+- State at least three selection criteria, including evidence adequacy, comparability/uncertainty and decisive missing evidence/feasibility.
+- Give each non-selected candidate route a disposition (deferred, rejected, merged or not selected) and a substantive reason.
+- Keep Gate A approval pending unless a human decision is actually recorded. Automated route scoring or recommendation is not human approval.
