@@ -81,15 +81,23 @@ def validate_evidence_integrity(bundle: dict[str, Any]) -> tuple[list[str], list
 
     # Do not rely only on an Agent-authored triage label. Detect repeated
     # header/footer crops from their physical layout and pixel fingerprints.
-    layout_occurrences: dict[tuple[str, str], list[str]] = {}
+    layout_occurrences: dict[tuple[Any, ...], list[str]] = {}
     for region_id, region in regions.items():
         bbox = region.get("bbox_normalized") or []
-        fingerprint = region.get("layout_fingerprint") or region.get("pixel_sha256")
-        if not fingerprint or len(bbox) != 4:
+        if len(bbox) != 4:
+            continue
+        # Prefer an exact decoded-pixel fingerprint. Fall back to the
+        # perceptual hash only when the exact pixel digest is unavailable.
+        fingerprint_type = "pixels" if region.get("pixel_sha256") else "perceptual"
+        fingerprint = region.get("pixel_sha256") or region.get("layout_fingerprint")
+        if not fingerprint:
             continue
         zone = "header" if bbox[3] <= 0.24 else ("footer" if bbox[1] >= 0.76 else "body")
         if zone in {"header", "footer"}:
-            layout_occurrences.setdefault((str(fingerprint), zone), []).append(region_id)
+            geometry = tuple(round(float(value), 2) for value in bbox)
+            layout_occurrences.setdefault(
+                (fingerprint_type, str(fingerprint), zone, geometry), []
+            ).append(region_id)
     minimum_repeated_pages = max(
         3, int(math.ceil((bundle.get("source", {}).get("page_count") or 0) * 0.15))
     )
@@ -406,17 +414,30 @@ def validate_visual_claim_comparability(
             if claim_id in assessment.get("claim_ids", [])
         )
         linked_ids = sorted(set(linked_ids))
-        if not linked_ids:
+
+        # A Claim may also carry non-visual comparability checks (e.g.
+        # chemical conditions). Only assessments containing visual-acquisition
+        # dimensions are candidates for the image-comparability gate.
+        visual_assessments = []
+        for assessment_id in linked_ids:
+            assessment = assessments.get(assessment_id)
+            if not isinstance(assessment, dict):
+                continue
+            dimensions = {
+                _visual_dimension_id(dimension.get("dimension"))
+                for dimension in assessment.get("dimensions", [])
+            }
+            if dimensions.intersection(VISUAL_DIMENSIONS):
+                visual_assessments.append((assessment_id, assessment))
+
+        if not visual_assessments:
             errors.append(
                 f"{claim_id}: claim uses multiple image-derived Result Units "
                 f"{', '.join(image_result_ids)} without a linked visual comparability assessment"
             )
             continue
 
-        for assessment_id in linked_ids:
-            assessment = assessments.get(assessment_id)
-            if not isinstance(assessment, dict):
-                continue
+        for assessment_id, assessment in visual_assessments:
             visual_dimensions = {}
             for dimension in assessment.get("dimensions", []):
                 dimension_id = _visual_dimension_id(dimension.get("dimension"))
