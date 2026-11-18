@@ -22,7 +22,7 @@ Explain what the evidence collectively says, what it does not say and why. Do no
 
 ## Stage 2 — Literature frontier
 
-Read and follow `docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md`, plus relevant stage-specific literature procedures. Build query facets from this project's actual system, mechanism, transformation, methods and vocabulary. Use independent discovery routes and backward/forward citation trails; a failed or empty search endpoint is not a stopping condition.
+Read and follow `docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md`, plus relevant stage-specific literature procedures. Build query facets from this project's actual system, mechanism, transformation, methods and vocabulary. Use templates/V5_1_LITERATURE_FRONTIER_LEDGER.md to retain a project-specific search-route, exact-query, citation-lead resolution, citation-trail and closest-prior-art audit. Keep the completed ledger under the isolated workspace and reference its path from the narrative plan. Use independent discovery routes and backward/forward citation trails; a failed or empty search endpoint is not a stopping condition.
 
 Record routes, query families, dates, access tiers, publication status and source locations. Identify the primary studies most capable of defeating candidate novelty claims. Compare actual systems, transformation direction, medium/conditions, mechanisms, impurity/structure roles, observables, demonstrated findings and limitations. Include contradictory and inconvenient sources.
 
