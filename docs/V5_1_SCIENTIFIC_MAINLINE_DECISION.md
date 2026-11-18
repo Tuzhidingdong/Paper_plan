@@ -53,3 +53,31 @@ The chosen line must determine the Introduction gap, Results/Discussion question
 Show the original intent (or state none was supplied), candidate lines and evidence/literature basis, nearest-work differences and counter-evidence, why the selected line is stronger than an audit-only fallback where relevant, decisive missing evidence and feasible recovery, recommendation status and conditions that would change it.
 
 No fixed candidate count, numeric score, paper structure or scientific method is required.
+
+## 8. Adversarial novelty test for the selected and rejected candidates
+
+Before choosing the mainline, decompose every serious candidate's contribution into atomic novelty propositions. Do not let one plausible new element lend novelty to the whole thesis. For each proposition, identify the closest source that could already establish it; search for direct and adjacent precedents using alternate field terminology; and classify it as already established, an incremental extension, potentially distinct or not assessable.
+
+Ask the strongest skeptical-reviewer question: **What is the closest published work that would make this contribution unnecessary, already known or overstated?** Compare actual systems, transformation direction, medium/conditions, mechanism, causal relation, measurands, demonstrated outcomes and limitations. If a distinction is only a different material label, a different parameter value, a new combination of known factors, or a new interpretation of the same observation, explain why that distinction has scientific consequence—or narrow the claim.
+
+The selected candidate must survive this test better than alternatives. If the closest prior art cannot be identified or inspected adequately, do not compensate with confidence language. Keep novelty provisional and make literature completion an explicit decision gate.
+
+## 9. Design the smallest decisive evidence-recovery path
+
+Separate the **minimum discriminating test** from the **full publication-strength program**. The first should answer the highest-value go/no-go question with the fewest justified measurements or calculations, where feasible. The full program should then add evidence needed for causality, mechanism, generality, robustness or application claims.
+
+For each proposed step explain:
+- which competing hypotheses or candidate lines it distinguishes;
+- which variable or observable changes the decision;
+- which confounders must be controlled or measured;
+- what outcomes support, weaken, contradict or leave the question inconclusive;
+- what new work becomes unnecessary under each outcome;
+- what resources/inputs make it feasible or blocked.
+
+Do not call an evidence path finite or feasible until essential samples, metadata, methods, equipment/access and collaborator responsibilities have been checked or explicitly marked unknown. A long list of desirable characterizations is not a decisive evidence-recovery plan.
+
+## 10. Align contribution language with evidence and prior art
+
+The title, one-sentence contribution, abstract argument map, Introduction gap, Figure take-home messages and conclusion must make claims at the same epistemic strength. A working title must not state a product purity, phase identity, mechanism, causal effect, lattice incorporation/removal or performance improvement that has not been established. Use neutral/question-oriented wording or mark the phrase as a provisional hypothesis when necessary.
+
+A hypothesis can remain the preferred candidate without being described as demonstrated. If evidence supports only a bounded association, do not upgrade it to causation or mechanism in the title or Figure labels. If literature comparison shows the broad mechanism is known, state the narrower remaining contribution rather than repeating the broad claim.
