@@ -115,3 +115,6 @@ Do not claim acceptance solely from regression/validators. State Skill commit, i
 
  
 **Stage 3 hybrid guard.** HYBRID is valid only when its components are necessary, logically linked parts of one central inference. It is not a compromise between disconnected stories. Explicitly state the shared central question and why each component is needed; otherwise select one route and defer or separately scope the other. Check that main-text Figure allocation and task priority follow that same logic.
+
+
+**Benchmark calibration guard.** When a benchmark is supplied, extract its complete criteria and map each criterion to the new plan, distinguishing transferable quality expectations from case-specific scientific content. Transfer only the former into generic Skill rules; the benchmark is not evidence for the current project's scientific claims. If the required benchmark is unavailable or only partially accessible, mark BENCHMARK_COMPARISON as BLOCKED_REFERENCE_UNAVAILABLE and PLAN_PRODUCT_STATUS as PARTIAL at best; do not claim overall product acceptance.
