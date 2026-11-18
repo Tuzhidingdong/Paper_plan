@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from scientific_quality_gates import validate_evidence_quality
+
 from era_core import (
     atomic_write_json,
     load_evidence_bundle,
@@ -212,6 +214,9 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                     errors.append(f"{finding_id}: {field} references unknown Result Unit {rid}")
         if finding.get("epistemic_status") == "Interpreted" and not finding.get("alternative_explanations"):
             warnings.append(f"{finding_id}: interpreted finding has no alternative_explanations")
+    quality_errors, quality_warnings = validate_evidence_quality(bundle)
+    errors.extend(quality_errors)
+    warnings.extend(quality_warnings)
     return errors, warnings
 
 
