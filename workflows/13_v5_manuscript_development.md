@@ -6,11 +6,11 @@ This is the controlling V5 workflow for a full Paper_plan project. Workflows 01�
 
 The goal is one integrated, supervisor-reviewable and team-assignable manuscript-development plan grounded in the user's actual research. The narrative plan is the first-class deliverable; structured bundles are its traceability layer.
 
-Read docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, and docs/V4_PRODUCT_CONTRACT.md for retained integrity rules. Load only stage-specific procedures and references.
+Read docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, docs/V4_PRODUCT_CONTRACT.md, docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md and docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md. Load only stage-specific procedures and references.
 
 ## Stage 0 — Intake and workspace protection
 
-Confirm project objective, target journal/article type if supplied, scope and preferred plan language. Default to the user's language (Chinese where the user works in Chinese); write English manuscript prose only when evidence and citations support it. Inventory all supplied reports, SI, native data, images, methods, calculations and notes. Record hashes and paths where possible; preserve originals read-only. Use an isolated workspace. Do not overwrite old V4/V4.3 runs or human decisions. Reuse extraction only when source hashes and provenance match. Record Skill commit and known model/tool limitations. Do not start hidden Workers or billable jobs. Ask only essential questions; otherwise preserve unknowns explicitly.
+Confirm project objective, the user's original scientific intent/hypothesis, scope and preferred plan language. Record the target journal/article type only from this current project's explicit user input or an explicit current test-run configuration, and record its provenance. A journal mentioned only in a benchmark, prior project, previous run or memory is not inherited as the current target. If none is specified, use the journal-selection procedure without silently choosing one. Default to the user's language (Chinese where the user works in Chinese); write English manuscript prose only when evidence and citations support it. Inventory all supplied reports, SI, native data, images, methods, calculations and notes. Record hashes and paths where possible; preserve originals read-only. Use an isolated workspace. Do not overwrite old V4/V4.3 runs or human decisions. Reuse extraction only when source hashes and provenance match. Record Skill commit and known model/tool limitations. Do not start hidden Workers or billable jobs. Ask only essential questions; otherwise preserve unknowns explicitly.
 
 ## Stage 1 — Scientific evidence base
 
@@ -22,28 +22,27 @@ Explain what the evidence collectively says, what it does not say and why. Do no
 
 ## Stage 2 — Literature frontier
 
-Follow workflow 02. Record databases/search systems, queries, date, access tier and inclusion boundaries. Prefer relevant primary studies. Build a closest-work comparison, not merely a broad bibliography. For each relevant competitor explain its system, method/conditions, key observable, conclusion actually supported, what it established, what it did not address, whether that limit is explicit or inferred, and how the user's evidence differs or does not differ.
+Read and follow `docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md`, plus relevant stage-specific literature procedures. Build query facets from this project's actual system, mechanism, transformation, methods and vocabulary. Use independent discovery routes and backward/forward citation trails; a failed or empty search endpoint is not a stopping condition.
 
-Include contradictory or inconvenient studies. Distinguish metadata-only, abstract-verified and full-text-verified sources. Link every gap statement to supporting/limiting literature records. If full text is unavailable, narrow the comparison and mark the gap provisional.
+Record routes, query families, dates, access tiers, publication status and source locations. Identify the primary studies most capable of defeating candidate novelty claims. Compare actual systems, transformation direction, medium/conditions, mechanisms, impurity/structure roles, observables, demonstrated findings and limitations. Include contradictory and inconvenient sources.
 
-## Stage 3 — Central contribution decision
+Do not substitute a bibliography, search snippet or metadata-only record for a nearest-prior-art comparison. Each gap statement must link relevant sources and be classified as supported, provisional or not established. When a provider returns no result, retry alternate terminology/formulas, publisher/DOI lookup and citation chasing.
 
-Follow workflow 03 where useful, but a route table cannot replace the scientific decision.
+## Stage 3 — Scientific-mainline and central-contribution decision
 
-Evaluate importance; difference from closest work; strength/independence of evidence; falsifiability; alternatives/confounders; missing decisive evidence; feasibility and value of required work.
+Read and follow `docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md`. Recover the user's original scientific problem and hypothesis from the current project's own inputs before selecting a paper story. Preserve it as an explicit candidate even when evidence is incomplete. Compare it with materially different evidence-led alternatives, an independently defensible method/measurement contribution where relevant, and a stop/defer option. Candidate count is project-dependent.
 
-Choose one:
-A. one defensible central contribution and its boundary;
-B. a narrower contribution actually supported by the evidence;
-C. stop/defer because current evidence and feasible work do not justify a coherent paper.
+Use the nearest-prior-art evidence from Stage 2. Compare candidates on significance, precise difference from closest work, supporting/counter-evidence, mechanistic/causal adequacy, alternative explanations, falsifiability, decisive evidence-recovery needs, feasibility/dependencies and current-project journal fit. Do not use pseudo-precise scores.
 
-For A/B write the one-sentence contribution, research question, thesis/scope, strongest support, strongest weakness/counter-evidence, competing explanations, evidence that would strengthen/weaken/falsify the thesis, and side findings to defer/omit. Do not combine unrelated observations to create an impressive story. Human approval remains pending until recorded.
+Do not pivot automatically from the user's intended scientific contribution to a validation/audit paper merely because the current dataset lacks decisive measurements. Determine whether a finite, feasible evidence-recovery path can test the original line and whether it remains differentiated from prior work. A validation route becomes the central contribution only if it independently passes the significance and prior-art test; otherwise it remains a supporting task.
+
+Recommend RECOMMENDED, CONDITIONAL, HYBRID, FALLBACK or STOP/DEFER. For every serious non-selected candidate, explain why it was deferred/rejected and what could revive it. For the selected line, state the one-sentence contribution, boundary, support, strongest challenge, decisive missing evidence, outcomes that change the decision and human decision pending.
 
 ## Stage 4 — Journal/article-type fit
 
 Follow workflow 08. Verify current official journal/publisher requirements and record URL, access date, source type and supported requirement. Assess audience/scope fit, contribution type, evidence maturity, article type, manuscript structure, Figure/TOC/SI restrictions, reference style and relevant data/reporting policies.
 
-Do not infer requirements from old papers or memory. Unknowns remain unresolved. Explain how journal fit affects the architecture. If no target journal is supplied, do not silently choose one.
+Do not infer requirements from old papers or memory. Unknowns remain unresolved. Explain how journal fit affects the architecture. If no target journal is supplied for this current project, do not silently choose one or inherit it from a benchmark; ask, keep unresolved, or produce a conditional analysis as appropriate. A benchmark's journal applies only when this exact run explicitly identifies it as target-journal input for this test case.
 
 ## Stage 5 — Introduction
 
@@ -95,7 +94,7 @@ Tables may summarize comparisons, Figures/Panels, SI and tasks; they must not re
 
 Read the full Markdown as a supervisor would and compare it with docs/V5_PRODUCT_CONTRACT.md and the project benchmark. Do not infer quality from file presence, character count, schema completeness or validator status.
 
-Check consistency of the central contribution; Introduction gap/literature; story/evidence; Figure/Panel/claim links; SI purpose; closure of essential missing Data Slots; task outputs; dependency-aware priorities; counter-evidence, uncertainty and blockers.
+Check consistency of the user's original scientific intent and its disposition; candidate-line comparison and selection rationale; nearest-prior-art coverage and bounded novelty; Introduction gap/literature; story/evidence; Figure/Panel/claim links; SI purpose; closure of essential missing Data Slots; task outputs; dependency-aware priorities; counter-evidence, uncertainty and blockers. Confirm no project-specific benchmark journal or scientific content has leaked into reusable sources or another project's run.
 
 Then run relevant existing validators and report separately from the product judgment. Export PDF from the final Markdown revision using scripts/export_plan_pdf.py. Verify file existence, non-empty extracted text and multiple pages for a substantive full-paper project unless justified otherwise. Reopen/review the PDF for truncation.
 
