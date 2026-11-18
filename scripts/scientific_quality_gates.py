@@ -453,6 +453,9 @@ def validate_route_selection(routes_bundle: dict[str, Any]) -> tuple[list[str], 
     if decision.get("selected_route_id") != selected_id:
         errors.append("route_decision.selected_route_id must match recommended_route_id")
     rationale = decision.get("selection_rationale")
+    recommendation_rationale = routes_bundle.get("recommendation_rationale")
+    if not isinstance(recommendation_rationale, str) or len(recommendation_rationale.strip()) < 30:
+        errors.append("recommended_route_id requires recommendation_rationale explaining the preferred direction")
     if not isinstance(rationale, str) or len(rationale.strip()) < 40:
         errors.append("route_decision.selection_rationale must explain the evidence-based selection")
     criteria = decision.get("selection_criteria", [])
