@@ -71,3 +71,21 @@ Recommended plan path: WORKSPACE/deliverables/FINAL_MANUSCRIPT_DEVELOPMENT_PLAN.
 The supervisor must be able to answer from the narrative plan: What is the one-sentence contribution and boundary? Which closest studies define novelty? What is the whole argument from Introduction to conclusion? What is every Figure/Panel's exact role/content? What belongs in SI? What must be verified/reprocessed/measured and why? What must collaborators receive and return? Which outcomes support, weaken, contradict or leave the interpretation unresolved? What is the execution order and what decisions remain?
 
 A package that only passes schemas, lists directions or gives generic advice fails. Product acceptance is human inspection of the complete Markdown/PDF against the project benchmark. Engineering tests and validators support, but never substitute for, that review.
+
+
+## Narrative-product quality gates
+
+Apply the operational review in docs/V5_1_NARRATIVE_PRODUCT_QA.md to the actual final Markdown and its matching PDF. This is a product-quality gate, not another schema validator.
+
+A plan is not complete merely because every template heading, bundle entity or work-package field is present. It must pass these substantive checks:
+
+- **Scientific distinctiveness:** the selected contribution survives an adversarial comparison with the closest primary studies; each novelty dimension has a specific, evidenced distinction or is explicitly provisional.
+- **Literature reliability:** supplied literature leads have documented identity-resolution outcomes; novelty-critical sources are inspected at the highest accessible tier; important absences/access limits constrain the claim.
+- **Argument integrity:** one contribution connects the Introduction, Results/Discussion, Figures, SI, work packages and conclusion without unrelated side stories.
+- **Figure logic:** main-text Figures carry the central argument. Data-extraction audits, calculation-reproduction diagnostics and general QC material normally belong in SI unless their result is itself essential to the central contribution.
+- **Experimental discrimination:** work packages distinguish competing explanations and address material confounders; matching one control variable is not assumed to control all others.
+- **Sample-state integrity:** where sampling, quenching, washing, drying, storage, transfer or measurement can change the property being studied, the plan includes a preservation/stability check before relying on those measurements.
+- **Claim calibration:** title, abstract, Figure labels and conclusion do not assert planned, hypothesized or literature-inferred outcomes as observations.
+- **Handoff readiness:** each priority task has concrete inputs, a decision question, design, controls, outputs, QC, alternative outcomes, dependencies and completion/stop criteria; blocked tasks name their unlocking inputs.
+
+Report three separate outcomes: (1) PLAN_PRODUCT_STATUS = PASS / PARTIAL / FAIL; (2) SCIENTIFIC_READINESS = READY / CONDITIONAL / NOT_READY / STOP_DEFER; and (3) BENCHMARK_COMPARISON = COMPLETE / BLOCKED_REFERENCE_UNAVAILABLE / NOT_APPLICABLE. Missing decisive research data can make the science conditional without making a carefully bounded plan a product failure. Conversely, a polished plan cannot be marked product PASS when its requested benchmark is unavailable and no valid comparison can be performed. Never collapse these three outcomes into one green status.
