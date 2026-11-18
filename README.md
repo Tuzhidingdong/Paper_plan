@@ -4,13 +4,13 @@ Paper_plan develops an evidence-grounded, target-journal-aware manuscript projec
 
 Its deliverable is broader than a research-plan summary: it connects the existing evidence and literature frontier to one central contribution, an Introduction, a complete manuscript storyline, Figure/Panel and Supporting Information architecture, and assignable experiment/analysis/computation work packages.
 
-## V5 manuscript-planning core
+## V5.1 scientific-mainline and literature frontier
 
-V5 retains the deterministic evidence engine and V4.1–V4.3 scientific-integrity controls, while making the integrated manuscript-development dossier the first-class product.
+V5.1 retains the V5 narrative-first product and V4.1–V4.3 scientific-integrity controls. It strengthens scientific-mainline selection (including explicit evaluation of the user's original hypothesis) and literature-frontier discovery/synthesis.
 
 The structured bundles remain the provenance/state layer. The final deliverable must be a standalone, reasoned narrative that a supervisor can review and a team can execute: research diagnosis, closest-literature comparison, bounded novelty, one central contribution, paragraph-level Introduction, connected Results/Discussion storyline, TOC and Figure/Panel design, SI map, actionable experiment/analysis/computation handoffs and a prioritized execution plan.
 
-The controlling workflow is workflows/13_v5_manuscript_development.md. Read docs/V5_PRODUCT_CONTRACT.md and templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md. Product acceptance requires inspection of the actual Markdown and PDF against the project benchmark; regression tests and structural validators are not substitutes.
+The controlling workflow is workflows/13_v5_manuscript_development.md. Read docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md. Product acceptance requires inspection of the actual Markdown and PDF against the project benchmark; regression tests and structural validators are not substitutes.
 
 ## V4 baseline retained under V5
 
@@ -41,7 +41,7 @@ The V4 package schema is in schemas/manuscript_development_bundle.schema.json. T
 
 ## Generality contract
 
-The Skill must remain domain-neutral. No project-specific material names, sample labels, values, equations, mechanisms, literature findings, journal requirements or Figure designs may be embedded in generic Skill instructions, references, schemas, templates or configuration. Those belong only in an isolated workspace. Figure count, route count and manuscript structure are determined at runtime.
+The Skill must remain domain-neutral. No project-specific material names, sample labels, values, equations, mechanisms, literature findings, journal requirements or Figure designs may be embedded in generic Skill instructions, references, schemas, templates or configuration. Target journal is a current-project runtime input and must never be inherited from a benchmark, prior project or previous run. Case-specific details belong only in an isolated workspace/test-run input. Figure count, route count and manuscript structure are determined at runtime.
 
 ## Run
 
