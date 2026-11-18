@@ -6,7 +6,7 @@ This is the controlling V5 workflow for a full Paper_plan project. Workflows 01â
 
 The goal is one integrated, supervisor-reviewable and team-assignable manuscript-development plan grounded in the user's actual research. The narrative plan is the first-class deliverable; structured bundles are its traceability layer.
 
-Read docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, docs/V4_PRODUCT_CONTRACT.md, docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md and docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md. Load only stage-specific procedures and references.
+Read docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, docs/V4_PRODUCT_CONTRACT.md, docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md, docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_NARRATIVE_PRODUCT_QA.md. Load only stage-specific procedures and references.
 
 ## Stage 0 â€” Intake and workspace protection
 
