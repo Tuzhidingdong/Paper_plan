@@ -6,7 +6,7 @@ This is the controlling V5 workflow for a full Paper_plan project. Workflows 01�
 
 The goal is one integrated, supervisor-reviewable and team-assignable manuscript-development plan grounded in the user's actual research. The narrative plan is the first-class deliverable; structured bundles are its traceability layer.
 
-Read docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, docs/V4_PRODUCT_CONTRACT.md, docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md, docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_NARRATIVE_PRODUCT_QA.md. Load only stage-specific procedures and references.
+Read docs/V5_PRODUCT_CONTRACT.md, docs/V5_1_RESEARCHER_FACING_DELIVERY_STANDARD.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, docs/V4_PRODUCT_CONTRACT.md, docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md, docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_NARRATIVE_PRODUCT_QA.md. Also read templates/V5_INTERNAL_PRODUCT_QA_REPORT.md for the separate internal review record. Load only stage-specific procedures and references.
 
 ## Stage 0 — Intake and workspace protection
 
@@ -82,24 +82,85 @@ For relevant theory/computation specify scientific question/inference; model/sys
 
 Order verification/reanalysis, experiments/controls, theory/computation, Figure/TOC/SI preparation and writing as appropriate. For every action state deliverable, priority reason, prerequisite, decision unlocked and completion/stop condition. Identify parallel tasks. Do not invent dates/durations.
 
-## Stage 11 — Write the narrative product
+## Stage 11 — Produce the researcher-facing scientific plan
 
-Use templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md. Create WORKSPACE/deliverables/FINAL_MANUSCRIPT_DEVELOPMENT_PLAN.md and a same-basename PDF.
+Follow docs/V5_1_RESEARCHER_FACING_DELIVERY_STANDARD.md and use templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md as a writing guide. The template is not the report: remove all instructional text and replace prompts with fully developed project-specific reasoning.
 
-Write an integrated document, not concatenated bundle summaries. Open with the project-specific recommendation and central contribution or stop decision. Explain the literature/evidence logic in prose. Tell the entire paper story. Specify every main Figure/Panel and SI item. Explain each proposed experiment/analysis/computation and its decision value. Connect task outputs to claims, Figures, SI and sections. Finish with priorities and supervisor decisions.
+The main deliverable is a professional research proposal and manuscript-development dossier for the principal investigator, students and collaborators. It must not read like an Agent execution log, structured-data summary, quality-control report or software-development document.
 
-Tables may summarize comparisons, Figures/Panels, SI and tasks; they must not replace the reasoning. Avoid filler/repetition. Use the user's preferred plan language. Include source-grounded English Introduction text as a separate subsection when useful.
+### 11.1 Synthesize before drafting
 
-## Stage 12 — Product review and delivery
+Build an internal synthesis linking the research materials, evidence, literature frontier, central question, complete manuscript argument, Figures, SI and research tasks. Resolve inconsistencies and identify missing logical connections before writing. Use structured bundles and identifiers for traceability; do not paste their contents into the narrative.
 
-Read the full Markdown as a supervisor would and compare it with docs/V5_PRODUCT_CONTRACT.md and the project benchmark. Do not infer quality from file presence, character count, schema completeness or validator status.
+### 11.2 Write the scientific rationale and current research basis
 
-Check consistency of the user's original scientific intent and its disposition; candidate-line comparison and selection rationale; nearest-prior-art coverage and bounded novelty; Introduction gap/literature; story/evidence; Figure/Panel/claim links; SI purpose; closure of essential missing Data Slots; task outputs; dependency-aware priorities; counter-evidence, uncertainty and blockers. Confirm no project-specific benchmark journal or scientific content has leaked into reusable sources or another project's run.
+Explain the scientific field problem, why it matters, the limitations of existing knowledge and how the user's research addresses the gap. Interpret the actual findings as a coherent body of evidence. Explain their source, conditions, reliability, scientific meaning and limitations. Do not write a bare inventory of extracted values or instruments.
 
-Then run relevant existing validators and report separately from the product judgment. Export PDF from the final Markdown revision using scripts/export_plan_pdf.py. Verify file existence, non-empty extracted text and multiple pages for a substantive full-paper project unless justified otherwise. Reopen/review the PDF for truncation.
+### 11.3 Write the literature argument
 
-Do not claim acceptance solely from regression/validators. State Skill commit, inputs/source hashes, files inspected/output hashes, product strengths/gaps, literature/evidence limitations, unresolved tasks, validator results and human decisions pending. Link Markdown and PDF in the final response.
+Synthesize the research frontier in connected prose. Discuss the closest primary studies and explain what each has established, how their systems and findings compare with the current project, and what precise contribution remains plausible. Use a comparison table only as a supplement to the explanation. Keep exact queries and citation trails in the separate literature ledger.
 
+### 11.4 Develop the manuscript, not just its outline
+
+Provide a meaningful working title and abstract argument. Design the Introduction paragraph by paragraph, including verified support, rhetorical purpose and transitions. Draft coherent manuscript-ready English prose when source evidence permits; do not leave only a paragraph-role table or generic citation placeholders.
+
+Build Results/Discussion as a connected sequence of scientific questions and answers. For every section explain why it appears at that point, the evidence it will use, the comparisons and controls needed, the inference it can support, the main alternative interpretation and how it advances the central argument. Planned results must remain clearly planned.
+
+### 11.5 Design the visual argument
+
+Derive the Figure portfolio from the scientific story. For each Figure state the reader-facing message and argument role. For every Panel give the exact data or conceptual content, source and availability, groups/conditions, comparison, proposed visual form, axes/units/normalization, statistical and uncertainty presentation where appropriate, intended and prohibited inference, layout considerations, and link to the manuscript section and producing task.
+
+Diagnostic audits, extraction/transcription checks and general quality-control material normally belong in SI unless they are central scientific findings. Explain the actual contents and purpose of each SI item.
+
+### 11.6 Design assignable research tasks
+
+Write complete student/collaborator briefs for every decision-critical experiment, reanalysis, data acquisition or characterization task. A brief must explain its scientific purpose, starting inputs, missing prerequisites, design and comparison basis, controls, practical considerations, records to retain, analysis and QC, required return files, completion criteria, alternative outcomes and manuscript use.
+
+Separate the minimum work needed to decide whether the central question is viable from the additional evidence needed for a full publication-strength paper. Do not compress high-priority tasks into a one-line list. Do not invent local operating conditions, sample amounts, replicate counts or thresholds; state who must confirm them.
+
+### 11.7 Provide computation handoffs only when they add scientific value
+
+When relevant, give the computational collaborator the model question, construction strategy, required structures/compositions, assumptions, conditions, method rationale, parameters that are known versus unresolved, convergence/sensitivity checks, observables, raw/processed output files, validation against experiment and the specific paper claim/Figure served. A method name alone is not a handoff.
+
+### 11.8 Edit for the reader
+
+Perform a full editorial pass after all sections are drafted:
+
+- remove repeated content, filler and disconnected topic lists;
+- make the scientific argument and section transitions explicit;
+- ensure every main Figure, SI item and task contributes to the same central paper;
+- translate missing inputs and uncertainty into understandable scientific consequences;
+- remove unexplained internal IDs, route enums, QA statuses, validator results, tool names, schema/workflow terminology, Skill versions, commit SHAs and worktree paths;
+- distinguish existing results from hypotheses and planned work throughout;
+- use descriptive titles and task names instead of software identifiers.
+
+The final Markdown should read as a complete professional scientific plan. If it still consists mainly of short bullets, empty headings, status labels, task IDs or structured tables without interpretation, continue drafting and integration before export.
+
+## Stage 12 — Independent product review and delivery
+
+Read the complete final Markdown as a supervisor and then as a student receiving an assignment. Apply docs/V5_1_NARRATIVE_PRODUCT_QA.md to the actual Markdown and the PDF exported from that same revision.
+
+### 12.1 Review the main product
+
+Check the scientific rationale, evidence interpretation, literature synthesis, central contribution, Introduction prose, Results/Discussion logic, Figure/Panel design, SI contents, task briefs, computational handoffs, execution order, clarity and editorial integration. Confirm that the report stands alone without opening JSON bundles or development logs.
+
+### 12.2 Keep internal QA separate
+
+Create `WORKSPACE/internal/PRODUCT_QA_REPORT.md` using templates/V5_INTERNAL_PRODUCT_QA_REPORT.md. Record product-quality, scientific-readiness and benchmark-comparison outcomes separately, together with gate findings and technical validation.
+
+The internal QA report is not part of the researcher-facing plan. Do not append its statuses, validator summaries, workflow notes or Skill metadata to the Markdown or PDF. Benchmark unavailability blocks a claim of benchmark comparison but does not automatically lower the plan's intrinsic product quality; assess the report against the product contract independently.
+
+### 12.3 Export and verify
+
+Export the PDF from the final Markdown revision using scripts/export_plan_pdf.py. Verify the PDF's text extraction, page structure, tables and visual presentation. Reopen the PDF and confirm that the same content is present without truncation, blank pages, missing sections or layout failures.
+
+### 12.4 Deliver
+
+The researcher-facing deliverables are the integrated Markdown plan and its matching PDF, plus scientific appendices that genuinely help the research team (for example, literature ledger, detailed evidence register or collaborator input files). Keep logs, raw query histories, workflow status and internal QA in separate workspace locations.
+
+The final response should lead with the plan and PDF, and briefly disclose only material scientific limitations and the location of useful appendices. Do not present the internal QA report as the scientific plan.
+
+Engineering tests and validators are supporting evidence only. Do not claim product acceptance solely from regression, schema validation, file presence, page count or successful PDF export.
 
 ### Mandatory quality controls within the workflow
 
