@@ -69,9 +69,9 @@ A task is assignable only when a colleague can understand what decision it serve
 - outcomes that support, weaken, contradict or leave the question unresolved;
 - dependency, priority, owner/role, linked Figure/Panel/SI and completion/stop condition.
 
-Where the target property can change during sampling or handling, explicitly consider aliquot representativeness, timing, quenching, separation, washing, drying, transfer, storage and measurement state. Do not assume a handling step preserves the state; require a suitable preservation/stability check or mark the inference blocked. Apply this where relevant rather than forcing it into unrelated project types.
+Where the target property or phenomenon can change during acquisition or handling, explicitly consider sampling-unit representativeness, timing, preparation, processing, transfer, storage and measurement state. Do not assume a handling step preserves the state; require a suitable preservation/stability or process-effect check, or mark the inference blocked. Apply this where relevant rather than forcing it into unrelated project types.
 
-Matching one parameter (for example, concentration, ionic strength, temperature or nominal dose) does not automatically isolate all chemical, physical or procedural alternatives. State which dimensions are matched, which vary, which remain confounded and what additional controls or narrowed inference are needed.
+Matching one parameter does not automatically isolate other coupled or confounded variables. State which dimensions are matched, which vary, which remain confounded and what additional controls, measurements or narrowed inference are needed.
 
 For spatial or compositional claims, distinguish the scale and operational meaning of the measurement where relevant (for example, bulk composition, surface composition, pore/phase association or lattice-level incorporation). A method that measures one scale cannot alone establish a claim at another scale.
 
