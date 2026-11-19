@@ -75,6 +75,12 @@
     },
     "micro_gate": {
       "type": "object"
+    },
+    "spectral_comparisons": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/spectral_comparison"
+      }
     }
   },
   "$defs": {
@@ -1234,6 +1240,262 @@
         }
       },
       "additionalProperties": false
+    },
+    "spectral_comparison": {
+      "type": "object",
+      "required": [
+        "task_id",
+        "modality",
+        "comparison_status",
+        "compared_units",
+        "comparability_dimensions",
+        "band_comparisons",
+        "overall_synthesis",
+        "uncertainty_note",
+        "source_entities",
+        "source_result_ids",
+        "recorded_at"
+      ],
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "modality": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measurement_group": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "comparison_status": {
+          "enum": [
+            "COMPARABLE",
+            "CONDITIONALLY_COMPARABLE",
+            "NOT_COMPARABLE",
+            "NOT_ASSESSABLE"
+          ]
+        },
+        "compared_units": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "comparability_dimensions": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/spectral_comparability_dimension"
+          }
+        },
+        "band_comparisons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/spectral_band_comparison"
+          },
+          "minItems": 1
+        },
+        "overall_synthesis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cross_validation_targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "uncertainty_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "source_entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_result_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "compared_unit_context": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    "spectral_comparability_dimension": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "MATCHED",
+            "MISMATCHED",
+            "UNKNOWN",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "spectral_band_comparison": {
+      "type": "object",
+      "required": [
+        "band_id",
+        "unit_ids",
+        "observed_difference",
+        "epistemic_status",
+        "shift_direction",
+        "relative_intensity_trend",
+        "relative_peak_area_trend",
+        "band_presence_change"
+      ],
+      "properties": {
+        "band_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "observed_difference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "peak_position_estimates_cm1": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "unit_id",
+              "range",
+              "confidence"
+            ],
+            "properties": {
+              "unit_id": {
+                "type": "string"
+              },
+              "range": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "confidence": {
+                "enum": [
+                  "High",
+                  "Medium",
+                  "Low",
+                  "Unassessable"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "shift_direction": {
+          "enum": [
+            "HIGHER_WAVENUMBER",
+            "LOWER_WAVENUMBER",
+            "NO_CLEAR_SHIFT",
+            "NOT_ASSESSABLE"
+          ]
+        },
+        "shift_magnitude_cm1_range": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "relative_intensity_trend": {
+          "enum": [
+            "INCREASED",
+            "DECREASED",
+            "SIMILAR",
+            "MIXED",
+            "NOT_ASSESSABLE"
+          ]
+        },
+        "relative_peak_area_trend": {
+          "enum": [
+            "INCREASED",
+            "DECREASED",
+            "SIMILAR",
+            "MIXED",
+            "NOT_ASSESSABLE"
+          ]
+        },
+        "band_presence_change": {
+          "enum": [
+            "PRESENT_IN_ALL",
+            "EMERGES",
+            "DISAPPEARS",
+            "PRESENT_IN_SUBSET",
+            "NOT_ASSESSABLE"
+          ]
+        },
+        "assignment_candidates": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "epistemic_status": {
+          "enum": [
+            "Observed",
+            "Interpreted",
+            "Hypothesized"
+          ]
+        },
+        "alternative_explanations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": false

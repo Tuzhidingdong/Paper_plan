@@ -71,13 +71,30 @@ Figure-level status and report-level status stay separate. NOT_SHOWN means not s
 - Mark each Result Unit's intended claim role as UNDECIDED, SUPPORTING, CORE or NOT_USED. A numeric CORE result must pass the measurement-definition checks before it can support a central quantitative claim.
 - Compare experimental conditions explicitly before combining or contrasting Result Units. Record matched, mismatched, unknown and not-applicable dimensions rather than assuming like-for-like comparability.
 
-## 7. Artifact/confounder audit
+## 7. Cross-sample Raman / IR comparison (mandatory when spectra are present)
+
+Run this after the Result Units, sample identities and visual-inspection cards have been created:
+
+    python scripts/prepare_spectral_comparison.py --workspace WORKSPACE
+
+- Inspect every generated task pack. Each pack groups all candidate spectra of one vibrational modality within the source document; do not silently drop a sample because its measurement-group label differs.
+- Open all listed source assets together at original resolution in a multimodal comparison pass. Contact sheets are not suitable for resolving weak bands, close peak shifts or intensity differences. If a task is too large for one model context, split it into batches while preserving explicit sample/series pairs and the same comparison dimensions.
+- Return one structured record per task, following the task's output contract and \`templates/spectral_comparison_card.json\`. Compare peak-position ranges and shift direction; relative intensity and visually estimated band-area trends only where signal basis, baseline, normalization, acquisition and offsets permit; emergent/disappearing/broadened/split bands; and plausible functional-group/bond changes.
+- Record comparability before interpreting chemistry. Unknown or mismatched conditions must constrain or block the relevant comparison, not be filled by assumption. Separate Observed, Interpreted and Hypothesized; list alternative explanations and possible cross-checks.
+- Record each comparison:
+
+      python scripts/record_spectral_comparison.py --workspace WORKSPACE --task-json TASK_JSON --record-json RECORD_JSON
+
+- After all available spectral comparison records are saved, recompile \`evidence_context.md\`. If the preparation script finds no comparison groups, review spectral modality detection, Region/Panel links, first-pass cards and sample/series mappings; its empty result is not evidence that the PDF contains no vibrational spectra.
+- No curve digitization or numerical integration from pixels is required. Visual estimates must be ranges and retain their resolution/raw-data limitations.
+
+## 8. Artifact/confounder audit
 
 Before upgrading observations into interpretations, consider relevant sample identity, preparation differences, instrument calibration, acquisition settings, baseline/background/fitting, normalization and units, replicate variability, controls, alternate mechanisms, image cropping/contrast and selection bias.
 
 For every relevant factor record whether the report shows it, where that evidence came from, plausible alternatives and what would resolve the uncertainty. Missing metadata makes the stronger claim not assessable; it does not prove the experiment is wrong.
 
-## 8. Validation and context compilation
+## 9. Validation and context compilation
 
 Run:
 

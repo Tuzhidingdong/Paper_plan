@@ -22,13 +22,15 @@ For each field record one state: FOUND, NOT_SHOWN, NOT_LEGIBLE, UNCERTAIN or NOT
 - background_model_visible
 - sample_labels_visible
 
-## Raman / FTIR
+## Raman / FTIR / DRIFTS
 - spectral_range
 - wavenumber_unit
-- intensity_or_transmittance_basis
+- intensity_or_transmittance_basis (intensity, absorbance or transmittance)
 - baseline_processing_visible
-- peak_labels_visible
-- laser_or_acquisition_conditions_visible (where applicable)
+- normalization_or_scaling_basis_visible
+- peak_labels_and_sample_or_series_labels_visible
+- spectral_resolution_and_acquisition_conditions_visible (where applicable)
+- temperature, atmosphere, pH, timepoint and specimen state where reported
 
 ## CV / LSV
 - potential_axis_and_unit
@@ -76,3 +78,28 @@ Record each dimension per compared entity, including explicit UNKNOWN values whe
 - `field_selection_and_sampling` — field selection, number of fields, replicate specimens and sampling basis
 
 Do not infer particle-size or morphology changes from images acquired at different scales or modalities unless a valid scale-normalized comparison is available. Record the permissible observation (e.g. each image shows a morphology) separately from any prohibited between-image inference.
+
+
+## Cross-sample vibrational-spectrum comparison (required when at least two samples or series are available)
+
+After independent original-resolution inspection, prepare one joint comparison task for spectra of the same modality. Keep Raman, FTIR and DRIFTS distinct unless a scientifically justified cross-technique comparison is explicitly planned. Compare all available sample/timepoint spectra rather than stopping at the first pair; where one panel contains multiple legend series, treat those series as separate comparison units.
+
+For each comparison record:
+- sample/series identity and source Region/Panel/page;
+- spectral modality and acquisition mode;
+- spectral range and x-axis unit;
+- intensity / absorbance / transmittance basis;
+- baseline correction and normalization;
+- instrument, spectral resolution and acquisition conditions;
+- sample state/preparation and treatment/timepoint;
+- curve offsets, stacking, vertical scaling and display processing.
+
+Required scientific observations:
+- band/peak positions as approximate ranges when readable, direction and bounded shift estimate (never false-precision point values);
+- relative intensity changes only when the plotted basis, normalization, baseline and acquisition make them defensible;
+- relative band-area trends only as qualitative/semi-quantitative visual observations, never numerical integration from pixels;
+- bands that emerge, disappear, broaden, narrow, split, merge or remain stable;
+- plausible functional-group and bond assignments, confidence, alternatives and chemical meaning;
+- alternative explanations and independent measurements that could corroborate or contradict each interpretation.
+
+A comparison is COMPARABLE only when all decision-relevant dimensions match or are not applicable. Unknown dimensions must remain UNKNOWN and limit the inference. Keep direct visual observations separate from assignments and mechanistic hypotheses. A new band is not, by itself, proof of a unique species or reaction pathway.

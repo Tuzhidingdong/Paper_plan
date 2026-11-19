@@ -1,0 +1,37 @@
+{
+  "task_id": "SPC0000000000",
+  "comparison_status": "NOT_ASSESSABLE",
+  "compared_units": ["R001", "R002"],
+  "comparability_dimensions": {
+    "spectral_modality_and_acquisition_mode": {"status": "UNKNOWN", "reason": "Not stated in available evidence"},
+    "spectral_range_and_x_axis_unit": {"status": "UNKNOWN", "reason": "Not stated in available evidence"},
+    "intensity_or_transmittance_basis": {"status": "UNKNOWN", "reason": "Not stated in available evidence"},
+    "baseline_and_normalization": {"status": "UNKNOWN", "reason": "Not stated in available evidence"},
+    "instrument_and_acquisition_conditions": {"status": "UNKNOWN", "reason": "Not stated in available evidence"},
+    "sample_state_and_preparation": {"status": "UNKNOWN", "reason": "Not stated in available evidence"},
+    "timepoint_or_treatment_condition": {"status": "UNKNOWN", "reason": "Not stated in available evidence"},
+    "plot_scaling_offsets_and_stacking": {"status": "UNKNOWN", "reason": "Not stated in available evidence"}
+  },
+  "band_comparisons": [
+    {
+      "band_id": "BAND-001",
+      "unit_ids": ["R001", "R002"],
+      "observed_difference": "Describe only what is visible in the compared spectra.",
+      "peak_position_estimates_cm1": [
+        {"unit_id": "R001", "range": [0, 0], "confidence": "Unassessable"},
+        {"unit_id": "R002", "range": [0, 0], "confidence": "Unassessable"}
+      ],
+      "shift_direction": "NOT_ASSESSABLE",
+      "shift_magnitude_cm1_range": null,
+      "relative_intensity_trend": "NOT_ASSESSABLE",
+      "relative_peak_area_trend": "NOT_ASSESSABLE",
+      "band_presence_change": "NOT_ASSESSABLE",
+      "assignment_candidates": [],
+      "epistemic_status": "Observed",
+      "alternative_explanations": []
+    }
+  ],
+  "overall_synthesis": "State what can and cannot be concluded from the visual comparison.",
+  "cross_validation_targets": [],
+  "uncertainty_note": "No curve digitization or numerical integration from pixels was performed."
+}

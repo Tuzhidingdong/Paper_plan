@@ -2,7 +2,7 @@ name: ERA tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'v5.1/**']
   pull_request:
     branches: [main]
 

@@ -40,6 +40,50 @@ def compact_record(result_id: str, item: dict[str, Any]) -> str:
     return "\n".join(parts)
 
 
+
+def compact_spectral_comparison(task_id: str, item: dict[str, Any]) -> str:
+    lines = [
+        f"### {task_id} [{item.get('modality', 'unknown')} | {item.get('comparison_status', 'UNASSESSED')} | "
+        f"measurement group: {item.get('measurement_group') or 'unspecified'}]",
+        f"- Source entities: {', '.join(item.get('source_entities', [])) or 'not recorded'}",
+        f"- Source Result Units: {', '.join(item.get('source_result_ids', [])) or 'not mapped'}",
+    ]
+    for unit in item.get("compared_unit_context", []):
+        samples = ", ".join(
+            f"{sample.get('label', 'unmapped')} ({sample.get('sample_id') or 'no ID'}; {sample.get('identity_status', 'UNKNOWN')})"
+            for sample in unit.get("samples", [])
+        ) or "unmapped"
+        lines.append(
+            f"- Compared unit **{unit.get('unit_id')}**: samples={samples}; "
+            f"conditions={unit.get('condition_summary') or 'UNKNOWN'}; "
+            f"visual permission={unit.get('quantitative_permission', 'None')}"
+        )
+    lines.append("- Comparability dimensions:")
+    for name, dimension in item.get("comparability_dimensions", {}).items():
+        lines.append(f"  - {name.replace('_', ' ')}: {dimension.get('status', 'UNKNOWN')} — {dimension.get('reason', '')}")
+    lines.append("- Cross-sample band comparisons:")
+    for band in item.get("band_comparisons", []):
+        assignments = "; ".join(
+            f"{candidate.get('assignment', '')} ({candidate.get('confidence', 'unspecified confidence')})"
+            for candidate in band.get("assignment_candidates", [])
+        ) or "no assignment proposed"
+        lines.append(
+            f"  - **{band.get('band_id')}** [{', '.join(band.get('unit_ids', []))}]: "
+            f"{band.get('observed_difference', '')}; shift={band.get('shift_direction', 'NOT_ASSESSABLE')} "
+            f"{band.get('shift_magnitude_cm1_range')}; relative intensity={band.get('relative_intensity_trend', 'NOT_ASSESSABLE')}; "
+            f"relative band-area trend={band.get('relative_peak_area_trend', 'NOT_ASSESSABLE')}; "
+            f"presence={band.get('band_presence_change', 'NOT_ASSESSABLE')}; assignments={assignments}; "
+            f"epistemic={band.get('epistemic_status', 'UNSPECIFIED')}"
+        )
+        if band.get("alternative_explanations"):
+            lines.append(f"    - Alternative explanations: {'; '.join(band['alternative_explanations'])}")
+    lines.append(f"- Overall synthesis: {item.get('overall_synthesis', '')}")
+    if item.get("cross_validation_targets"):
+        lines.append(f"- Cross-validation targets: {'; '.join(item['cross_validation_targets'])}")
+    lines.append(f"- Uncertainty: {item.get('uncertainty_note', 'not recorded')}")
+    lines.append("- Interpretation boundary: visual/semi-quantitative comparison only; no curve digitization or absolute peak-area claim.")
+    return "\n".join(lines)
+
 def compile_context(bundle: dict[str, Any]) -> str:
     lines = ["# ERA compact evidence context", "", "This is a task view, not the complete evidence record.",
              "Preserve every uncertainty and source limitation when reasoning.", ""]
@@ -65,6 +109,15 @@ def compile_context(bundle: dict[str, Any]) -> str:
         if finding.get("limitations"):
             lines.append(f"  - Limitations: {'; '.join(finding['limitations'])}")
     lines.append("")
+    lines.append("## Cross-sample Raman / IR comparisons")
+    spectral = bundle.get("spectral_comparisons", {})
+    if spectral:
+        for task_id, comparison in sorted(spectral.items()):
+            lines.append(compact_spectral_comparison(task_id, comparison))
+            lines.append("")
+    else:
+        lines.append("- No structured spectral comparison has been recorded. Do not treat this as evidence that no spectra exist.")
+        lines.append("")
     lines.append("## Human attention")
     if bundle.get("micro_gate", {}).get("triggered"):
         lines.append("- Micro-Gate 0.5 is triggered for a decision-relevant sample mapping. Unrelated independent results may still be analyzed.")
