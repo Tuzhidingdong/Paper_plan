@@ -29,12 +29,16 @@ The Skill may identify that the available evidence does not yet support a defens
 
 ## V5 product rules — narrative plan is the product
 
-- The controlling product contract is docs/V5_PRODUCT_CONTRACT.md and the controlling full-run workflow is workflows/13_v5_manuscript_development.md. Also read docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md before a full project.
+- The controlling product contract is docs/V5_PRODUCT_CONTRACT.md, the controlling full-run workflow is workflows/13_v5_manuscript_development.md, and the researcher-facing writing rules are in docs/V5_1_RESEARCHER_FACING_DELIVERY_STANDARD.md. Use templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md for the primary report and templates/V5_INTERNAL_PRODUCT_QA_REPORT.md only for the separate internal QA record. Also read docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md before a full project.
 - Maintain two synchronized representations: structured bundles for provenance, IDs and cross-reference integrity; and a complete narrative plan for the researcher. The narrative is the delivered product. Structured JSON, validator reports and workflow-stage notes are supporting state only.
 - Do not assemble the final plan by concatenating short bundle summaries. Explain scientific reasoning in connected prose, with detailed tables only where they help comparison or assignment.
+- The primary deliverable must read like a professional scientific research proposal and manuscript-development dossier for supervisors, students and collaborators. It is not an Agent activity report, validator report, schema export or checklist.
+- Keep all workflow stages, Skill/commit/runtime details, schema and bundle terminology, raw entity IDs, route enums, QA status codes, validator results and tool diagnostics in internal workspace records. Never append them to the researcher-facing plan. Translate genuine uncertainty into its scientific consequence, missing input, responsible source and next action.
+- Perform explicit synthesis, narrative drafting, task-brief development and editorial-integration passes. Complete prose is required for the scientific rationale, literature position, Introduction, Results/Discussion storyline and task handoffs; tables support these sections but cannot substitute for them.
+- A student-facing task must state its scientific purpose, starting inputs, design, controls, records to retain, analysis/QC, required return files, completion criteria, interpretation of alternative outcomes and manuscript use. Do not use internal task IDs as the task description.
 - For substantive projects, cover research diagnosis, closest-literature comparison and bounded novelty, one central contribution, paragraph-level Introduction design, complete Results/Discussion storyline, TOC and Figure/Panel architecture, SI architecture, actionable experiment/analysis packages, relevant collaborator-ready theory/computation briefs, priorities, risks and supervisor decisions.
 - Default to the user's language for the planning dossier. When the user works in Chinese, write the integrated plan in Chinese unless asked otherwise. Draft manuscript English only when sources support the claims and citations.
-- Read the whole Markdown as a supervisor would; judge reasoning, specificity, evidence grounding, connected logic and handoff readiness against the V5 contract and user's benchmark.
+- Read the whole Markdown and PDF as a supervisor would and then as a student would; judge scientific reasoning, writing quality, Figure specificity, student handoff readiness and standalone usefulness against the V5 product contract and the researcher-facing delivery standard. Internal QA statuses and validator output must remain outside the primary report.
 - Keep every V4.1–V4.3 scientific-integrity gate active. Never weaken evidence requirements, turn planned work into observed results or invent missing literature, values, protocols, conditions or thresholds.
 - Evaluate the user's original scientific hypothesis as an explicit candidate alongside evidence-led alternatives. Do not automatically replace a scientifically meaningful line with a measurement/audit paper because evidence is incomplete; test whether a finite, feasible evidence-recovery path exists. A validation route becomes the main contribution only if it independently passes novelty/significance review.
 - Never hard-code a project's scientific subject, samples, results, mechanisms, Figure scheme, literature or journal choices into reusable sources.
@@ -108,7 +112,7 @@ The Skill may identify that the available evidence does not yet support a defens
 
 ## Entry and commands
 
-For every full project, read workflows/13_v5_manuscript_development.md, docs/V5_PRODUCT_CONTRACT.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md and docs/V5_1_NARRATIVE_PRODUCT_QA.md first; also follow docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md and docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md before completing their respective stages, using templates/V5_1_LITERATURE_FRONTIER_LEDGER.md for the project-specific search audit. workflows/07_full_run.md is a compatibility entry point to V5. Reuse workflows/01–06 and 08–12 as stage-specific technical procedures when the V5 runbook calls for them; do not treat their intermediate outputs as the final plan. Load only reference files needed for the current stage.
+For every full project, read workflows/13_v5_manuscript_development.md, docs/V5_PRODUCT_CONTRACT.md, docs/V5_1_RESEARCHER_FACING_DELIVERY_STANDARD.md, templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md, templates/V5_INTERNAL_PRODUCT_QA_REPORT.md and docs/V5_1_NARRATIVE_PRODUCT_QA.md first; also follow docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md and docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md before completing their respective stages, using templates/V5_1_LITERATURE_FRONTIER_LEDGER.md for the project-specific search audit. workflows/07_full_run.md is a compatibility entry point to V5. Reuse workflows/01–06 and 08–12 as stage-specific technical procedures when the V5 runbook calls for them; do not treat their intermediate outputs as the final plan. Load only reference files needed for the current stage.
 
     python -m pip install -r requirements.txt
     python -m unittest discover -s tests -v
@@ -143,7 +147,7 @@ Adapt the depth and exact file split to the project. The researcher-facing narra
 - Claim–Evidence–Data Slot relationships;
 - detailed experiment, analysis and computation work packages;
 - dependencies, milestones, decision gates, student/supervisor checklists and risks;
-- consolidated editable Markdown and verified PDF.
+- a complete researcher-facing Markdown report and matching verified PDF; keep literature ledgers, structured bundles and internal QA/run metadata as separate supporting records.
 
 Do not force exactly three routes, any fixed Figure/Panel count, a three-paragraph Introduction, a standard instrument sequence or a mandatory computation section. Let evidence, scientific logic and verified journal instructions determine the package.
 
