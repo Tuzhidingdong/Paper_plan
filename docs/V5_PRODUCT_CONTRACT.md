@@ -84,7 +84,7 @@ A plan is not complete merely because every template heading, bundle entity or w
 - **Argument integrity:** one contribution connects the Introduction, Results/Discussion, Figures, SI, work packages and conclusion without unrelated side stories.
 - **Figure logic:** main-text Figures carry the central argument. Data-extraction audits, calculation-reproduction diagnostics and general QC material normally belong in SI unless their result is itself essential to the central contribution.
 - **Experimental discrimination:** work packages distinguish competing explanations and address material confounders; matching one control variable is not assumed to control all others.
-- **Sample-state integrity:** where sampling, quenching, washing, drying, storage, transfer or measurement can change the property being studied, the plan includes a preservation/stability check before relying on those measurements.
+- **Sample-state integrity:** where acquisition, preparation, handling, processing, storage, transfer or measurement can change the property or phenomenon being studied, the plan includes an appropriate preservation/stability or process-effect check before relying on those measurements.
 - **Claim calibration:** title, abstract, Figure labels and conclusion do not assert planned, hypothesized or literature-inferred outcomes as observations.
 - **Handoff readiness:** each priority task has concrete inputs, a decision question, design, controls, outputs, QC, alternative outcomes, dependencies and completion/stop criteria; blocked tasks name their unlocking inputs.
 
