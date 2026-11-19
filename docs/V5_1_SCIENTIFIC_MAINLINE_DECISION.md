@@ -78,7 +78,7 @@ Do not call an evidence path finite or feasible until essential samples, metadat
 
 ## 10. Align contribution language with evidence and prior art
 
-The title, one-sentence contribution, abstract argument map, Introduction gap, Figure take-home messages and conclusion must make claims at the same epistemic strength. A working title must not state a product purity, phase identity, mechanism, causal effect, lattice incorporation/removal or performance improvement that has not been established. Use neutral/question-oriented wording or mark the phrase as a provisional hypothesis when necessary.
+The title, one-sentence contribution, abstract argument map, Introduction gap, Figure take-home messages and conclusion must make claims at the same epistemic strength. A working title must not assert an entity or property identity, transformation, mechanism, causal effect, structural change or performance improvement that has not been established. Use neutral/question-oriented wording or mark the phrase as a provisional hypothesis when necessary.
 
 A hypothesis can remain the preferred candidate without being described as demonstrated. If evidence supports only a bounded association, do not upgrade it to causation or mechanism in the title or Figure labels. If literature comparison shows the broad mechanism is known, state the narrower remaining contribution rather than repeating the broad claim.
 
