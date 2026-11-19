@@ -133,7 +133,7 @@ For visual inspection, prepare image-only task packs and record structured cards
 
 ## Required product coverage
 
-Adapt the depth and exact file split to the project. The researcher-facing narrative must independently explain the scientific reasoning; do not satisfy this list by merely populating JSON fields. Use the V5 integrated-plan template. The package must cover:
+Adapt the depth and exact file split to the project. The researcher-facing narrative must independently explain the scientific reasoning; do not satisfy this list by merely populating JSON fields. Use the V5 integrated-plan template and V5.1 researcher-facing delivery standard. The package must cover:
 
 - evidence and source inventory, including uncertainty and calculation lineage;
 - literature frontier, closest competitors, counter-evidence and bounded novelty;
@@ -144,18 +144,18 @@ Adapt the depth and exact file split to the project. The researcher-facing narra
 - TOC/graphical abstract brief when relevant;
 - main Figure and Panel specifications with data provenance and acceptance criteria;
 - Supporting Information architecture;
-- Claim–Evidence–Data Slot relationships;
-- detailed experiment, analysis and computation work packages;
-- dependencies, milestones, decision gates, student/supervisor checklists and risks;
+- clear relationships between important scientific claims and their source evidence, expressed in readable language;
+- detailed student-/collaborator-ready experiment, analysis and computation briefs;
+- dependencies, milestones, scientific decision points, responsibilities and risks;
 - a complete researcher-facing Markdown report and matching verified PDF; keep literature ledgers, structured bundles and internal QA/run metadata as separate supporting records.
 
 Do not force exactly three routes, any fixed Figure/Panel count, a three-paragraph Introduction, a standard instrument sequence or a mandatory computation section. Let evidence, scientific logic and verified journal instructions determine the package.
 
 ## Completion and validation
 
-Run all applicable validators, review every warning and verify the final PDF is generated from the final Markdown revision. The final report must state source hashes, project/Skill versions, literature access levels, journal profile status, central contribution confidence, Figure/SI coverage, work-package closure, blocked calculations, human decisions, validation outcome and available usage deltas.
+Run applicable validators, review warnings and verify that the PDF is generated from the final Markdown revision. Record source hashes, project/Skill versions, literature access, journal-profile status, structural validation, tool limitations and other run details in the separate internal QA/run record. Do not put these technical details into the researcher-facing plan.
 
-The result is a complete, supervisor-reviewable and team-assignable manuscript-development package. It is not a guarantee of publishability or an automatically approved lab/computational protocol. Product acceptance requires human inspection of the complete Markdown/PDF against the project benchmark; passing tests or validators alone is insufficient.
+The result must be a complete, supervisor-reviewable and team-assignable scientific report. It is not a guarantee of publishability or an automatically approved lab/computational protocol. Product acceptance requires human inspection of the complete Markdown/PDF against the product contract and any available project benchmark; tests and validators alone are insufficient.
 
 46. Create each fitted Result Unit's source-linked calculation audit at the time the fit is extracted or calculated, not as a post hoc repair. Record an explicit `reproduction_status` (`REPRODUCED`, `NOT_REPRODUCED`, `NOT_ASSESSABLE` or `NOT_ASSESSED`) and require the deterministic validator to verify that label against recomputed coefficients and source precision. Keep statistical-quality diagnostics/uncertainty and internal/external/prospective validation in their separate fields; one status never substitutes for another.
 
