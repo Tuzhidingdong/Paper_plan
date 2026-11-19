@@ -75,6 +75,19 @@ Run the existing validators as well:
 
 See docs/V4_PRODUCT_CONTRACT.md, docs/ARCHITECTURE.md and docs/IMPLEMENTATION_STATUS.md for the product boundary and development status.
 
+
+## V5.1 researcher-facing product
+
+The primary deliverable is a professional scientific research and manuscript-development plan for supervisors, students and collaborators. It must explain the research rationale, current evidence, literature position, contribution, full manuscript storyline, concrete Figure/Panel and Supporting Information plans, and assignable research/computation briefs in connected prose.
+
+Workflow stages, schema/bundle state, internal route labels, Skill/runtime metadata, validator results and product-QA statuses remain in separate internal records. They are not part of the researcher-facing plan.
+
+See:
+- `docs/V5_1_RESEARCHER_FACING_DELIVERY_STANDARD.md`
+- `docs/V5_PRODUCT_CONTRACT.md`
+- `templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md`
+- `templates/V5_INTERNAL_PRODUCT_QA_REPORT.md`
+
 ## V4.1–V4.2 scientific decision and integrity controls
 
 V4.1 adds typed evidence-use roles, distinct evidence assessments and comparability states, Panel data scopes, execution-readiness gates, agreement/equivalence decision rules, classified task dependencies and validation fingerprints.
