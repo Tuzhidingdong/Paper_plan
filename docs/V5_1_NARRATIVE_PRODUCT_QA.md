@@ -73,7 +73,7 @@ Where the target property or phenomenon can change during acquisition or handlin
 
 Matching one parameter does not automatically isolate other coupled or confounded variables. State which dimensions are matched, which vary, which remain confounded and what additional controls, measurements or narrowed inference are needed.
 
-For spatial or compositional claims, distinguish the scale and operational meaning of the measurement where relevant (for example, bulk composition, surface composition, pore/phase association or lattice-level incorporation). A method that measures one scale cannot alone establish a claim at another scale.
+For claims that cross spatial, temporal, population or aggregation levels, distinguish the operational scale and resolution of the measurement from the scale of the claim. A measurement at one level cannot alone substantiate a claim at another level without an appropriate sampling, modelling or inference bridge.
 
 Require a minimum discriminating test where feasible before a larger resource-intensive program. A list of techniques is not a work package. An experiment is not ready merely because a named technique is available.
 
