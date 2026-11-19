@@ -1,121 +1,159 @@
-# V5.1 Narrative Product Quality and Acceptance Protocol
+# V5.1 Researcher-Facing Product QA Protocol
 
 ## Purpose and authority
 
-This protocol defines how to review the actual researcher-facing manuscript-development plan. It complements, but is not replaced by, schemas, deterministic validators, unit tests, workflow completion or PDF export checks. It is domain-neutral: use the gates as reasoning checks, not as a fixed scientific story, method list, section count or Figure count.
+This protocol reviews the actual researcher-facing manuscript-development plan, not the Skill's workflow log or structured bundle. It complements schemas, deterministic validators, unit tests and PDF-export checks; none of those can replace the review.
 
-Apply it after drafting the complete Markdown and again to the same-revision PDF. The plan must be understandable and useful without opening the structured bundles.
+Apply the protocol to the complete Markdown and the matching PDF. Record findings in a separate internal QA report using `templates/V5_INTERNAL_PRODUCT_QA_REPORT.md`. **Never append the QA report, status codes or validator summary to the research plan.**
 
-## 1. Keep three decisions separate
+The main plan must be understandable and useful to a supervisor, student and collaborator without opening internal JSON bundles, logs or developer documentation.
 
-Report these independently:
+## 1. Keep product quality, scientific readiness and benchmark comparison independent
 
-- PLAN_PRODUCT_STATUS: PASS, PARTIAL or FAIL. Does the plan meet the product contract and provide a reliable, usable explanation and handoff?
-- SCIENTIFIC_READINESS: READY, CONDITIONAL, NOT_READY or STOP_DEFER. Does the existing evidence support the paper now, support it only after defined work, or fail to justify proceeding?
-- BENCHMARK_COMPARISON: COMPLETE, BLOCKED_REFERENCE_UNAVAILABLE or NOT_APPLICABLE. Was the requested project benchmark actually available and compared?
+Record these only in the separate internal QA report:
 
-A lack of decisive data does not automatically make the plan a product failure: an excellent plan may identify a conditional path or recommend stopping. Conversely, engineering PASS, a polished PDF or complete template headings do not make a plan PASS when the scientific reasoning or handoffs are inadequate.
+- **PLAN_PRODUCT_STATUS:** PASS, PARTIAL or FAIL. Does the actual plan meet the researcher-facing product contract and provide a reliable, usable scientific explanation and work handoff?
+- **SCIENTIFIC_READINESS:** READY, CONDITIONAL, NOT_READY or STOP_DEFER. Does the existing evidence support the paper now, support it only after defined work, or fail to justify proceeding?
+- **BENCHMARK_COMPARISON:** COMPLETE, BLOCKED_REFERENCE_UNAVAILABLE or NOT_APPLICABLE. Was the requested project benchmark available and actually compared?
 
-When a benchmark is explicitly required but unavailable, do not substitute a remembered summary, unrelated benchmark, generic journal style or the Agent's own checklist and claim a benchmark pass. State exactly which comparisons could not be made. Continue the general product review, but mark PLAN_PRODUCT_STATUS PARTIAL at best while the required benchmark is unavailable; BENCHMARK_COMPARISON remains BLOCKED_REFERENCE_UNAVAILABLE. Do not report overall product acceptance until the required comparison can be completed.
+A lack of decisive data does not automatically make the plan a product failure. A strong plan may correctly recommend conditional work or stopping. Benchmark unavailability limits the benchmark comparison, but **does not automatically cap or lower PLAN_PRODUCT_STATUS**. Evaluate the actual plan independently against the V5 product contract and researcher-facing delivery standard. Never claim a comparison that was not performed.
 
-## 2. Research question and contribution gate
+## 2. Reader-facing form and usefulness
 
-A supervisor should be able to identify, from the narrative alone:
-- the user's original research intent and how it was assessed;
-- materially different candidate contributions and why they were selected, combined, deferred or rejected;
-- one central question and one bounded contribution, or a justified stop/defer decision;
+Read the report as if it were being handed to a supervisor and then to a student.
+
+- Does it read as a professional scientific research proposal and manuscript-development plan rather than a software, workflow or validator report?
+- Does it begin with the scientific problem, proposed contribution and research recommendation?
+- Is the scientific reasoning explained in complete prose, with tables used to clarify rather than replace argument?
+- Are unexplained abbreviations, raw internal IDs, state enums, schema terms, workflow stages, commit hashes and tool diagnostics absent from the main narrative?
+- Are important limitations translated into clear scientific and operational consequences rather than unexplained status labels?
+- Can the supervisor understand the scientific rationale and decide what to approve?
+- Can a student understand the purpose, inputs, work design, records, analyses and expected return from an assigned task?
+- Is the main document readable on its own, without asking the user to open JSON files to understand the paper?
+
+A report that is primarily short bullets, headings, internal status messages, task IDs or copied structured records fails this gate even if it is complete by schema.
+
+## 3. Scientific background, evidence and contribution
+
+A supervisor should be able to identify from the narrative:
+
+- the field-level problem and why it matters;
+- the specific unresolved problem motivating the project;
+- the evidence supplied by the user and its reliability/limitations;
+- the original research intent and how it was assessed;
+- materially different candidate contributions and why they were selected, narrowed or rejected;
+- one central question and bounded contribution, or a justified recommendation not to proceed;
 - the closest prior work that most threatens the contribution and the exact scientific distinction;
-- the strongest supporting and contradicting evidence, the alternative explanations and what would change the recommendation.
+- the strongest supporting and contradicting evidence, alternatives and observations that would change the recommendation.
 
-Reject cosmetic route variants, topic statements masquerading as contributions, and a contribution that changes wording but not scientific understanding. Do not reward a candidate merely because it was the user's original hypothesis; do not discard it solely because current evidence is incomplete.
+Reject cosmetic route variants, generic topic statements masquerading as contributions and a contribution that changes wording but not scientific understanding. Do not reward a candidate merely because it was the user's original hypothesis; do not discard it solely because current evidence is incomplete.
 
-## 3. Literature-frontier gate
+## 4. Literature-frontier and novelty gate
 
-Inspect the completed project-specific literature frontier audit ledger (based on templates/V5_1_LITERATURE_FRONTIER_LEDGER.md) and nearest-work comparison, not just the bibliography. The populated ledger must be retained under the isolated workspace and its path referenced from the plan; the final narrative should summarize the consequential search findings without becoming a raw query dump.
+Inspect the completed project-specific literature audit ledger and the narrative synthesis, not just the bibliography.
 
-- Every paper/author/year/DOI/title clue explicitly supplied by the user or found in project source materials has a resolution record and disposition.
-- Exact-system, transformation-direction, mechanism, condition, measurement and adjacent-system query facets are represented where relevant.
+- Important citation leads and references identified in project material have documented identity-resolution outcomes.
+- Discovery covers relevant system, transformation, mechanism, condition, measurement and adjacent-system facets.
 - Independent discovery routes and backward/forward citation trails are documented.
-- Novelty-critical primary studies are inspected at the highest accessible tier. Metadata-only items cannot substantiate scientific conclusions; abstract-only items cannot support details absent from the abstract.
-- Each serious candidate has undergone an adversarial novelty test. Known principles, incremental extensions and potentially distinct contributions are not conflated.
-- Contradictory/inconvenient sources are included. A single failed endpoint or empty query has not been treated as evidence of absence.
-- Gap statements are bounded by inspected literature and access limits. Unsupported "first", "unprecedented" and "no studies" claims are removed.
+- Novelty-critical primary studies are inspected at the highest accessible tier.
+- Metadata-only items do not substantiate technical conclusions; abstract-only sources do not support details absent from the abstract.
+- Closest studies are discussed in prose, with a comparison table where useful.
+- Contradictory/inconvenient sources are considered.
+- Each serious contribution claim has undergone an adversarial novelty test.
+- Gap statements are bounded by actual literature coverage and source-access limitations.
 
-If an identity-critical citation or likely direct competitor remains unresolved, the novelty boundary cannot be rated fully supported. Identify the exact missing source or retrieval task.
+An identity-critical citation or likely direct competitor that remains unresolved must narrow the novelty claim and be assigned a specific retrieval task. Do not turn a search log into the literature narrative.
 
-## 4. Evidence-to-argument gate
+## 5. Manuscript narrative and argument integrity
 
-The mainline is built from the actual project's evidence, not from the order of files or instrument types. Each major claim has an explicit epistemic status, source provenance, measurement definition where applicable, comparability assessment and alternative explanation.
+The proposed paper must form a sequence of scientific questions and answers, not an inventory of instruments or characterization methods.
 
-The narrative separates observations, derived results, interpretations, hypotheses and planned work. The story does not turn a measured proxy into the target property, an audit discrepancy into a scientific finding, or an absent record into proof that an experiment never occurred. It explains how each Results/Discussion step changes the argument and why the next step follows.
+Check that:
+- the Introduction narrows logically from field context to the unresolved question and contribution;
+- each paragraph has a clear reader-facing role, evidence/literature support and transition;
+- the Results/Discussion order follows the logic of proof and reader comprehension;
+- each section has an explained scientific purpose, evidence, comparisons, inference limits and transition;
+- abstract and conclusion logic match the proposed evidence and contribution;
+- important alternatives and contradictory results are integrated rather than relegated to generic risk statements.
 
-## 5. Figure and SI allocation gate
+If the plan contains only section headings, brief notes or "add literature/data" placeholders, it is not a complete manuscript-development plan.
 
-For every main-text Figure, ask: **What central claim or decision would be lost if this Figure were removed?** If the answer is only "it proves that data extraction, transcription or a calculation was checked", the material normally belongs in SI or a data-quality note unless method validity is itself the central contribution.
+## 6. Figure and Supporting Information gate
 
-The main Figure portfolio should carry the paper's scientific argument in the order a reader needs it. Diagnostic source audits, raw-data transcription checks, coefficient reproduction and general QC should not crowd out central scientific results. Do not move decisive evidence to SI to hide a weak argument.
+For every main-text Figure, ask: what scientific message does it communicate, and what would be lost from the central argument if it were removed?
 
-Every Panel must state its question, exact planned content, data/source and status, comparison groups, analysis, intended inference, prohibited inference, linked claim/task/SI and acceptance criterion. Planned or blocked Panels must be visually and textually distinguishable from observed results. SI items must have exact contents and a reason for being outside the main text.
+For every Panel, inspect:
+- exact scientific question and data/conceptual content;
+- source and whether the evidence exists, requires reanalysis or remains planned;
+- groups, conditions, controls and comparison basis;
+- proposed visual form, axes, units, normalization and statistical/uncertainty display where relevant;
+- intended and prohibited inferences;
+- required annotations, image handling or layout guidance where relevant;
+- linked manuscript section, research task and supplementary item;
+- criteria for making the Panel interpretable.
 
-## 6. Experiment and analysis handoff gate
+Diagnostic audits, source transcription checks, fit reproduction and general QC normally belong in supplementary material unless they are themselves central to the scientific contribution. Do not hide decisive scientific evidence in SI.
 
-A task is assignable only when a colleague can understand what decision it serves, what is needed and what files/results to return. For each material task inspect:
+Each supplementary item must have defined contents, source/producing task, purpose, main-paper relationship and required reproducibility checks. An ID/title alone is insufficient.
 
-- a precise scientific or analytical question and the uncertainty/claim it addresses;
-- known inputs and missing prerequisites, without invented values or local procedures;
-- sampling/experimental unit, pairing, conditions, comparison basis and variables;
-- plausible confounders and a control/measurement strategy for each decision-relevant alternative;
-- outputs, analysis, normalization, uncertainty and QC;
-- outcomes that support, weaken, contradict or leave the question unresolved;
-- dependency, priority, owner/role, linked Figure/Panel/SI and completion/stop condition.
+## 7. Student and collaborator task handoff gate
 
-Where the target property or phenomenon can change during acquisition or handling, explicitly consider sampling-unit representativeness, timing, preparation, processing, transfer, storage and measurement state. Do not assume a handling step preserves the state; require a suitable preservation/stability or process-effect check, or mark the inference blocked. Apply this where relevant rather than forcing it into unrelated project types.
+A task is assignable only when a recipient can understand the decision it serves, what is needed and what to return.
 
-Matching one parameter does not automatically isolate other coupled or confounded variables. State which dimensions are matched, which vary, which remain confounded and what additional controls, measurements or narrowed inference are needed.
+For each important task inspect:
+- scientific question and rationale;
+- available materials and missing inputs, including who can provide them;
+- study unit, groups, variables, conditions and comparisons;
+- relevant controls and plausible confounders;
+- method and practical planning considerations without invented local parameters;
+- required raw/processed data, metadata, scripts, records and outputs;
+- analysis, normalization, statistics, uncertainty and QC;
+- supportive, negative, mixed and inconclusive outcome interpretations;
+- dependencies, approvals, priority and concrete completion criteria;
+- manuscript section, Figure/Panel or SI item that uses the output.
 
-For claims that cross spatial, temporal, population or aggregation levels, distinguish the operational scale and resolution of the measurement from the scale of the claim. A measurement at one level cannot alone substantiate a claim at another level without an appropriate sampling, modelling or inference bridge.
+Where the target property or phenomenon can change during acquisition or handling, require a relevant state-preservation or process-effect check. Matching one parameter does not automatically isolate other coupled variables. Distinguish the operational scale of a measurement from the scale of the claim.
 
-Require a minimum discriminating test where feasible before a larger resource-intensive program. A list of techniques is not a work package. An experiment is not ready merely because a named technique is available.
+A list of techniques is not a task brief. Do not force every task to contain irrelevant details; adapt the design to the actual science and local expertise.
 
-## 7. Title, abstract and claim-language gate
+## 8. Computational handoff gate
 
-Compare the title, contribution sentence, abstract map, Figure messages and conclusion against the current evidence status. No part may imply that planned work has already succeeded. Do not assert a phase, purity, mechanism, causal relationship, structural incorporation/removal or application benefit more strongly than the available evidence permits. Use neutral or question-oriented working language while a result remains hypothetical. A strong hypothesis may be the subject of the plan without being presented as a fact.
+Where computation has a defined scientific role, confirm that the brief specifies model construction, required inputs, assumptions, method rationale, known settings versus unresolved settings, convergence/sensitivity, observables, raw and processed outputs, controls, validation against experiment, limitations and links to the paper's scientific questions and Figures.
 
-## 8. Journal-fit gate
+A method name alone is not an executable or discussable handoff. Missing essential inputs must be identified with a responsible source or role.
 
-Verify requirements for the current project's target journal and article type using current official sources. Record exact URLs, checked dates, source locations and access limitations. A link or a statement that the journal is prestigious is not verification. Keep journal fit conditional if the journal/article type is unresolved or official instructions are inaccessible. Never inherit journal settings from another project or benchmark.
+## 9. Figure-to-task and whole-plan consistency
 
-## 9. Whole-plan consistency gate
+Trace the selected scientific contribution through current evidence, literature, Introduction, Results/Discussion, Figures, SI, research tasks, priorities and conclusion.
 
-Trace the selected contribution through: project evidence → literature gap → Introduction → Results/Discussion → main Figures → SI → tasks → priorities → conclusion. Find and resolve contradictions such as:
-- a validation/audit route described as secondary but occupying most main Figures;
-- a mechanism described as hypothetical in the evidence section but stated as fact in the title or conclusion;
-- a planned result appearing as observed in a Figure caption;
-- an essential claim with no linked evidence or work package;
-- a task whose output is not used by any claim/Figure/decision;
-- a Figure/Panel with no acceptance criterion or no place in the story;
-- a prerequisite that is unavailable but not marked as a blocker.
+Resolve contradictions such as:
+- a secondary validation topic occupying most main Figures;
+- a hypothesis described as unproven in one section but asserted as fact in the title or conclusion;
+- a planned result being presented as existing data;
+- an essential manuscript claim with no supporting evidence or acquisition task;
+- a task whose result is not used by any scientific decision or manuscript section;
+- a Figure with no scientific message or acceptance criterion;
+- an essential missing input that has no owner or acquisition route.
 
-Run one skeptical-reviewer pass: identify the strongest reason the preferred contribution could already be known, could be explained by an alternative, could fail measurement, or could be infeasible. State the decisive observation that would resolve each concern.
+Run a skeptical-reviewer pass and identify the strongest challenge to the preferred contribution and the observation that would resolve it.
 
-## 10. Deliverable and review checks
+## 10. Editorial and document checks
 
-Confirm that the Markdown is complete, readable and not a bundle dump; that the PDF is generated from exactly that Markdown revision; and that the PDF has usable text, page structure, readable tables/figures and no truncation or missing sections. There is no fixed page-count or word-count target: depth is determined by project complexity and the benchmark/product requirements. Report hashes/revisions.
+The Markdown and matching PDF must:
+- read as one coherent professional report, not concatenated summaries;
+- use clear scientific prose, logical transitions and consistent terminology;
+- avoid repetition and filler;
+- include no empty headings or unresolved generic placeholders;
+- distinguish established findings, interpretations, hypotheses and planned work;
+- include usable references and readable source locations;
+- give sufficiently detailed Figures, SI and task briefs for the project;
+- be exported from the exact same Markdown revision;
+- contain readable text, page structure, tables and figures without truncation or missing sections.
 
-Record the findings by gate with PASS, PARTIAL or FAIL and a concise reason. Do not use pseudo-precise quality scores or allow a numeric aggregate to conceal a critical failure.
+There is no fixed page count or word count. A short report is acceptable only when the scientific scope and product requirements genuinely justify it. Do not use length as a proxy for quality.
 
-A final review must state the three independent statuses from Section 1, material strengths, blocking/conditional issues, exact follow-up tasks and human decisions. Product QA is a human reasoning review; an automated checklist can prepare it but cannot certify scientific correctness.
+## 11. Internal review output
 
- 
-## 11. Hybrid and supporting-contribution gate
+Record gate-level findings, three independent statuses, benchmark limitations, scientific-readiness issues, product defects, technical validation and release recommendation in a separate internal QA report.
 
-A HYBRID recommendation must identify one shared central question and show why its components are necessary parts of the same inference. It is not a compromise between two preferred stories or a way to retain unrelated results. A method/measurement-validation task may support a scientific contribution, but must not become a second paper inside the same plan unless its independent contribution is explicitly selected and defended. Check that the distribution of Results/Discussion sections, main Figures and tasks reflects the declared central contribution.
-
-
-## 12. Extract and map benchmark requirements without copying its case
-
-When a benchmark is supplied and required, inspect its complete accessible content and extract a criterion matrix before judging the new plan. For each criterion record: the benchmark's quality expectation; whether it is transferable as a domain-neutral product requirement or is case-specific scientific content; the location in the new plan that satisfies it; and any gap or justified non-applicability.
-
-Transfer only the abstract quality expectation (for example, the required depth of a scientific argument or specificity of an execution handoff) into reusable product rules. Keep benchmark-specific materials, mechanisms, numerical results, references, journal settings, experimental decisions and storylines confined to that benchmark's isolated case. The benchmark is a quality reference, not evidence for the new project's claims and not a default template for its scientific story.
-
-Set BENCHMARK_COMPARISON to COMPLETE only when the benchmark content needed for comparison was actually available and the criterion-to-plan mapping was performed. A title, remembered description, partial excerpt or similar-looking report is not a substitute for the complete benchmark when complete comparison was requested.
+Do not put the QA report in the main manuscript-development plan. Do not make the researcher-facing plan end with validator claims, Skill status codes or benchmark availability statements.
