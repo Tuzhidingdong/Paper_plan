@@ -306,6 +306,30 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "does not match"):
                 validate_record(bundle, request, record, workspace)
 
+    def test_every_result_requires_signal_applicability_disposition(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            bundle, request, record = _analysis_fixture(workspace)
+            del record["signal_analysis_coverage"]
+            with self.assertRaisesRegex(ValueError, "signal_analysis_coverage must explicitly"):
+                validate_record(bundle, request, record, workspace)
+
+    def test_applicable_signal_result_requires_a_feature_record(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            bundle, request, record = _analysis_fixture(workspace)
+            record["signal_analysis_coverage"][0]["feature_ids"] = []
+            with self.assertRaisesRegex(ValueError, "APPLICABLE signal coverage requires"):
+                validate_record(bundle, request, record, workspace)
+
+    def test_signal_comparison_must_link_multiple_features(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            bundle, request, record = _analysis_fixture(workspace)
+            record["signal_comparisons"][0]["feature_ids"] = ["SIG-1"]
+            with self.assertRaisesRegex(ValueError, "at least two recorded signal features"):
+                validate_record(bundle, request, record, workspace)
+
 
 if __name__ == "__main__":
     unittest.main()
