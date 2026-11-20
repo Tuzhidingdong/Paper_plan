@@ -88,6 +88,9 @@ def validate_figure_candidate_coverage(
                 image_path = None
             if image_path is not None and not image_path.is_file():
                 errors.append(f"{candidate_id}: extracted Region image file is missing")
+            elif image_path is not None and candidate.get("asset_sha256"):
+                if sha256_file(image_path) != candidate.get("asset_sha256"):
+                    errors.append(f"{candidate_id}: extracted Region file SHA-256 does not match its figure-candidate record")
         if candidate.get("triage_status") != "REVIEWED":
             errors.append(f"{candidate_id}: explicit scientific-figure inclusion/exclusion decision is missing")
             continue
