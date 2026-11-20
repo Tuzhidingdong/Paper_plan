@@ -250,6 +250,24 @@ class TestGeneralScientificAnalysis(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "at least two Result Units"):
             validate_record(bundle, request, record)
 
+    def test_recorder_rejects_stale_source_request(self):
+        bundle = bundle_fixture()
+        _, packs = prepare_all(bundle, Path("/workspace"), max_results_per_pack=10)
+        request = packs[0]
+        request["source"]["sha256"] = "b" * 64
+        record = valid_record(request)
+        with self.assertRaisesRegex(ValueError, "source SHA-256 does not match"):
+            validate_record(bundle, request, record)
+
+    def test_recorder_rejects_unqualified_numeric_difference(self):
+        bundle = bundle_fixture()
+        _, packs = prepare_all(bundle, Path("/workspace"), max_results_per_pack=10)
+        request = packs[0]
+        record = valid_record(request)
+        record["comparisons"][0]["quantitative_differences"][0]["values"][0]["value"] = "approximately many"
+        with self.assertRaisesRegex(ValueError, "finite numeric"):
+            validate_record(bundle, request, record)
+
 
 if __name__ == "__main__":
     unittest.main()
