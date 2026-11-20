@@ -18,7 +18,7 @@ COMPARISON_INSTRUCTIONS = [
     "First identify each plotted spectrum/curve, legend entry, sample label and the Result Unit / panel it belongs to. A single Result Unit may contain several sample traces; compare those traces when labels permit.",
     "Before comparing, assess whether spectra are comparable: technique/mode (including ATR vs transmission where relevant), x/y axes and units, spectral range, resolution/calibration, acquisition settings, sample state/preparation, baseline treatment, normalization, smoothing, vertical offsets and replicate basis. Mark unknown dimensions explicitly.",
     "Do not force a comparison across incompatible modes, units, spectral ranges, sample states or processing. Separate compatible subsets and explain why excluded items cannot be compared.",
-    "For each defensible band comparison, report approximate peak/band positions only to the precision supported by the original axis ticks and image resolution; state the uncertainty/range. Describe shift direction and approximate magnitude when supported. Never invent exact peak positions.",
+    "For each defensible band comparison, provide structured approximate wavenumber estimates for each sample/series, an approximate peak-shift magnitude and an uncertainty/range when the axis ticks support them. Mark visual readings VISUAL_ESTIMATE and never imply exact raw-data precision.",
     "Compare relative intensity trends and apparent band-area trends when the plotted basis and baseline/normalization make that meaningful. State whether the comparison is qualitative, semi-quantitative or quantitatively supported. Do not claim integrated peak area from a simple curve unless an area/integration basis is actually available.",
     "Explicitly identify bands that appear, disappear, split, merge, broaden, narrow or remain approximately unchanged between samples. Do not equate a band becoming invisible with chemical absence when overlap, noise or plotting scale could explain it.",
     "Connect the observed spectral changes to plausible functional groups, bonds, coordination environments or chemical interactions. Separate direct observations, interpretations and hypotheses. Give confidence and competing assignments/alternative explanations.",
@@ -31,7 +31,7 @@ COMPARISON_INSTRUCTIONS = [
 def classify_spectral_technique(result: dict[str, Any]) -> str | None:
     context = result.get("measurement_context", {})
     text = " ".join(str(value or "") for value in (
-        result.get("data_type"), context.get("technique"), context.get("measurement_group")
+        result.get("data_type"), context.get("technique")
     ))
     for pattern, technique in SPECTRAL_TERMS:
         if pattern.search(text):
@@ -215,7 +215,12 @@ def build_payload(
                 "change_type": "SHIFT | RELATIVE_INTENSITY | AREA_TREND | NEW_BAND | DISAPPEARING_BAND | SPLITTING | MERGING | BROADENING | NARROWING | SIMILARITY | OTHER",
                 "samples_or_series": [],
                 "position_comparison": "Approximate positions/ranges and shift direction; unresolved when unsupported.",
+                "position_estimates": [{"sample_or_series": "", "position_cm1_approx": None, "uncertainty_cm1_approx": None, "reading_basis": "VISUAL_ESTIMATE | EXACT_TEXT | EXACT_TABLE | VECTOR_EXTRACTED | UNRESOLVED", "confidence": "High | Medium | Low | Unresolved"}],
+                "peak_shift_cm1_approx": None,
+                "shift_direction": "LOWER_WAVENUMBER | HIGHER_WAVENUMBER | NO_CLEAR_SHIFT | UNRESOLVED",
                 "relative_signal_comparison": "Qualitative/semi-quantitative trend only when supported.",
+                "relative_signal_trend": "INCREASED | DECREASED | UNCHANGED | MIXED | UNRESOLVED",
+                "apparent_area_trend": "INCREASED | DECREASED | UNCHANGED | MIXED | NOT_ASSESSABLE",
                 "signal_basis": "Intensity / absorbance / transmittance / integrated area / unavailable",
                 "observed_change": "", "result_ids": [],
                 "evidence_refs": [{"result_id": "", "region_id": "", "panel_id": "", "page_number": 0}],
