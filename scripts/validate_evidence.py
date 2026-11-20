@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -214,6 +215,57 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                     errors.append(f"{finding_id}: {field} references unknown Result Unit {rid}")
         if finding.get("epistemic_status") == "Interpreted" and not finding.get("alternative_explanations"):
             warnings.append(f"{finding_id}: interpreted finding has no alternative_explanations")
+    spectral_pattern = r"\braman\b|\bftir\b|\bft-ir\b|\binfrared\b|\bir spectroscopy\b"
+    spectral_result_ids = [
+        result_id for result_id, result in results.items()
+        if re.search(spectral_pattern,
+                     " ".join(str(value or "") for value in (
+                         result.get("data_type"),
+                         result.get("measurement_context", {}).get("technique"),
+                     )), re.I)
+    ]
+    comparisons = bundle.get("spectral_comparisons", {})
+    if spectral_result_ids and not comparisons:
+        warnings.append(
+            "Raman/FTIR Result Units exist but no joint spectral_comparisons are recorded; "
+            "independent single-image inspections do not satisfy cross-sample comparison."
+        )
+    for comparison_id, comparison in comparisons.items():
+        if comparison.get("comparison_id") != comparison_id:
+            errors.append(f"{comparison_id}: spectral comparison key/id mismatch")
+        if comparison.get("comparison_mode") != "SPECTRAL_CROSS_SAMPLE":
+            errors.append(f"{comparison_id}: invalid comparison_mode")
+        if comparison.get("comparison_status") not in {"COMPLETE", "PARTIAL", "NOT_COMPARABLE"}:
+            errors.append(f"{comparison_id}: invalid comparison_status")
+        compared_ids = comparison.get("result_ids", [])
+        if not compared_ids:
+            errors.append(f"{comparison_id}: result_ids must not be empty")
+        for result_id in compared_ids:
+            if result_id not in results:
+                errors.append(f"{comparison_id}: unknown Result Unit {result_id}")
+            elif not re.search(
+                spectral_pattern,
+                " ".join(str(value or "") for value in (
+                    results[result_id].get("data_type"),
+                    results[result_id].get("measurement_context", {}).get("technique"),
+                )), re.I
+            ):
+                errors.append(f"{comparison_id}: {result_id} is not a Raman/FTIR Result Unit")
+        assessment = comparison.get("comparability_assessment", {})
+        if assessment.get("status") not in {"COMPARABLE", "PARTIALLY_COMPARABLE", "NOT_COMPARABLE", "UNKNOWN"}:
+            errors.append(f"{comparison_id}: missing/invalid comparability_assessment.status")
+        if not str(comparison.get("summary") or "").strip():
+            errors.append(f"{comparison_id}: comparative summary is missing")
+        for observation in comparison.get("direct_observations", []):
+            if not set(observation.get("result_ids", [])).issubset(set(compared_ids)):
+                errors.append(f"{comparison_id}: direct observation references a Result Unit outside its comparison set")
+        for band in comparison.get("band_comparisons", []):
+            if not set(band.get("result_ids", [])).issubset(set(compared_ids)):
+                errors.append(f"{comparison_id}: band comparison references a Result Unit outside its comparison set")
+            for evidence_ref in band.get("evidence_refs", []):
+                if evidence_ref.get("result_id") not in compared_ids:
+                    errors.append(f"{comparison_id}: band evidence reference is outside its comparison set")
+
     quality_errors, quality_warnings = validate_evidence_quality(bundle)
     errors.extend(quality_errors)
     warnings.extend(quality_warnings)
