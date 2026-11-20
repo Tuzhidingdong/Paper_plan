@@ -41,135 +41,174 @@ def _grid_components(cell_weights):
 
 
 def assess_vector_figure_review(drawings, page_rect):
-    """Flag spatially coherent, plot-like vector clusters for human review.
+    """Identify plot-like vector clusters and record crop bounds for rasterization.
 
-    Candidate scoring uses the central-page cluster, not the union of every
-    drawing on the whole page. The legacy drawing_bbox_area_ratio now reports
-    the largest cluster's bounding area; the full-page union is separate.
-    This is triage, not semantic chart recognition.
+    The detector is deliberately a recall-oriented page triage heuristic, not
+    semantic chart recognition. Each accepted spatial component is retained as
+    a separate crop candidate so multiple plots on one page are not collapsed
+    into a single page-wide image.
     """
-    drawing_count = len(drawings)
-    item_counts = _item_type_counts(drawings)
-    drawing_item_count = sum(item_counts.values())
+    drawing_item_count = sum(
+        len(drawing.get("items") or ()) for drawing in drawings
+    )
     page_width = float(page_rect.width)
     page_height = float(page_rect.height)
     page_area = page_width * page_height
+    empty = {
+        "drawing_item_count": drawing_item_count,
+        "drawing_bbox_area_ratio": 0.0,
+        "drawing_full_page_union_bbox_area_ratio": 0.0,
+        "drawing_grid_occupancy_ratio": 0.0,
+        "central_drawing_count": 0,
+        "largest_cluster_drawing_count": 0,
+        "vector_item_type_counts": dict(_item_type_counts(drawings)),
+        "cluster_plot_primitive_counts": {"line": 0, "rectangle": 0, "quad": 0},
+        "vector_or_text_figure_review": False,
+        "vector_review_reason": None,
+        "vector_figure_candidates": [],
+        "vector_candidate_bbox_pdf": None,
+        "vector_candidate_bbox_normalized": None,
+    }
     if page_width <= 0 or page_height <= 0:
-        return {
-            "drawing_item_count": drawing_item_count,
-            "drawing_bbox_area_ratio": 0.0,
-            "drawing_full_page_union_bbox_area_ratio": 0.0,
-            "drawing_grid_occupancy_ratio": 0.0,
-            "central_drawing_count": 0,
-            "largest_cluster_drawing_count": 0,
-            "vector_item_type_counts": dict(item_counts),
-            "vector_or_text_figure_review": False,
-            "vector_review_reason": None,
-        }
+        return empty
 
-    rects = [d.get("rect") for d in drawings if d.get("rect") is not None]
-    if rects:
-        x0 = min(float(r.x0) for r in rects)
-        y0 = min(float(r.y0) for r in rects)
-        x1 = max(float(r.x1) for r in rects)
-        y1 = max(float(r.y1) for r in rects)
-        full_page_union_ratio = min(1.0, max(0.0, (x1 - x0) * (y1 - y0) / page_area))
+    all_rects = [item.get("rect") for item in drawings if item.get("rect") is not None]
+    if all_rects:
+        ux0 = min(float(rect.x0) for rect in all_rects)
+        uy0 = min(float(rect.y0) for rect in all_rects)
+        ux1 = max(float(rect.x1) for rect in all_rects)
+        uy1 = max(float(rect.y1) for rect in all_rects)
+        full_page_union_ratio = min(1.0, max(0.0, (ux1-ux0)*(uy1-uy0)/page_area))
     else:
         full_page_union_ratio = 0.0
 
-    # Ignore the outer page furniture for candidate scoring, but retain all
-    # drawings and source metadata in the page inventory.
+    columns, rows = 8, 6
     cell_weights = defaultdict(int)
     cell_types = defaultdict(Counter)
     central_drawings = []
-    columns, rows = 8, 6
+    drawing_cells = {}
     for drawing in drawings:
         rect = drawing.get("rect")
         if rect is None:
             continue
-        cx = (float(rect.x0) + float(rect.x1)) / 2.0 / page_width
-        cy = (float(rect.y0) + float(rect.y1)) / 2.0 / page_height
+        cx = ((float(rect.x0) + float(rect.x1)) / 2.0 - float(page_rect.x0)) / page_width
+        cy = ((float(rect.y0) + float(rect.y1)) / 2.0 - float(page_rect.y0)) / page_height
         if not (0.04 <= cx <= 0.96 and 0.12 <= cy <= 0.90):
             continue
+        cell = (
+            min(columns - 1, max(0, int(cx * columns))),
+            min(rows - 1, max(0, int(cy * rows))),
+        )
         central_drawings.append(drawing)
-        gx = min(columns - 1, max(0, int(cx * columns)))
-        gy = min(rows - 1, max(0, int(cy * rows)))
-        cell = (gx, gy)
-        items = drawing.get("items") or ()
-        cell_weights[cell] += max(1, len(items))
-        for item in items:
+        drawing_cells[id(drawing)] = cell
+        cell_weights[cell] += max(1, len(drawing.get("items") or ()))
+        for item in drawing.get("items") or ():
             if item:
                 cell_types[cell][str(item[0])] += 1
 
     components = _grid_components(cell_weights)
-    if components:
-        largest = max(components, key=lambda cells: sum(cell_weights[c] for c in cells))
-        largest_set = set(largest)
-        cluster_drawing_count = 0
-        for drawing in central_drawings:
-            rect = drawing.get("rect")
-            cx = (float(rect.x0) + float(rect.x1)) / 2.0 / page_width
-            cy = (float(rect.y0) + float(rect.y1)) / 2.0 / page_height
-            cell = (
-                min(columns - 1, max(0, int(cx * columns))),
-                min(rows - 1, max(0, int(cy * rows))),
-            )
-            if cell in largest_set:
-                cluster_drawing_count += 1
-        cluster_types = Counter()
-        for cell in largest:
-            cluster_types.update(cell_types[cell])
+    occupied_ratio = len(cell_weights) / float(columns * rows)
+    component_records = []
+    for component_index, component in enumerate(components, start=1):
+        component_set = set(component)
+        component_drawings = [
+            drawing for drawing in central_drawings
+            if drawing_cells.get(id(drawing)) in component_set
+        ]
+        component_types = Counter()
+        for cell in component:
+            component_types.update(cell_types[cell])
+        min_x = min(cell[0] for cell in component)
+        max_x = max(cell[0] for cell in component)
+        min_y = min(cell[1] for cell in component)
+        max_y = max(cell[1] for cell in component)
+        bbox_ratio = ((max_x-min_x+1)/columns) * ((max_y-min_y+1)/rows)
+        line_items = component_types.get("l", 0)
+        rectangle_items = component_types.get("re", 0)
+        quad_items = component_types.get("qu", 0)
+        plot_primitives = line_items + rectangle_items + quad_items
+        reason = None
+        if len(component_drawings) >= 50 and plot_primitives >= 80:
+            reason = "dense_vector_figure_cluster"
+        elif len(component_drawings) >= 12 and rectangle_items >= 8 and bbox_ratio >= 0.04 and len(component) >= 2:
+            reason = "moderate_rectangular_plot_cluster"
+        elif len(component_drawings) >= 18 and line_items >= 32 and occupied_ratio >= 0.04 and bbox_ratio >= 0.06:
+            reason = "moderate_line_plot_cluster"
+        if not reason:
+            continue
+
+        rects = [drawing.get("rect") for drawing in component_drawings if drawing.get("rect") is not None]
+        if not rects:
+            continue
+        x0 = min(float(rect.x0) for rect in rects)
+        y0 = min(float(rect.y0) for rect in rects)
+        x1 = max(float(rect.x1) for rect in rects)
+        y1 = max(float(rect.y1) for rect in rects)
+        # Include tick labels, axis titles and nearby legend glyphs around the
+        # vector primitives; clip the crop to the physical page rectangle.
+        pad_x = max(page_width * 0.035, 2.0)
+        pad_y = max(page_height * 0.055, 2.0)
+        crop = [
+            max(float(page_rect.x0), x0-pad_x),
+            max(float(page_rect.y0), y0-pad_y),
+            min(float(page_rect.x1), x1+pad_x),
+            min(float(page_rect.y1), y1+pad_y),
+        ]
+        if crop[2] <= crop[0] or crop[3] <= crop[1]:
+            continue
+        normalized = [
+            round((crop[0]-float(page_rect.x0))/page_width, 6),
+            round((crop[1]-float(page_rect.y0))/page_height, 6),
+            round((crop[2]-float(page_rect.x0))/page_width, 6),
+            round((crop[3]-float(page_rect.y0))/page_height, 6),
+        ]
+        component_records.append({
+            "candidate_index": component_index,
+            "bbox_pdf": [round(value, 3) for value in crop],
+            "bbox_normalized": normalized,
+            "reason": reason,
+            "drawing_count": len(component_drawings),
+            "plot_primitive_counts": {
+                "line": line_items, "rectangle": rectangle_items, "quad": quad_items
+            },
+        })
+
+    largest = max(components, key=lambda cells: sum(cell_weights[cell] for cell in cells)) if components else []
+    largest_drawings = [
+        drawing for drawing in central_drawings
+        if drawing_cells.get(id(drawing)) in set(largest)
+    ]
+    largest_types = Counter()
+    for cell in largest:
+        largest_types.update(cell_types[cell])
+    largest_bbox_ratio = 0.0
+    if largest:
         min_x = min(cell[0] for cell in largest)
         max_x = max(cell[0] for cell in largest)
         min_y = min(cell[1] for cell in largest)
         max_y = max(cell[1] for cell in largest)
-        cluster_bbox_ratio = ((max_x - min_x + 1) / columns) * ((max_y - min_y + 1) / rows)
-    else:
-        cluster_drawing_count = 0
-        cluster_types = Counter()
-        cluster_bbox_ratio = 0.0
+        largest_bbox_ratio = ((max_x-min_x+1)/columns) * ((max_y-min_y+1)/rows)
 
-    occupied_ratio = len(cell_weights) / float(columns * rows)
-    line_items = cluster_types.get("l", 0)
-    rectangle_items = cluster_types.get("re", 0)
-    quad_items = cluster_types.get("qu", 0)
-    plot_primitives = line_items + rectangle_items + quad_items
-
-    reason = None
-    if cluster_drawing_count >= 50 and plot_primitives >= 80:
-        reason = "dense_vector_figure_cluster"
-    elif (
-        cluster_drawing_count >= 12
-        and rectangle_items >= 8
-        and cluster_bbox_ratio >= 0.04
-        and len(max(components, key=len)) >= 2
-    ):
-        reason = "moderate_rectangular_plot_cluster"
-    elif (
-        cluster_drawing_count >= 18
-        and line_items >= 32
-        and occupied_ratio >= 0.04
-        and cluster_bbox_ratio >= 0.06
-    ):
-        reason = "moderate_line_plot_cluster"
-
+    primary = max(component_records, key=lambda item: item["drawing_count"]) if component_records else None
     return {
         "drawing_item_count": drawing_item_count,
-        "drawing_bbox_area_ratio": round(cluster_bbox_ratio, 4),
+        "drawing_bbox_area_ratio": round(largest_bbox_ratio, 4),
         "drawing_full_page_union_bbox_area_ratio": round(full_page_union_ratio, 4),
         "drawing_grid_occupancy_ratio": round(occupied_ratio, 4),
         "central_drawing_count": len(central_drawings),
-        "largest_cluster_drawing_count": cluster_drawing_count,
-        "vector_item_type_counts": dict(item_counts),
+        "largest_cluster_drawing_count": len(largest_drawings),
+        "vector_item_type_counts": dict(_item_type_counts(drawings)),
         "cluster_plot_primitive_counts": {
-            "line": line_items,
-            "rectangle": rectangle_items,
-            "quad": quad_items,
+            "line": largest_types.get("l", 0),
+            "rectangle": largest_types.get("re", 0),
+            "quad": largest_types.get("qu", 0),
         },
-        "vector_or_text_figure_review": reason is not None,
-        "vector_review_reason": reason,
+        "vector_or_text_figure_review": bool(component_records),
+        "vector_review_reason": primary.get("reason") if primary else None,
+        "vector_figure_candidates": component_records,
+        "vector_candidate_bbox_pdf": primary.get("bbox_pdf") if primary else None,
+        "vector_candidate_bbox_normalized": primary.get("bbox_normalized") if primary else None,
     }
-
 
 from era_core import (
     atomic_write_json,
@@ -254,7 +293,7 @@ def main() -> int:
     atomic_write_json(paths["bundle"], bundle)
     manifest = {
         "schema_version": 1,
-        "vector_detector_version": "spatial-vector-cluster/0.2.0",
+        "vector_detector_version": "spatial-vector-cluster/0.3.0",
         "vector_review_candidate_count": sum(1 for item in page_records if item["vector_or_text_figure_review"]),
         "workspace_revision": "0.3.0",
         "stage": "INGESTED",
