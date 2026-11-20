@@ -574,7 +574,7 @@ def build_analysis_pack(
                 "limitations": []
             }
         },
-        "invocation_audit_required": true
+        "invocation_audit_required": True
     }
 
 
