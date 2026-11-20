@@ -179,6 +179,7 @@ def default_evidence_bundle() -> dict[str, Any]:
         "audit_records": [],
         "discrepancies": [],
         "visual_inspections": {},
+        "spectral_comparisons": {},
     }
 
 

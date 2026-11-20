@@ -71,13 +71,36 @@ Figure-level status and report-level status stay separate. NOT_SHOWN means not s
 - Mark each Result Unit's intended claim role as UNDECIDED, SUPPORTING, CORE or NOT_USED. A numeric CORE result must pass the measurement-definition checks before it can support a central quantitative claim.
 - Compare experimental conditions explicitly before combining or contrasting Result Units. Record matched, mismatched, unknown and not-applicable dimensions rather than assuming like-for-like comparability.
 
-## 7. Artifact/confounder audit
+## 7. Joint Raman / FTIR comparison (mandatory when spectral Result Units exist)
+
+After Result Units and sample associations have been created, identify every Raman/FTIR Result Unit and run the joint comparison task generator:
+
+    python scripts/prepare_spectral_comparison.py --workspace WORKSPACE --auto
+
+The script creates one original-resolution comparison request per technique and explicit measurement_group. When a measurement_group is absent, the group is marked GROUPING_REQUIRES_MODEL_REVIEW; do not assume that technique alone proves comparability. Inspect all listed image paths together in one visual context. One Result Unit may contain several plotted sample traces and must still be examined for within-figure comparisons.
+
+The joint visual analysis must:
+- identify visible spectra/series and map them to Result Units, sample IDs/aliases and figure labels without guessing unresolved mappings;
+- assess acquisition mode, axes/units/range/resolution, calibration, sample preparation/state, baseline, normalization, smoothing, vertical offsets, signal basis and replicate basis before comparing;
+- make a band-by-band comparison of approximate positions/shift directions, relative signal or area trends where defensible, and bands that appear/disappear/split/merge/broaden/narrow/remain stable;
+- state approximate peak-position ranges and uncertainty only when original-resolution ticks support them; do not digitize curves into raw datasets or manufacture exact values;
+- explain likely functional-group/bond/coordination changes, keeping observations, interpretations and hypotheses distinct and giving competing assignments/confounders;
+- state candidate scientific implications and what independent Result Units could corroborate them; never invent corroboration;
+- return PARTIAL or NOT_COMPARABLE when sample identity, image quality or measurement conditions prevent a defensible comparison.
+
+Save the model's structured response to a JSON file following the prepared request's required_output shape, then register it:
+
+    python scripts/record_spectral_comparison.py --workspace WORKSPACE --request-json REQUEST_JSON --record-json COMPARISON_RESULT_JSON
+
+The record is a first-class Evidence Bundle item and is included in cache/prompt_context/evidence_context.md. Do not proceed as though spectral comparison is complete when a spectral Result Unit has only an independent single-image inspection. If there are no Raman/FTIR Result Units, record none and continue.
+
+## 8. Artifact/confounder audit
 
 Before upgrading observations into interpretations, consider relevant sample identity, preparation differences, instrument calibration, acquisition settings, baseline/background/fitting, normalization and units, replicate variability, controls, alternate mechanisms, image cropping/contrast and selection bias.
 
 For every relevant factor record whether the report shows it, where that evidence came from, plausible alternatives and what would resolve the uncertainty. Missing metadata makes the stronger claim not assessable; it does not prove the experiment is wrong.
 
-## 8. Validation and context compilation
+## 9. Validation and context compilation
 
 Run:
 
@@ -89,7 +112,7 @@ A PASS is structural only. Surface sample warnings and unresolved mappings. Trig
 
 ## Required outputs
 
-Evidence Bundle, State Manifest, ID Registry, PDF/page inventory, all extracted Regions, Contact Sheets, Result Units, Sample Entities, instrument checklist, artifact audit, visual/text discrepancies, validation reports and compact context.
+Evidence Bundle, State Manifest, ID Registry, PDF/page inventory, all extracted Regions, Contact Sheets, Result Units, Sample Entities, instrument checklist, joint Raman/FTIR comparison records (when applicable), artifact audit, visual/text discrepancies, validation reports and compact context.
 
 ## Stop conditions
 

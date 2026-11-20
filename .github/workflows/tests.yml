@@ -2,9 +2,9 @@ name: ERA tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/spectral-cross-sample-comparison]
   pull_request:
-    branches: [main]
+    branches: [main, v5.1/researcher-facing-product]
 
 jobs:
   unit-tests:

@@ -75,6 +75,13 @@
     },
     "micro_gate": {
       "type": "object"
+    },
+    "spectral_comparisons": {
+      "type": "object",
+      "description": "Source-linked joint visual comparisons of Raman/FTIR spectra across samples or plotted series.",
+      "additionalProperties": {
+        "$ref": "#/$defs/spectral_comparison"
+      }
     }
   },
   "$defs": {
@@ -1234,6 +1241,133 @@
         }
       },
       "additionalProperties": false
+    },
+    "spectral_comparison": {
+      "type": "object",
+      "required": [
+        "comparison_id",
+        "comparison_mode",
+        "result_ids",
+        "technique",
+        "comparison_status",
+        "summary",
+        "comparability_assessment"
+      ],
+      "properties": {
+        "comparison_id": {
+          "type": "string",
+          "pattern": "^SCMP-[a-f0-9]{16}$"
+        },
+        "comparison_mode": {
+          "const": "SPECTRAL_CROSS_SAMPLE"
+        },
+        "result_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "technique": {
+          "enum": [
+            "Raman",
+            "FTIR"
+          ]
+        },
+        "comparison_status": {
+          "enum": [
+            "COMPLETE",
+            "PARTIAL",
+            "NOT_COMPARABLE"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "comparability_assessment": {
+          "type": "object",
+          "required": [
+            "status",
+            "assessed_dimensions",
+            "conclusion"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "COMPARABLE",
+                "PARTIALLY_COMPARABLE",
+                "NOT_COMPARABLE",
+                "UNKNOWN"
+              ]
+            },
+            "assessed_dimensions": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "conclusion": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "sample_groups": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "direct_observations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "band_comparisons": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "functional_group_interpretations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "candidate_scientific_implications": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cross_validation": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recorded_at": {
+          "type": "string"
+        },
+        "source_sha256": {
+          "type": "string"
+        },
+        "request_grouping_status": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": false
