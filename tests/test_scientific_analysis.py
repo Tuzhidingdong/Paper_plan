@@ -155,7 +155,20 @@ def valid_record(request):
         "contradictions": [],
         "candidate_scientific_implications": ["A candidate relationship merits targeted review."],
         "unresolved_questions": ["Are the conditions sufficiently matched?"],
-        "limitations": ["Synthetic fixture only."]
+        "limitations": ["Synthetic fixture only."],
+        "model_invocation": {
+            "invocation_id": "synthetic-test-invocation",
+            "status": "RESPONSE_RECEIVED",
+            "model_id": "synthetic-test-model",
+            "input_mode": "TEXT_ONLY_PATHS",
+            "evidence_level": "AGENT_REPORTED_RUNTIME_RECEIPT",
+            "attached_assets": [],
+            "request_log_path": "logs/request.json",
+            "request_log_sha256": "a" * 64,
+            "response_log_path": "logs/response.json",
+            "response_log_sha256": "b" * 64,
+            "limitations": ["The fixture contains no existing image files."]
+        }
     }
 
 
