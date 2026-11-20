@@ -16,7 +16,7 @@ from extract_regions import extract_vector_figure_candidates
 from ingest_pdf import assess_vector_figure_review
 from record_figure_triage import record_figure_triage
 from record_scientific_analysis import validate_record
-from validate_evidence import validate_figure_candidate_coverage
+from validate_evidence import validate, validate_figure_candidate_coverage
 
 
 def _rect(x0, y0, x1, y1):
@@ -342,6 +342,54 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
             record["signal_comparisons"][0]["feature_ids"] = ["SIG-1"]
             with self.assertRaisesRegex(ValueError, "at least two recorded signal features"):
                 validate_record(bundle, request, record, workspace)
+
+    def test_evidence_validator_handles_general_analysis_coverage_without_signal_audit(self):
+        bundle = {
+            "source": {"file_name": "source.pdf", "sha256": "f" * 64, "page_count": 1},
+            "regions": {
+                "REG001": {
+                    "region_id": "REG001",
+                    "page_number": 1,
+                    "bbox_normalized": [0.1, 0.1, 0.9, 0.9],
+                    "image_path": "regions/REG001.png",
+                }
+            },
+            "panels": {},
+            "samples": {},
+            "result_units": {
+                "R001": {
+                    "result_id": "R001",
+                    "region_ids": ["REG001"],
+                    "panel_ids": [],
+                    "data_origin": "Exact_Table",
+                    "visual_legibility": "High",
+                    "quantitative_permission": "Trend_Only",
+                    "epistemic_status": "Observed",
+                    "is_visual_estimate": False,
+                    "measurement_context": {},
+                    "observations": [],
+                }
+            },
+            "findings": {},
+            "audit_records": [],
+            "scientific_analyses": {
+                "SANA-TEST": {
+                    "analysis_id": "SANA-TEST",
+                    "analysis_mode": "GENERAL_SCIENTIFIC_EVIDENCE_ANALYSIS",
+                    "analysis_status": "PARTIAL",
+                    "result_ids": ["R001"],
+                    "coverage": [{
+                        "result_id": "R001",
+                        "status": "NOT_ASSESSABLE",
+                        "observation_ids": [],
+                        "reason": "Synthetic fixture exercises general coverage only.",
+                    }],
+                }
+            },
+        }
+        errors, warnings = validate(bundle)
+        self.assertEqual(errors, [])
+        self.assertEqual(warnings, [])
 
 
 if __name__ == "__main__":
