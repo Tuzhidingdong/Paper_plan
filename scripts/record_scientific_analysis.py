@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from era_core import atomic_write_json, load_evidence_bundle, workspace_paths
+from era_core import atomic_write_json, load_evidence_bundle, parse_numeric_scalar, workspace_paths
 
 VALID_ANALYSIS_STATUS = {"COMPLETE", "PARTIAL", "NOT_ASSESSABLE"}
 VALID_COVERAGE = {"ANALYZED", "NO_COMPARISON_APPLICABLE", "NOT_ASSESSABLE"}
@@ -48,6 +48,10 @@ def validate_record(
     record: dict[str, Any],
 ) -> None:
     expected_id = request.get("analysis_id")
+    request_sha = request.get("source", {}).get("sha256")
+    current_sha = bundle.get("source", {}).get("sha256")
+    if not request_sha or not current_sha or request_sha != current_sha:
+        raise ValueError("Prepared request source SHA-256 does not match the current Evidence Bundle")
     if record.get("analysis_id") != expected_id:
         raise ValueError("analysis_id does not match the prepared request")
     if record.get("analysis_mode") != "GENERAL_SCIENTIFIC_EVIDENCE_ANALYSIS":
@@ -127,6 +131,14 @@ def validate_record(
             for value in difference.get("values", []):
                 if value.get("result_id") not in ids:
                     raise ValueError(f"comparisons[{index}] quantitative difference cites an unrelated Result Unit")
+                if parse_numeric_scalar(value.get("value")) is None:
+                    raise ValueError(f"comparisons[{index}] quantitative values must be finite numeric estimates or measurements")
+                if not str(value.get("unit") or "").strip():
+                    raise ValueError(f"comparisons[{index}] quantitative values must declare a unit (use 'dimensionless' when appropriate)")
+                if not str(value.get("source_basis") or "").strip():
+                    raise ValueError(f"comparisons[{index}] quantitative values must declare their source basis")
+                if not str(value.get("precision_or_uncertainty") or "").strip():
+                    raise ValueError(f"comparisons[{index}] quantitative values must state precision or uncertainty")
 
     for index, item in enumerate(record.get("relationships", [])):
         ids = item.get("result_ids", [])
