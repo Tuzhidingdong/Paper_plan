@@ -52,6 +52,23 @@ def compile_context(bundle: dict[str, Any]) -> str:
     for region_id, region in sorted(regions.items(), key=lambda pair: (pair[1].get("page_number", 0), pair[0])):
         lines.append(f"- {region_id} | page {region.get('page_number')} | {region.get('region_type')} | {region.get('image_path')}")
     lines.append("")
+    lines.append("## Source figure candidate coverage")
+    figure_candidates = bundle.get("figure_candidates", {})
+    if figure_candidates:
+        for candidate_id, candidate in sorted(figure_candidates.items()):
+            disposition = candidate.get("disposition") or "UNDECIDED"
+            lines.append(
+                f"- **{candidate_id}** | page {candidate.get('page_number')} | "
+                f"{candidate.get('extraction_status', 'unknown')} | "
+                f"{candidate.get('triage_status', 'unknown')} | {disposition} | "
+                f"Region: {candidate.get('region_id') or 'not registered'} | "
+                f"Result Units: {', '.join(candidate.get('result_ids', [])) or 'none'}"
+            )
+            if candidate.get("reason"):
+                lines.append(f"  - Decision reason: {candidate['reason']}")
+    else:
+        lines.append("- No vector-figure candidates were registered by the ingest detector.")
+    lines.append("")
     lines.append("## Result Units")
     for result_id, result in sorted(bundle.get("result_units", {}).items()):
         enriched = dict(result)
@@ -91,6 +108,58 @@ def compile_context(bundle: dict[str, Any]) -> str:
                     f"{observation.get('description', '')} "
                     f"[{', '.join(observation.get('result_ids', []))}]"
                 )
+            for feature in analysis.get("signal_features", []):
+                result_id = feature.get("result_id", "unknown")
+                position = feature.get("position") or {}
+                width = feature.get("width") or {}
+                intensity = feature.get("intensity") or {}
+                area = feature.get("area") or {}
+                lines.append(
+                    f"  - Signal feature {feature.get('feature_id', 'unidentified')} "
+                    f"[{feature.get('feature_type', 'OTHER')} | {result_id} | "
+                    f"{feature.get('series_id') or 'series unspecified'}]: {feature.get('description', '')}"
+                )
+                for label, estimate in (("position", position), ("width", width), ("intensity", intensity), ("area", area)):
+                    if estimate.get("value") is not None:
+                        lines.append(
+                            f"    - {label}: {estimate.get('value')} {estimate.get('unit', '')}; "
+                            f"basis={estimate.get('reading_basis', 'unspecified')}; "
+                            f"precision={estimate.get('precision_or_uncertainty', 'unreported')}; "
+                            f"normalization={estimate.get('normalization_basis', 'not stated')}"
+                        )
+                lines.append(
+                    "    - Evidence: " + "; ".join(
+                        f"{item.get('result_id')} {item.get('region_id') or item.get('panel_id')} p.{item.get('page_number')}"
+                        for item in feature.get("evidence_refs", [])
+                    )
+                )
+            for comparison in analysis.get("signal_comparisons", []):
+                quantified = comparison.get("quantified_change") or {}
+                lines.append(
+                    f"  - Signal comparison {comparison.get('comparison_id', 'unidentified')} "
+                    f"[{comparison.get('change_type', 'OTHER')} | "
+                    f"{', '.join(comparison.get('result_ids', []))} | "
+                    f"{comparison.get('comparability_status', 'UNKNOWN')}]: "
+                    f"{comparison.get('description', '')}"
+                )
+                if quantified.get("value") is not None:
+                    lines.append(
+                        f"    - Change: {quantified.get('metric', 'signal')} = {quantified.get('value')} "
+                        f"{quantified.get('unit', '')}; basis={quantified.get('source_basis', 'unspecified')}; "
+                        f"precision={quantified.get('precision_or_uncertainty', 'unreported')}"
+                    )
+                if comparison.get("interpretation_limits"):
+                    lines.append(f"    - Limits: {'; '.join(comparison['interpretation_limits'])}")
+            invocation = analysis.get("model_invocation") or {}
+            if invocation:
+                lines.append(
+                    f"  - Model image-input audit: {invocation.get('status', 'unknown')} | "
+                    f"{invocation.get('input_mode', 'unknown')} | model={invocation.get('model_id', 'unreported')} | "
+                    f"native image attachments={len(invocation.get('attached_assets', []))} | "
+                    f"evidence={invocation.get('evidence_level', 'unreported')}"
+                )
+                if invocation.get("limitations"):
+                    lines.append(f"    - Invocation limitations: {'; '.join(invocation['limitations'])}")
             for comparison in analysis.get("comparisons", []):
                 lines.append(
                     f"  - Comparison: {comparison.get('question', '')} "
@@ -240,9 +309,9 @@ def compile_context(bundle: dict[str, Any]) -> str:
             )
     elif spectral_result_ids:
         lines.append(
-            "- Spectral Result Units were identified, but no joint cross-sample comparison has been recorded. "
-            "Do not treat independent single-spectrum inspections as a completed comparison; prepare and record "
-            "a joint task with scripts/prepare_spectral_comparison.py."
+            "- Signal-level analysis is part of the general scientific-analysis record. Prepare source-linked "
+            "signal_features and signal_comparisons for the plotted spectra/series; the legacy spectral-comparison "
+            "record is retained only for backwards compatibility."
         )
         lines.append(f"  - Spectral Result Units: {', '.join(sorted(spectral_result_ids))}")
     else:
