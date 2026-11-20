@@ -117,6 +117,12 @@ def validate_record(
                 raise ValueError(f"comparisons[{index}] has an invalid dimension status")
         if not str(item.get("conclusion") or "").strip():
             raise ValueError(f"comparisons[{index}] requires a conclusion")
+        observation_refs = set(item.get("observation_ids", []))
+        if not observation_refs or not observation_refs.issubset(observation_ids):
+            raise ValueError(f"comparisons[{index}] must cite recorded observations")
+        _valid_refs(bundle, expected_ids, item.get("evidence_refs", []), f"comparisons[{index}]")
+        if any(ref.get("result_id") not in ids for ref in item.get("evidence_refs", [])):
+            raise ValueError(f"comparisons[{index}] cites evidence outside its compared Result Units")
         for difference in item.get("quantitative_differences", []):
             for value in difference.get("values", []):
                 if value.get("result_id") not in ids:
