@@ -343,7 +343,7 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "at least two recorded signal features"):
                 validate_record(bundle, request, record, workspace)
 
-    def test_evidence_validator_handles_general_analysis_coverage_without_signal_audit(self):
+    def test_evidence_validator_handles_general_and_signal_coverage_maps(self):
         bundle = {
             "source": {"file_name": "source.pdf", "sha256": "f" * 64, "page_count": 1},
             "regions": {
@@ -382,8 +382,18 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
                         "result_id": "R001",
                         "status": "NOT_ASSESSABLE",
                         "observation_ids": [],
-                        "reason": "Synthetic fixture exercises general coverage only.",
+                        "reason": "Synthetic fixture isolates validator coverage-map behavior.",
                     }],
+                    "invocation_audit_required": True,
+                    "signal_analysis_coverage": [{
+                        "result_id": "R001",
+                        "status": "NOT_ASSESSABLE",
+                        "feature_ids": [],
+                        "comparison_ids": [],
+                        "reason": "Synthetic fixture contains no resolvable signal image.",
+                    }],
+                    "signal_features": [],
+                    "signal_comparisons": [],
                 }
             },
         }
