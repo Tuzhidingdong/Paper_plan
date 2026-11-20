@@ -215,6 +215,127 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                     errors.append(f"{finding_id}: {field} references unknown Result Unit {rid}")
         if finding.get("epistemic_status") == "Interpreted" and not finding.get("alternative_explanations"):
             warnings.append(f"{finding_id}: interpreted finding has no alternative_explanations")
+    analyses = bundle.get("scientific_analyses", {})
+    analyzed_result_ids: set[str] = set()
+    for analysis_id, analysis in analyses.items():
+        if analysis.get("analysis_id") != analysis_id:
+            errors.append(f"{analysis_id}: scientific analysis key/id mismatch")
+        if analysis.get("analysis_mode") != "GENERAL_SCIENTIFIC_EVIDENCE_ANALYSIS":
+            errors.append(f"{analysis_id}: invalid analysis_mode")
+        if analysis.get("analysis_status") not in {"COMPLETE", "PARTIAL", "NOT_ASSESSABLE"}:
+            errors.append(f"{analysis_id}: invalid analysis_status")
+        result_ids = analysis.get("result_ids", [])
+        result_id_set = set(result_ids)
+        if not result_ids or len(result_id_set) != len(result_ids):
+            errors.append(f"{analysis_id}: result_ids must be non-empty and unique")
+        for result_id in result_ids:
+            if result_id not in results:
+                errors.append(f"{analysis_id}: unknown Result Unit {result_id}")
+        coverage = analysis.get("coverage", [])
+        coverage_ids = [item.get("result_id") for item in coverage]
+        if set(coverage_ids) != result_id_set or len(coverage_ids) != len(result_id_set):
+            errors.append(f"{analysis_id}: coverage must account for each Result Unit exactly once")
+        for item in coverage:
+            result_id = item.get("result_id")
+            status = item.get("status")
+            if status not in {"ANALYZED", "NO_COMPARISON_APPLICABLE", "NOT_ASSESSABLE"}:
+                errors.append(f"{analysis_id}: invalid coverage status for {result_id}")
+            if status in {"NO_COMPARISON_APPLICABLE", "NOT_ASSESSABLE"} and not str(item.get("reason") or "").strip():
+                errors.append(f"{analysis_id}: {result_id} requires a reason for {status}")
+            if result_id:
+                analyzed_result_ids.add(result_id)
+        if analysis.get("analysis_status") == "COMPLETE" and any(
+            item.get("status") == "NOT_ASSESSABLE" for item in coverage
+        ):
+            errors.append(f"{analysis_id}: COMPLETE analysis contains NOT_ASSESSABLE coverage")
+
+        observations = analysis.get("observations", [])
+        observation_ids = set()
+        observation_result_map: dict[str, set[str]] = {}
+        for index, observation in enumerate(observations):
+            observation_id = observation.get("observation_id")
+            if not observation_id or observation_id in observation_ids:
+                errors.append(f"{analysis_id}: observations[{index}] has missing/duplicate observation_id")
+            observation_ids.add(observation_id)
+            if observation.get("epistemic_status") != "Observed":
+                errors.append(f"{analysis_id}: observations[{index}] must be Observed")
+            refs = observation.get("result_ids", [])
+            if not refs or not set(refs).issubset(result_id_set):
+                errors.append(f"{analysis_id}: observations[{index}] references Result Units outside its pack")
+            observation_result_map[observation_id] = set(refs)
+            for ref in observation.get("evidence_refs", []):
+                rid = ref.get("result_id")
+                if rid not in result_id_set:
+                    errors.append(f"{analysis_id}: observation evidence reference is outside its pack")
+                    continue
+                source_result = results.get(rid, {})
+                if ref.get("region_id") and ref["region_id"] not in source_result.get("region_ids", []):
+                    errors.append(f"{analysis_id}: observation cites unrelated Region {ref['region_id']}")
+                if ref.get("panel_id") and ref["panel_id"] not in source_result.get("panel_ids", []):
+                    errors.append(f"{analysis_id}: observation cites unrelated Panel {ref['panel_id']}")
+                if not ref.get("region_id") and not ref.get("panel_id"):
+                    errors.append(f"{analysis_id}: observation evidence reference lacks Region/Panel")
+        for item in coverage:
+            if item.get("status") == "ANALYZED":
+                ids = set(item.get("observation_ids", []))
+                if not ids or not ids.issubset(observation_ids):
+                    errors.append(f"{analysis_id}: ANALYZED coverage lacks valid observations for {item.get('result_id')}")
+                elif any(item.get("result_id") not in observation_result_map.get(obs_id, set()) for obs_id in ids):
+                    errors.append(f"{analysis_id}: coverage observation does not cite {item.get('result_id')}")
+
+        for index, comparison in enumerate(analysis.get("comparisons", [])):
+            compare_ids = comparison.get("result_ids", [])
+            if len(set(compare_ids)) < 2 or not set(compare_ids).issubset(result_id_set):
+                errors.append(f"{analysis_id}: comparisons[{index}] must reference at least two Result Units in its pack")
+            if comparison.get("comparison_status") not in {"COMPARABLE", "PARTIALLY_COMPARABLE", "NOT_COMPARABLE", "NOT_APPLICABLE"}:
+                errors.append(f"{analysis_id}: comparisons[{index}] has invalid comparison_status")
+            dimensions = comparison.get("dimension_assessments")
+            if not isinstance(dimensions, list) or not dimensions:
+                errors.append(f"{analysis_id}: comparisons[{index}] requires dimension_assessments")
+            else:
+                for dimension in dimensions:
+                    if dimension.get("status") not in {"MATCHED", "MISMATCHED", "UNKNOWN", "NOT_APPLICABLE"}:
+                        errors.append(f"{analysis_id}: comparisons[{index}] has invalid dimension status")
+            if not str(comparison.get("conclusion") or "").strip():
+                errors.append(f"{analysis_id}: comparisons[{index}] requires a conclusion")
+            for difference in comparison.get("quantitative_differences", []):
+                for value in difference.get("values", []):
+                    if value.get("result_id") not in compare_ids:
+                        errors.append(f"{analysis_id}: quantitative difference references an unrelated Result Unit")
+
+        for index, relationship in enumerate(analysis.get("relationships", [])):
+            refs = relationship.get("result_ids", [])
+            if not refs or not set(refs).issubset(result_id_set):
+                errors.append(f"{analysis_id}: relationships[{index}] references Result Units outside its pack")
+            if not set(relationship.get("observation_ids", [])).issubset(observation_ids):
+                errors.append(f"{analysis_id}: relationships[{index}] references unknown observations")
+            if relationship.get("causal_status") not in {"NOT_ESTABLISHED", "SUPPORTED_WITH_CONTROLS", "ESTABLISHED_BY_DESIGN"}:
+                errors.append(f"{analysis_id}: relationships[{index}] has invalid causal_status")
+
+        for index, interpretation in enumerate(analysis.get("interpretations", [])):
+            if interpretation.get("epistemic_status") not in {"Interpreted", "Hypothesized"}:
+                errors.append(f"{analysis_id}: interpretations[{index}] has invalid epistemic_status")
+            refs = set(interpretation.get("supporting_observation_ids", []))
+            if not refs or not refs.issubset(observation_ids):
+                errors.append(f"{analysis_id}: interpretations[{index}] lacks valid supporting observations")
+            if not interpretation.get("alternative_explanations"):
+                errors.append(f"{analysis_id}: interpretations[{index}] requires alternative_explanations")
+
+        for index, contradiction in enumerate(analysis.get("contradictions", [])):
+            refs = contradiction.get("result_ids", [])
+            if not refs or not set(refs).issubset(result_id_set):
+                errors.append(f"{analysis_id}: contradictions[{index}] references Result Units outside its pack")
+            for ref in contradiction.get("evidence_refs", []):
+                if ref.get("result_id") not in result_id_set:
+                    errors.append(f"{analysis_id}: contradiction evidence reference is outside its pack")
+
+    uncovered_analysis_results = sorted(set(results) - analyzed_result_ids)
+    if results and uncovered_analysis_results:
+        warnings.append(
+            "Result Units not yet covered by general scientific analysis: "
+            + ", ".join(uncovered_analysis_results)
+        )
+
     spectral_pattern = r"\braman\b|\bftir\b|\bft-ir\b|\binfrared\b|\bir spectroscopy\b"
     spectral_result_ids = [
         result_id for result_id, result in results.items()
@@ -225,7 +346,8 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                      )), re.I)
     ]
     comparisons = bundle.get("spectral_comparisons", {})
-    if spectral_result_ids and not comparisons:
+    legacy_spectral_covered = {rid for item in comparisons.values() for rid in item.get("result_ids", [])}
+    if spectral_result_ids and (set(spectral_result_ids) - legacy_spectral_covered - analyzed_result_ids):
         warnings.append(
             "Raman/FTIR Result Units exist but no joint spectral_comparisons are recorded; "
             "independent single-image inspections do not satisfy cross-sample comparison."
@@ -270,7 +392,7 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
         result_id for comparison in comparisons.values()
         for result_id in comparison.get("result_ids", [])
     }
-    uncovered_spectral_result_ids = sorted(set(spectral_result_ids) - covered_spectral_result_ids)
+    uncovered_spectral_result_ids = sorted(set(spectral_result_ids) - covered_spectral_result_ids - analyzed_result_ids)
     if uncovered_spectral_result_ids:
         warnings.append(
             "Raman/FTIR Result Units are not covered by a recorded joint comparison: "
