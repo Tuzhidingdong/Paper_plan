@@ -228,8 +228,15 @@ class TestGeneralScientificAnalysis(unittest.TestCase):
 
     def test_single_result_multiple_panels_keeps_all_original_assets(self):
         pack = build_analysis_pack(bundle_fixture(), Path("/workspace"), ["R001"], [], 1)
-        paths = {asset["image_path"] for asset in pack["assets"]}
-        self.assertEqual(paths, {"assets/a1.png", "assets/a2.png"})
+        assets_by_path = {asset["image_path"]: asset for asset in pack["assets"]}
+        self.assertEqual(set(assets_by_path), {"assets/a1.png", "assets/a2.png"})
+        self.assertEqual(
+            {asset["panel_id"] for asset in assets_by_path.values()},
+            {"PANEL001", "PANEL002"},
+        )
+        self.assertTrue(all(asset["resolution_scope"] == "PANEL" for asset in assets_by_path.values()))
+        self.assertTrue(all(asset["asset_exists"] is False for asset in assets_by_path.values()))
+        self.assertTrue(all(asset["asset_sha256"] is None for asset in assets_by_path.values()))
         self.assertTrue(any("connected scientific dataset" in line for line in pack["instructions"]))
         association = pack["result_units"][0]["sample_associations"][0]
         self.assertEqual(association["sample_aliases"], ["Specimen A"])
