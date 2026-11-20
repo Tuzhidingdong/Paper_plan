@@ -397,12 +397,11 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
                 }
             },
         }
+        # NOT_ASSESSABLE is an explicit coverage disposition: it is not
+        # ANALYZED, but it must not trigger the generic "not yet covered" warning.
         errors, warnings = validate(bundle)
         self.assertEqual(errors, [])
-        self.assertEqual(
-            warnings,
-            ["Result Units not yet covered by general scientific analysis: R001"],
-        )
+        self.assertEqual(warnings, [])
 
 
 if __name__ == "__main__":
