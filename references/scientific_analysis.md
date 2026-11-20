@@ -19,6 +19,10 @@ Choose comparisons dynamically according to the evidence. Depending on the proje
 
 These are examples of possible relationship classes, not a required checklist. Do not force an analysis that the evidence cannot support. Do not limit discovery to candidate links emitted by the preparation script: inspect the underlying evidence map for relationships the metadata index did not detect.
 
+For plotted experimental signals, identify the axes, units, plotted series and visible features from the original-resolution asset. Where supported, record feature-level properties such as position, width, intensity, apparent area, shape, shoulders, splitting, appearance/disappearance and within-plot or between-plot changes. The feature taxonomy must be selected from the current evidence, not imposed as an instrument-specific checklist. A generic feature-assignment list without comparison of the actual plotted series is not sufficient.
+
+For every proposed signal-feature comparison, identify the feature instances and source series, the scientific question, exactly which Result Units/samples/conditions are compared, the measurement/axis units, normalization and processing basis, image/data reading basis, and whether the compared items are sufficiently compatible. Record position/width/intensity/area estimates only when supported; preserve source precision, image resolution, uncertainty and confidence. A metric that cannot be read reliably remains unresolved rather than guessed. Explain the visible change, trend, convergence or contradiction and what cannot be inferred.
+
 For every proposed comparison, identify the scientific question; exactly which Result Units, samples, series or conditions are compared; the relevant measurement definition and units; whether the compared items are sufficiently compatible; what difference, trend, convergence or contradiction is directly visible or numerically supported; and what cannot be inferred from that comparison.
 
 ### Pass C — assess compatibility and strength
@@ -42,7 +46,9 @@ For each interpretation, provide the observation IDs and source evidence that su
 ### Pass E — synthesize scientific value
 Identify which relationships materially change the understanding of the project, which findings are robust, which remain provisional and which expected relationships are not present. Surface potential scientific implications that were not explicitly prompted by the user, but show the evidence chain and label them as candidates until established.
 
-The output should explain the strongest patterns and differences in the current evidence; cross-result convergence and divergence; observations inconsistent with the leading interpretation; the limits of each comparison; the most discriminating missing evidence or reanalysis; and which findings can advance the manuscript storyline and which cannot.
+The output should explain the strongest patterns and differences in the current evidence; cross-result convergence and divergence; observations inconsistent with the leading interpretation; the limits of each comparison; the most discriminating missing evidence or reanalysis; and which findings can advance the manuscript storyline and which cannot. For plotted signals, persist source-linked `signal_features` and `signal_comparisons` including actual feature observations, measured/estimated properties, comparison basis and limitations.
+
+For every analysis pack that contains image assets, the runtime Agent must attach the original-resolution files as native image inputs and save the actual request and response artifacts. Include an invocation receipt mapping each requested image path and SHA-256 to its native attachment reference, together with the model identifier and request/response paths and hashes. This is an Agent-reported runtime receipt, not independent host-level attestation. When native image delivery or request/response artifacts cannot be verified, do not classify the affected Result Units as ANALYZED.
 
 ## Coverage contract
 Every Result Unit in the prepared analysis pack must receive exactly one coverage disposition:
