@@ -49,6 +49,45 @@ def _sample_map(result: dict[str, Any]) -> dict[str, str]:
             output[str(sample_id)] = str(observation.get("mapping_status") or "UNKNOWN")
     return output
 
+def _sample_association_records(bundle: dict[str, Any], result: dict[str, Any]) -> list[dict[str, Any]]:
+    context = result.get("measurement_context", {})
+    associations = list(context.get("sample_associations", []) or [])
+    for observation in result.get("observations", []) or []:
+        sample_id = observation.get("sample_id")
+        if sample_id:
+            associations.append({
+                "sample_id": sample_id,
+                "mapping_status": observation.get("mapping_status", "UNKNOWN"),
+                "series_id": observation.get("series_id"),
+            })
+    unique: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for item in associations:
+        sample_id = str(item.get("sample_id") or "")
+        if not sample_id:
+            continue
+        key = (
+            sample_id,
+            str(item.get("series_id") or ""),
+            str(item.get("mapping_status") or "UNKNOWN"),
+        )
+        unique[key] = item
+    output = []
+    for (sample_id, series_id, mapping_status), item in sorted(unique.items()):
+        sample = bundle.get("samples", {}).get(sample_id, {})
+        output.append({
+            "sample_id": sample_id,
+            "sample_aliases": [
+                alias.get("alias") for alias in sample.get("aliases", []) if alias.get("alias")
+            ],
+            "identity_status": sample.get("identity_status", "UNKNOWN"),
+            "prep_conditions": sample.get("prep_conditions", {}),
+            "batch_note": sample.get("batch_note"),
+            "mapping_status": mapping_status,
+            "series_id": series_id or None,
+        })
+    return output
+
+
 
 def _condition_map(result: dict[str, Any]) -> dict[str, Any]:
     conditions = result.get("measurement_context", {}).get("measurement_conditions", {})
@@ -99,9 +138,12 @@ def discover_relationship_candidates(bundle: dict[str, Any]) -> list[dict[str, A
 
     def link_group(member_ids: list[str], reason: str) -> None:
         unique = sorted(set(member_ids))
-        for i, left in enumerate(unique):
-            for right in unique[i + 1:]:
-                pair_reasons[(left, right)].add(reason)
+        if len(unique) < 2:
+            return
+        # A bounded star connects the component without asserting all-pairs comparability.
+        anchor_id = unique[0]
+        for related_id in unique[1:]:
+            pair_reasons[(anchor_id, related_id)].add(reason)
 
     for ids in indexes["sample"].values():
         link_group(ids, "SHARED_SAMPLE_ASSOCIATION")
@@ -159,6 +201,17 @@ def discover_relationship_candidates(bundle: dict[str, Any]) -> list[dict[str, A
     return candidates[:MAX_CANDIDATE_LINKS]
 
 
+def _asset_exists(image_path: str, workspace: Path) -> bool:
+    root = workspace.resolve()
+    candidate = Path(image_path)
+    candidate = candidate if candidate.is_absolute() else root / candidate
+    try:
+        candidate.resolve().relative_to(root)
+    except ValueError:
+        return False
+    return candidate.is_file()
+
+
 def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Path) -> list[dict[str, Any]]:
     regions = bundle.get("regions", {})
     panels = bundle.get("panels", {})
@@ -174,11 +227,9 @@ def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Pa
             if not image_path or str(image_path) in seen:
                 continue
             seen.add(str(image_path))
-            target = Path(str(image_path))
-            resolved = target if target.is_absolute() else workspace / target
             records.append({
                 "image_path": str(image_path),
-                "asset_exists": resolved.is_file(),
+                "asset_exists": _asset_exists(str(image_path), workspace),
                 "page_number": region.get("page_number"),
                 "region_id": parent_id,
                 "panel_id": panel_id,
@@ -193,11 +244,9 @@ def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Pa
             if not image_path or str(image_path) in seen:
                 continue
             seen.add(str(image_path))
-            target = Path(str(image_path))
-            resolved = target if target.is_absolute() else workspace / target
             records.append({
                 "image_path": str(image_path),
-                "asset_exists": resolved.is_file(),
+                "asset_exists": _asset_exists(str(image_path), workspace),
                 "page_number": region.get("page_number"),
                 "region_id": region_id,
                 "panel_id": None,
@@ -286,9 +335,12 @@ def build_analysis_pack(
             "epistemic_status": result.get("epistemic_status"),
             "claim_role": result.get("claim_role", "UNDECIDED"),
             "measurement_context": context,
-            "sample_associations": [
-                {"sample_id": sample_id, "mapping_status": status}
-                for sample_id, status in sorted(_sample_map(result).items())
+            "sample_associations": _sample_association_records(bundle, result),
+            "series_associations": [
+                {"series_id": observation.get("series_id"), "sample_id": observation.get("sample_id"),
+                 "description": observation.get("description", "")}
+                for observation in result.get("observations", []) or []
+                if observation.get("series_id") or observation.get("sample_id")
             ],
             "region_ids": result.get("region_ids", []),
             "panel_ids": result.get("panel_ids", []),
@@ -355,6 +407,8 @@ def build_analysis_pack(
                 "comparison_id": "CMP-1",
                 "question": "",
                 "result_ids": [],
+                "observation_ids": [],
+                "evidence_refs": [{"result_id": "", "region_id": "", "panel_id": None, "page_number": None}],
                 "comparison_status": "COMPARABLE | PARTIALLY_COMPARABLE | NOT_COMPARABLE | NOT_APPLICABLE",
                 "dimension_assessments": [{
                     "dimension": "",
