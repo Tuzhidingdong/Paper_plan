@@ -2,7 +2,7 @@ name: ERA tests
 
 on:
   push:
-    branches: [main, v5.1/researcher-facing-product, feat/general-scientific-evidence-analysis]
+    branches: [main, v5.1/researcher-facing-product, feat/general-scientific-evidence-analysis, feat/spectral-analysis-capability]
   pull_request:
     branches: [main, v5.1/researcher-facing-product]
 
