@@ -156,6 +156,11 @@ def valid_record(request):
         "candidate_scientific_implications": ["A candidate relationship merits targeted review."],
         "unresolved_questions": ["Are the conditions sufficiently matched?"],
         "limitations": ["Synthetic fixture only."],
+        "signal_analysis_coverage": [
+            {"result_id": result_id, "status": "NOT_APPLICABLE", "feature_ids": [], "comparison_ids": [],
+             "reason": "The synthetic tabular fixture does not contain a plotted signal trace."}
+            for result_id in ids
+        ],
         "model_invocation": {
             "invocation_id": "synthetic-test-invocation",
             "status": "RESPONSE_RECEIVED",
