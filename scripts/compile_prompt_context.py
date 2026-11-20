@@ -37,7 +37,7 @@ def compact_record(result_id: str, item: dict[str, Any]) -> str:
     if artifact_notes:
         parts.append(f"  - Artifact audit: {artifact_notes}")
     if origin == "Visual_Estimate":
-        parts.append("  - [Visual Estimate - Raw Data Required]")
+        parts.append("  - [Image-derived estimate: state reading basis, confidence and figure-resolution limits; native data are required only for exact values or calculations the figure cannot support]")
     return "\n".join(parts)
 
 
