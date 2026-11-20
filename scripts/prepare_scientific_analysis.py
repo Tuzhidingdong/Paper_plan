@@ -536,11 +536,16 @@ def prepare_all(
         result_id: next(pack["analysis_id"] for pack in packs if result_id in pack["result_ids"])
         for result_id in result_ids
     }
+    cross_pack_relationships = [
+        item for item in candidates
+        if coverage.get(item["result_ids"][0]) != coverage.get(item["result_ids"][1])
+    ]
     index = {
         "source_sha256": bundle.get("source", {}).get("sha256"),
         "analysis_mode": "GENERAL_SCIENTIFIC_EVIDENCE_ANALYSIS",
         "result_unit_count": len(result_ids),
         "candidate_relationship_count": len(candidates),
+        "cross_pack_relationships": cross_pack_relationships,
         "pack_count": len(packs),
         "coverage_map": coverage,
         "unassigned_region_ids": unassigned_regions,
