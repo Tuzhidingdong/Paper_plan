@@ -69,7 +69,7 @@ def bundle_fixture():
                 "measurement_context": {"technique": "method-B", "measurement_group": "group-2",
                     "measurement_conditions": {"setting": "ambient"},
                     "sample_associations": [{"sample_id": "S001", "mapping_status": "CONFIRMED"}]},
-                "observations": [{"description": "A second type of response is visible.", "source_status": "Observed"}],
+                "observations": [{"description": "A second type of response is visible.", "source_status": "Observed", "sample_id": "S001", "mapping_status": "CONFIRMED", "series_id": "trace-1"}],
             },
         },
         "findings": {}, "audit_records": [], "discrepancies": [],
@@ -175,6 +175,7 @@ class TestGeneralScientificAnalysis(unittest.TestCase):
         self.assertEqual(sorted(assigned), ["R001", "R002", "R003"])
         self.assertEqual(index["result_unit_count"], 3)
         self.assertEqual(index["unassigned_region_ids"], ["REG004"])
+        self.assertEqual(index["unassigned_region_assets"][0]["image_path"], "assets/unassigned.png")
         self.assertEqual(index["coverage_map"].keys(), {"R001", "R002", "R003"})
 
     def test_cross_method_shared_sample_can_be_in_one_related_pack(self):
@@ -187,12 +188,19 @@ class TestGeneralScientificAnalysis(unittest.TestCase):
         ]
         self.assertTrue(cross_link)
         self.assertFalse(cross_link[0]["relationship_is_confirmed"])
+        self.assertTrue(any("SHARED_SERIES_IDENTIFIER" in item["candidate_reasons"]
+                            for item in pack_for["R001"]["candidate_relationships"]))
+        self.assertTrue(pack_for["R001"]["related_results_outside_pack"] == [])
 
     def test_single_result_multiple_panels_keeps_all_original_assets(self):
         pack = build_analysis_pack(bundle_fixture(), Path("/workspace"), ["R001"], [], 1)
         paths = {asset["image_path"] for asset in pack["assets"]}
         self.assertEqual(paths, {"assets/a1.png", "assets/a2.png"})
         self.assertTrue(any("connected scientific dataset" in line for line in pack["instructions"]))
+        association = pack["result_units"][0]["sample_associations"][0]
+        self.assertEqual(association["sample_aliases"], ["Specimen A"])
+        self.assertEqual(association["series_id"], "trace-1")
+        self.assertEqual(pack["result_units"][0]["series_associations"][0]["series_id"], "trace-1")
 
     def test_result_pack_is_domain_neutral_and_does_not_force_comparisons(self):
         pack = build_analysis_pack(bundle_fixture(), Path("/workspace"), ["R003"], [], 1)
