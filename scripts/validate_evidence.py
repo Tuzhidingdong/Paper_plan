@@ -380,9 +380,18 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                 errors.append(f"{analysis_id}: ANALYZED coverage requires a completed model invocation receipt")
             if analyzed_units and invocation.get("evidence_level") != "AGENT_REPORTED_RUNTIME_RECEIPT":
                 errors.append(f"{analysis_id}: model invocation evidence level is missing or misleading")
+            analyzed_result_ids = {
+                item.get("result_id") for item in coverage
+                if item.get("status") == "ANALYZED"
+            }
             request_assets = analysis.get("request_assets", [])
-            expected_assets = set()
+            applicable_assets = []
             for asset in request_assets:
+                linked_ids = asset.get("result_ids") or ([asset.get("result_id")] if asset.get("result_id") else [])
+                if not linked_ids or (set(linked_ids) & analyzed_result_ids):
+                    applicable_assets.append(asset)
+            expected_assets = set()
+            for asset in applicable_assets:
                 if not asset.get("asset_exists") or not asset.get("asset_sha256"):
                     if analyzed_units:
                         errors.append(f"{analysis_id}: ANALYZED coverage references a missing/unhashed image asset")
