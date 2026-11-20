@@ -10,7 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from era_core import atomic_write_json, load_evidence_bundle
+from era_core import atomic_write_json, load_evidence_bundle, sha256_file
 
 DEFAULT_MAX_RESULTS_PER_PACK = 10
 MAX_CANDIDATE_LINKS = 3000
@@ -29,7 +29,14 @@ ANALYSIS_INSTRUCTIONS = [
     "For each plausible interpretation, give competing explanations, confounders, scope limits and what additional evidence would discriminate them. Do not turn an attractive pattern into a mechanism without an adequate evidence chain.",
     "Identify candidate scientific implications or questions that were not explicitly supplied by the user, but label them as candidates and state exactly which existing evidence motivates them.",
     "Account for every Result Unit in the request. Use ANALYZED when its evidence has been examined, NO_COMPARISON_APPLICABLE when there is no defensible relationship to compare (with a reason), and NOT_ASSESSABLE when a source/identity/quality blocker prevents analysis.",
-    "If a relationship cannot be assessed, say so and preserve the blocker. A clear NOT_ASSESSABLE conclusion is preferable to a manufactured scientific finding."
+    "If a relationship cannot be assessed, say so and preserve the blocker. A clear NOT_ASSESSABLE conclusion is preferable to a manufactured scientific finding.",
+    "Treat plotted signals as primary experimental evidence, not as illustrations. For every relevant plot, identify the axes, units, trace/series identities and visible signal features before interpreting the result.",
+    "When the source supports it, record individual peak-like features (for example, peaks, reflections or absorption bands) with their position, width, signal magnitude and apparent area. Use the axis and unit of that plot; do not force a feature type or assign a chemical/structural identity without evidence.",
+    "Compare features across the curves, samples, conditions and stages that are actually shown. Record shifts, broadening/narrowing, relative-intensity changes, area changes, new or disappearing features, shoulders, splitting, overlap and non-monotonic responses when resolvable.",
+    "For every numeric signal estimate, state whether it comes from exact source data, printed values or visual reading from an image; preserve axis calibration, resolution, normalization basis, precision and uncertainty. Use null/not-resolvable rather than invented numeric values.",
+    "A list of generic feature assignments is not a completed signal analysis. Explain what changed between the actual plotted series, which changes are robust, and what instrument, processing, overlap, orientation, baseline or sample-state alternatives could produce them.",
+    "Before marking any image-derived Result Unit ANALYZED, record whether its original-resolution image was actually attached to the model call as native image input. A file path or text description alone is not an image attachment. If native image delivery cannot be confirmed, mark the affected units NOT_ASSESSABLE and disclose the blocker.",
+    "Persist the actual model request and response artifacts and provide an invocation receipt listing every requested image path, its SHA-256 and the matching native image attachment reference. The receipt is agent-reported evidence and must not be described as an independent host-level verification."
 ]
 
 
@@ -246,9 +253,14 @@ def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Pa
             if not image_path or str(image_path) in seen:
                 continue
             seen.add(str(image_path))
+            asset_exists = _asset_exists(str(image_path), workspace)
+            resolved_asset = Path(str(image_path))
+            resolved_asset = resolved_asset if resolved_asset.is_absolute() else workspace / resolved_asset
             records.append({
                 "image_path": str(image_path),
-                "asset_exists": _asset_exists(str(image_path), workspace),
+                "asset_exists": asset_exists,
+                "asset_sha256": sha256_file(resolved_asset) if asset_exists else None,
+                "asset_size_bytes": resolved_asset.stat().st_size if asset_exists else None,
                 "page_number": region.get("page_number"),
                 "region_id": parent_id,
                 "panel_id": panel_id,
@@ -263,9 +275,14 @@ def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Pa
             if not image_path or str(image_path) in seen:
                 continue
             seen.add(str(image_path))
+            asset_exists = _asset_exists(str(image_path), workspace)
+            resolved_asset = Path(str(image_path))
+            resolved_asset = resolved_asset if resolved_asset.is_absolute() else workspace / resolved_asset
             records.append({
                 "image_path": str(image_path),
-                "asset_exists": _asset_exists(str(image_path), workspace),
+                "asset_exists": asset_exists,
+                "asset_sha256": sha256_file(resolved_asset) if asset_exists else None,
+                "asset_size_bytes": resolved_asset.stat().st_size if asset_exists else None,
                 "page_number": region.get("page_number"),
                 "region_id": region_id,
                 "panel_id": None,
@@ -403,6 +420,18 @@ def build_analysis_pack(
         "result_units": selected,
         "assets": assets,
         "asset_count": len(assets),
+        "invocation_audit_required": True,
+        "invocation_audit": {
+            "required": True,
+            "evidence_level": "AGENT_REPORTED_RUNTIME_RECEIPT",
+            "expected_assets": [
+                {"image_path": item["image_path"], "asset_sha256": item.get("asset_sha256"),
+                 "region_id": item.get("region_id"), "panel_id": item.get("panel_id"),
+                 "page_number": item.get("page_number")}
+                for item in assets
+            ],
+            "receipt_rule": "Every expected asset must appear as a native image attachment in the actual model invocation, or the affected Result Units must be NOT_ASSESSABLE."
+        },
         "candidate_relationships": internal_links,
         "related_results_outside_pack": external_links,
         "task_status": "READY" if result_ids else "EMPTY",
@@ -480,7 +509,47 @@ def build_analysis_pack(
             "candidate_scientific_implications": [],
             "unresolved_questions": [],
             "limitations": [],
+            "signal_features": [{
+                "feature_id": "SIG-1",
+                "result_id": "",
+                "series_id": None,
+                "feature_type": "PEAK | BAND | REFLECTION | EDGE | SHOULDER | PLATEAU | OTHER",
+                "feature_label": "",
+                "description": "",
+                "position": {"value": None, "unit": "", "reading_basis": "", "precision_or_uncertainty": "", "confidence": "High | Medium | Low | Unresolved"},
+                "width": {"value": None, "unit": "", "reading_basis": "", "precision_or_uncertainty": ""},
+                "intensity": {"value": None, "unit": "", "reading_basis": "", "normalization_basis": "", "precision_or_uncertainty": ""},
+                "area": {"value": None, "unit": "", "reading_basis": "", "normalization_basis": "", "precision_or_uncertainty": ""},
+                "evidence_refs": [{"result_id": "", "region_id": "", "panel_id": None, "page_number": None}]
+            }],
+            "signal_comparisons": [{
+                "comparison_id": "SIGCMP-1",
+                "feature_ids": [],
+                "result_ids": [],
+                "change_type": "POSITION_SHIFT | WIDTH_CHANGE | INTENSITY_CHANGE | AREA_CHANGE | APPEARED | DISAPPEARED | SHAPE_CHANGE | OTHER",
+                "description": "",
+                "direction_or_pattern": "",
+                "comparability_status": "COMPARABLE | PARTIALLY_COMPARABLE | NOT_COMPARABLE | UNKNOWN",
+                "normalization_basis": "",
+                "quantified_change": {"metric": "", "value": None, "unit": "", "source_basis": "", "precision_or_uncertainty": ""},
+                "evidence_refs": [{"result_id": "", "region_id": "", "panel_id": None, "page_number": None}],
+                "interpretation_limits": []
+            }],
+            "model_invocation": {
+                "invocation_id": "",
+                "status": "RESPONSE_RECEIVED | BLOCKED | UNVERIFIABLE",
+                "model_id": "",
+                "input_mode": "NATIVE_IMAGE_ATTACHMENTS | TEXT_ONLY_PATHS | UNVERIFIABLE",
+                "evidence_level": "AGENT_REPORTED_RUNTIME_RECEIPT",
+                "attached_assets": [{"image_path": "", "asset_sha256": "", "attachment_type": "NATIVE_IMAGE", "attachment_reference": ""}],
+                "request_log_path": "",
+                "request_log_sha256": "",
+                "response_log_path": "",
+                "response_log_sha256": "",
+                "limitations": []
+            }
         },
+        "invocation_audit_required": true
     }
 
 
