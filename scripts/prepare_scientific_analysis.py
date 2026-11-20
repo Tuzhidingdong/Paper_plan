@@ -36,6 +36,7 @@ ANALYSIS_INSTRUCTIONS = [
     "For every numeric signal estimate, state whether it comes from exact source data, printed values or visual reading from an image; preserve axis calibration, resolution, normalization basis, precision and uncertainty. Use null/not-resolvable rather than invented numeric values.",
     "A list of generic feature assignments is not a completed signal analysis. Explain what changed between the actual plotted series, which changes are robust, and what instrument, processing, overlap, orientation, baseline or sample-state alternatives could produce them.",
     "Before marking any image-derived Result Unit ANALYZED, record whether its original-resolution image was actually attached to the model call as native image input. A file path or text description alone is not an image attachment. If native image delivery cannot be confirmed, mark the affected units NOT_ASSESSABLE and disclose the blocker.",
+    "For every Result Unit, explicitly assess whether the source contains plotted/scan/curve signal features that require feature-level analysis. Record exactly one signal_analysis_coverage disposition: APPLICABLE with linked feature IDs, NOT_APPLICABLE with a reason, or NOT_ASSESSABLE with a reason. Do not silently omit this decision; do not force feature extraction onto non-signal evidence.",
     "Persist the actual model request and response artifacts and provide an invocation receipt listing every requested image path, its SHA-256 and the matching native image attachment reference. The receipt is agent-reported evidence and must not be described as an independent host-level verification."
 ]
 
@@ -509,6 +510,13 @@ def build_analysis_pack(
             "candidate_scientific_implications": [],
             "unresolved_questions": [],
             "limitations": [],
+            "signal_analysis_coverage": [{
+                "result_id": result_id,
+                "status": "APPLICABLE | NOT_APPLICABLE | NOT_ASSESSABLE",
+                "feature_ids": [],
+                "comparison_ids": [],
+                "reason": ""
+            } for result_id in result_ids],
             "signal_features": [{
                 "feature_id": "SIG-1",
                 "result_id": "",
