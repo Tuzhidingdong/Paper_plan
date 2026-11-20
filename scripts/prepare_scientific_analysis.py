@@ -250,7 +250,10 @@ def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Pa
             panel = panels.get(panel_id, {})
             parent_id = panel.get("parent_region_id")
             region = regions.get(parent_id, {})
-            image_path = panel.get("image_path") or region.get("image_path")
+            image_path = panel.get("image_path")
+            if image_path and not _asset_exists(str(image_path), workspace):
+                image_path = region.get("image_path")
+            image_path = image_path or region.get("image_path")
             if not image_path or str(image_path) in seen:
                 continue
             seen.add(str(image_path))
