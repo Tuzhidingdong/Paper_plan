@@ -468,6 +468,20 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                 errors.append(f"{analysis_id}: signal_features[{index}] has invalid feature_type")
             if not str(feature.get("description") or "").strip():
                 errors.append(f"{analysis_id}: signal_features[{index}] requires an observed description")
+            axes = feature.get("axis_context")
+            if not isinstance(axes, dict):
+                errors.append(f"{analysis_id}: signal_features[{index}] requires axis_context")
+            else:
+                for field in ("x_axis_label", "x_axis_unit", "x_axis_scale",
+                              "y_axis_label", "y_axis_unit", "y_axis_scale", "normalization_basis"):
+                    if not str(axes.get(field) or "").strip():
+                        errors.append(f"{analysis_id}: signal_features[{index}].axis_context requires {field}")
+                if axes.get("x_axis_scale") not in {"LINEAR", "LOG", "CATEGORICAL", "UNKNOWN"}:
+                    errors.append(f"{analysis_id}: signal_features[{index}] has invalid x_axis_scale")
+                if axes.get("y_axis_scale") not in {"LINEAR", "LOG", "CATEGORICAL", "UNKNOWN"}:
+                    errors.append(f"{analysis_id}: signal_features[{index}] has invalid y_axis_scale")
+            if not str(feature.get("series_label") or "").strip():
+                errors.append(f"{analysis_id}: signal_features[{index}] requires series_label or UNKNOWN")
             for ref in feature.get("evidence_refs", []):
                 if ref.get("result_id") != result_id:
                     errors.append(f"{analysis_id}: signal_features[{index}] evidence cites another Result Unit")
@@ -487,6 +501,10 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                     for field in ("unit", "reading_basis", "precision_or_uncertainty"):
                         if not str(estimate.get(field) or "").strip():
                             errors.append(f"{analysis_id}: signal_features[{index}].{metric} requires {field}")
+                    if metric in {"intensity", "area"} and not str(
+                        estimate.get("normalization_basis") or (axes or {}).get("normalization_basis") or ""
+                    ).strip():
+                        errors.append(f"{analysis_id}: signal_features[{index}].{metric} requires normalization_basis")
 
         seen_signal_comparisons = set()
         for index, comparison in enumerate(analysis.get("signal_comparisons", [])):
