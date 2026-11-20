@@ -139,7 +139,8 @@ class TestSpectralComparison(unittest.TestCase):
 
     def test_context_compiler_warns_when_spectral_comparison_is_missing(self):
         context = compile_context(sample_bundle())
-        self.assertIn("no joint cross-sample comparison has been recorded", context)
+        self.assertIn("Signal-level analysis is part of the general scientific-analysis record.", context)
+        self.assertIn("signal_features and signal_comparisons", context)
         self.assertIn("R001", context)
 
 
