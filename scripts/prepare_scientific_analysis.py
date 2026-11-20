@@ -349,10 +349,16 @@ def build_analysis_pack(
             "measurement_context": context,
             "sample_associations": _sample_association_records(bundle, result),
             "series_associations": [
-                {"series_id": observation.get("series_id"), "sample_id": observation.get("sample_id"),
-                 "description": observation.get("description", "")}
-                for observation in result.get("observations", []) or []
-                if observation.get("series_id") or observation.get("sample_id")
+                {"series_id": item.get("series_id"), "sample_id": item.get("sample_id"),
+                 "mapping_status": item.get("mapping_status", "UNKNOWN"),
+                 "source_record": source_record,
+                 "description": item.get("description", "")}
+                for source_record, items in (
+                    ("measurement_context", context.get("sample_associations", []) or []),
+                    ("observation", result.get("observations", []) or []),
+                )
+                for item in items
+                if item.get("series_id") or item.get("sample_id")
             ],
             "region_ids": result.get("region_ids", []),
             "panel_ids": result.get("panel_ids", []),
