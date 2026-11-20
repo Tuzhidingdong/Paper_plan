@@ -236,6 +236,10 @@ def _analysis_fixture(workspace: Path):
         "relationships": [],
         "interpretations": [],
         "contradictions": [],
+        "signal_analysis_coverage": [
+            {"result_id": "R001", "status": "APPLICABLE", "feature_ids": ["SIG-1"], "comparison_ids": ["SIGCMP-1"], "reason": ""},
+            {"result_id": "R002", "status": "APPLICABLE", "feature_ids": ["SIG-2"], "comparison_ids": ["SIGCMP-1"], "reason": ""}
+        ],
         "signal_features": [
             {"feature_id": "SIG-1", "result_id": "R001", "series_id": "A", "feature_type": "BAND", "description": "A visible signal band.",
              "position": {"value": 1000.0, "unit": "cm-1", "reading_basis": "visual axis estimate", "precision_or_uncertainty": "±5 cm-1"},
