@@ -53,9 +53,16 @@ def _sample_map(result: dict[str, Any]) -> dict[str, str]:
 def _sample_association_records(bundle: dict[str, Any], result: dict[str, Any]) -> list[dict[str, Any]]:
     context = result.get("measurement_context", {})
     associations = list(context.get("sample_associations", []) or [])
+    context_sample_ids = {
+        str(item.get("sample_id")) for item in associations if item.get("sample_id")
+    }
     for observation in result.get("observations", []) or []:
         sample_id = observation.get("sample_id")
         if sample_id:
+            # Do not create a second non-series mapping when the measurement context
+            # already maps the same sample; preserve genuinely distinct series IDs.
+            if str(sample_id) in context_sample_ids and not observation.get("series_id"):
+                continue
             associations.append({
                 "sample_id": sample_id,
                 "mapping_status": observation.get("mapping_status", "UNKNOWN"),
