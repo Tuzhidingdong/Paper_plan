@@ -15,6 +15,100 @@ VALID_COVERAGE = {"ANALYZED", "NO_COMPARISON_APPLICABLE", "NOT_ASSESSABLE"}
 VALID_COMPARISON = {"COMPARABLE", "PARTIALLY_COMPARABLE", "NOT_COMPARABLE", "NOT_APPLICABLE"}
 VALID_DIMENSION = {"MATCHED", "MISMATCHED", "UNKNOWN", "NOT_APPLICABLE"}
 
+VALID_SIGNAL_FEATURE_TYPES = {"PEAK", "BAND", "REFLECTION", "EDGE", "SHOULDER", "PLATEAU", "OTHER"}
+VALID_SIGNAL_CHANGE_TYPES = {
+    "POSITION_SHIFT", "WIDTH_CHANGE", "INTENSITY_CHANGE", "AREA_CHANGE",
+    "APPEARED", "DISAPPEARED", "SHAPE_CHANGE", "OTHER",
+}
+
+
+def _validate_signal_estimate(estimate: Any, label: str) -> None:
+    if estimate is None:
+        return
+    if not isinstance(estimate, dict):
+        raise ValueError(f"{label} must be an object or null")
+    value = estimate.get("value")
+    if value is None:
+        return
+    if parse_numeric_scalar(value) is None:
+        raise ValueError(f"{label}.value must be a finite numeric estimate or null")
+    for field in ("unit", "reading_basis", "precision_or_uncertainty"):
+        if not str(estimate.get(field) or "").strip():
+            raise ValueError(f"{label}.{field} is required for numeric signal estimates")
+
+
+def _validate_model_invocation(
+    request: dict[str, Any],
+    record: dict[str, Any],
+    workspace: Path | None,
+    has_analyzed_units: bool,
+) -> None:
+    if not request.get("invocation_audit_required"):
+        return
+    invocation = record.get("model_invocation")
+    if not isinstance(invocation, dict):
+        raise ValueError("model_invocation receipt is required for this analysis pack")
+    if invocation.get("evidence_level") != "AGENT_REPORTED_RUNTIME_RECEIPT":
+        raise ValueError("model_invocation.evidence_level must disclose agent-reported runtime evidence")
+    if invocation.get("status") not in {"RESPONSE_RECEIVED", "BLOCKED", "UNVERIFIABLE"}:
+        raise ValueError("model_invocation.status is invalid")
+    if not str(invocation.get("invocation_id") or "").strip():
+        raise ValueError("model_invocation.invocation_id is required")
+    if has_analyzed_units and invocation.get("status") != "RESPONSE_RECEIVED":
+        raise ValueError("ANALYZED coverage requires a completed model invocation receipt")
+    expected_assets = [
+        item for item in request.get("assets", [])
+        if item.get("asset_exists") and item.get("asset_sha256")
+    ]
+    if has_analyzed_units and any(not item.get("asset_exists") for item in request.get("assets", [])):
+        raise ValueError("ANALYZED coverage is blocked because one or more requested image assets are missing")
+    if expected_assets and has_analyzed_units:
+        if invocation.get("input_mode") != "NATIVE_IMAGE_ATTACHMENTS":
+            raise ValueError("image-derived ANALYZED coverage requires confirmed native image attachments")
+        attached = invocation.get("attached_assets")
+        if not isinstance(attached, list):
+            raise ValueError("model_invocation.attached_assets must list every native image attachment")
+        expected = {(item["image_path"], item["asset_sha256"]) for item in expected_assets}
+        received = set()
+        for index, item in enumerate(attached):
+            pair = (item.get("image_path"), item.get("asset_sha256"))
+            if item.get("attachment_type") != "NATIVE_IMAGE":
+                raise ValueError(f"model_invocation.attached_assets[{index}] is not declared as NATIVE_IMAGE")
+            if not str(item.get("attachment_reference") or "").strip():
+                raise ValueError(f"model_invocation.attached_assets[{index}] requires the actual attachment reference")
+            received.add(pair)
+        if received != expected:
+            missing = sorted(expected - received)
+            extra = sorted(received - expected)
+            raise ValueError(
+                f"native image attachment manifest does not exactly match request assets; missing={missing}, extra={extra}"
+            )
+    elif has_analyzed_units and invocation.get("input_mode") not in {"TEXT_ONLY_PATHS", "NATIVE_IMAGE_ATTACHMENTS"}:
+        raise ValueError("model_invocation.input_mode must state how the model received the evidence")
+    if has_analyzed_units:
+        if not str(invocation.get("model_id") or "").strip():
+            raise ValueError("completed model invocation requires model_id")
+        for field in ("request_log_path", "request_log_sha256", "response_log_path", "response_log_sha256"):
+            if not str(invocation.get(field) or "").strip():
+                raise ValueError(f"completed model invocation requires {field}")
+        if workspace is not None:
+            root = workspace.resolve()
+            for path_field, hash_field in (
+                ("request_log_path", "request_log_sha256"),
+                ("response_log_path", "response_log_sha256"),
+            ):
+                artifact = Path(invocation[path_field])
+                artifact = artifact if artifact.is_absolute() else root / artifact
+                try:
+                    artifact.resolve().relative_to(root)
+                except ValueError as exc:
+                    raise ValueError(f"{path_field} must remain inside the workspace") from exc
+                if not artifact.is_file():
+                    raise ValueError(f"{path_field} does not exist: {artifact}")
+                if sha256_file(artifact) != invocation[hash_field]:
+                    raise ValueError(f"{hash_field} does not match {path_field}")
+
+
 
 def _valid_refs(
     bundle: dict[str, Any],
@@ -46,6 +140,7 @@ def validate_record(
     bundle: dict[str, Any],
     request: dict[str, Any],
     record: dict[str, Any],
+    workspace: Path | None = None,
 ) -> None:
     expected_id = request.get("analysis_id")
     request_sha = request.get("source", {}).get("sha256")
@@ -167,14 +262,71 @@ def validate_record(
             raise ValueError(f"contradictions[{index}] must cite Result Units in the prepared pack")
         _valid_refs(bundle, expected_ids, item.get("evidence_refs", []), f"contradictions[{index}]")
 
+    signal_features = record.get("signal_features", [])
+    feature_map: dict[str, dict[str, Any]] = {}
+    for index, feature in enumerate(signal_features):
+        feature_id = str(feature.get("feature_id") or "")
+        if not feature_id or feature_id in feature_map:
+            raise ValueError(f"signal_features[{index}] requires a unique feature_id")
+        if feature.get("result_id") not in expected_ids:
+            raise ValueError(f"signal_features[{index}] references a Result Unit outside the prepared pack")
+        if feature.get("feature_type") not in VALID_SIGNAL_FEATURE_TYPES:
+            raise ValueError(f"signal_features[{index}] has an invalid feature_type")
+        if not str(feature.get("description") or "").strip():
+            raise ValueError(f"signal_features[{index}] requires a description of the observed feature")
+        refs = feature.get("evidence_refs", [])
+        _valid_refs(bundle, expected_ids, refs, f"signal_features[{index}]")
+        if any(ref.get("result_id") != feature.get("result_id") for ref in refs):
+            raise ValueError(f"signal_features[{index}] evidence must belong to its declared Result Unit")
+        for estimate_name in ("position", "width", "intensity", "area"):
+            _validate_signal_estimate(feature.get(estimate_name), f"signal_features[{index}].{estimate_name}")
+        feature_map[feature_id] = feature
+
+    comparison_ids: set[str] = set()
+    for index, comparison in enumerate(record.get("signal_comparisons", [])):
+        comparison_id = str(comparison.get("comparison_id") or "")
+        if not comparison_id or comparison_id in comparison_ids:
+            raise ValueError(f"signal_comparisons[{index}] requires a unique comparison_id")
+        comparison_ids.add(comparison_id)
+        feature_ids = comparison.get("feature_ids", [])
+        if len(set(feature_ids)) < 2 or not set(feature_ids).issubset(feature_map):
+            raise ValueError(f"signal_comparisons[{index}] must reference at least two recorded signal features")
+        result_ids = comparison.get("result_ids", [])
+        if not result_ids or not set(result_ids).issubset(expected_ids):
+            raise ValueError(f"signal_comparisons[{index}] must cite Result Units in the prepared pack")
+        if any(feature_map[item]["result_id"] not in result_ids for item in feature_ids):
+            raise ValueError(f"signal_comparisons[{index}] feature/result links are inconsistent")
+        if comparison.get("change_type") not in VALID_SIGNAL_CHANGE_TYPES:
+            raise ValueError(f"signal_comparisons[{index}] has an invalid change_type")
+        if comparison.get("comparability_status") not in VALID_COMPARISON | {"UNKNOWN"}:
+            raise ValueError(f"signal_comparisons[{index}] has an invalid comparability_status")
+        if not str(comparison.get("description") or "").strip():
+            raise ValueError(f"signal_comparisons[{index}] requires an observed comparison description")
+        _valid_refs(bundle, expected_ids, comparison.get("evidence_refs", []), f"signal_comparisons[{index}]")
+        if any(ref.get("result_id") not in result_ids for ref in comparison.get("evidence_refs", [])):
+            raise ValueError(f"signal_comparisons[{index}] cites evidence outside its compared Result Units")
+        quantified = comparison.get("quantified_change")
+        if quantified and quantified.get("value") is not None:
+            if parse_numeric_scalar(quantified.get("value")) is None:
+                raise ValueError(f"signal_comparisons[{index}].quantified_change.value must be finite numeric or null")
+            for field in ("unit", "source_basis", "precision_or_uncertainty"):
+                if not str(quantified.get(field) or "").strip():
+                    raise ValueError(f"signal_comparisons[{index}].quantified_change.{field} is required")
+
+    _validate_model_invocation(
+        request, record, workspace,
+        has_analyzed_units=any(item.get("status") == "ANALYZED" for item in coverage),
+    )
+
 
 def register_analysis(
     bundle: dict[str, Any],
     request: dict[str, Any],
     record: dict[str, Any],
     replace_existing: bool = False,
+    workspace: Path | None = None,
 ) -> None:
-    validate_record(bundle, request, record)
+    validate_record(bundle, request, record, workspace)
     analyses = bundle.setdefault("scientific_analyses", {})
     analysis_id = record["analysis_id"]
     if analysis_id in analyses and not replace_existing:
@@ -184,6 +336,14 @@ def register_analysis(
     saved["source_sha256"] = bundle.get("source", {}).get("sha256")
     saved["request_pack_number"] = request.get("pack_number")
     saved["request_asset_count"] = request.get("asset_count")
+    saved["request_assets"] = [
+        {"image_path": item.get("image_path"), "asset_sha256": item.get("asset_sha256"),
+         "region_id": item.get("region_id"), "panel_id": item.get("panel_id"),
+         "asset_exists": item.get("asset_exists")}
+        for item in request.get("assets", [])
+    ]
+    saved["model_invocation_status"] = record.get("model_invocation", {}).get("status")
+    saved["model_input_mode"] = record.get("model_invocation", {}).get("input_mode")
     saved["candidate_relationships"] = request.get("candidate_relationships", [])
     saved["related_results_outside_pack"] = request.get("related_results_outside_pack", [])
     analyses[analysis_id] = saved
@@ -200,7 +360,7 @@ def main() -> int:
     request = json.loads(args.request_json.read_text(encoding="utf-8"))
     record = json.loads(args.record_json.read_text(encoding="utf-8"))
     bundle = load_evidence_bundle(workspace)
-    register_analysis(bundle, request, record, args.replace)
+    register_analysis(bundle, request, record, args.replace, workspace)
     paths = workspace_paths(workspace)
     atomic_write_json(paths["bundle"], bundle)
     saved = bundle["scientific_analyses"][record["analysis_id"]]
