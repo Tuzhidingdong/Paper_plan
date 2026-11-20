@@ -51,6 +51,11 @@ class TestVectorFigureCoverage(unittest.TestCase):
         self.assertEqual(len(candidate["bbox_pdf"]), 4)
         self.assertEqual(len(candidate["bbox_normalized"]), 4)
         self.assertGreater(candidate["drawing_count"], 50)
+        repeated = assess_vector_figure_review(
+            _dense_plot_drawings(),
+            _rect(0, 0, 800, 1000),
+        )
+        self.assertEqual(review["vector_figure_candidates"], repeated["vector_figure_candidates"])
 
     def test_vector_candidate_is_rasterized_without_manual_regions_json(self):
         with tempfile.TemporaryDirectory() as directory:
