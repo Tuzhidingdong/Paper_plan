@@ -298,6 +298,19 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                         errors.append(f"{analysis_id}: comparisons[{index}] has invalid dimension status")
             if not str(comparison.get("conclusion") or "").strip():
                 errors.append(f"{analysis_id}: comparisons[{index}] requires a conclusion")
+            observation_refs = set(comparison.get("observation_ids", []))
+            if not observation_refs or not observation_refs.issubset(observation_ids):
+                errors.append(f"{analysis_id}: comparisons[{index}] lacks valid observation references")
+            for evidence_ref in comparison.get("evidence_refs", []):
+                rid = evidence_ref.get("result_id")
+                if rid not in compare_ids:
+                    errors.append(f"{analysis_id}: comparisons[{index}] cites evidence outside its compared Result Units")
+                    continue
+                source_result = results.get(rid, {})
+                if evidence_ref.get("region_id") and evidence_ref["region_id"] not in source_result.get("region_ids", []):
+                    errors.append(f"{analysis_id}: comparisons[{index}] cites unrelated Region {evidence_ref['region_id']}")
+                if evidence_ref.get("panel_id") and evidence_ref["panel_id"] not in source_result.get("panel_ids", []):
+                    errors.append(f"{analysis_id}: comparisons[{index}] cites unrelated Panel {evidence_ref['panel_id']}")
             for difference in comparison.get("quantitative_differences", []):
                 for value in difference.get("values", []):
                     if value.get("result_id") not in compare_ids:
