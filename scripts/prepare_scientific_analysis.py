@@ -397,7 +397,7 @@ def build_analysis_pack(
         "analysis_id": analysis_id,
         "analysis_mode": "GENERAL_SCIENTIFIC_EVIDENCE_ANALYSIS",
         "pack_number": pack_number,
-        "source": source,
+        "source": dict(source),
         "bundle_revision": bundle.get("workspace_revision"),
         "result_ids": result_ids,
         "result_units": selected,
