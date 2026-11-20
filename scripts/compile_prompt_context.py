@@ -108,6 +108,15 @@ def compile_context(bundle: dict[str, Any]) -> str:
                     f"{observation.get('description', '')} "
                     f"[{', '.join(observation.get('result_ids', []))}]"
                 )
+            for signal_status in analysis.get("signal_analysis_coverage", []):
+                lines.append(
+                    f"  - Signal-feature review {signal_status.get('result_id', 'unknown')}: "
+                    f"{signal_status.get('status', 'unreported')} | "
+                    f"features={', '.join(signal_status.get('feature_ids', [])) or 'none'} | "
+                    f"comparisons={', '.join(signal_status.get('comparison_ids', [])) or 'none'}"
+                )
+                if signal_status.get("reason"):
+                    lines.append(f"    - Signal-review reason: {signal_status['reason']}")
             for feature in analysis.get("signal_features", []):
                 result_id = feature.get("result_id", "unknown")
                 position = feature.get("position") or {}
