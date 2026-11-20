@@ -9,6 +9,20 @@
 
 ---
 
+## Follow-on implementation: spectral and diffraction evidence (2026-11)
+
+The follow-on branch `feat/spectral-analysis-capability` is based on the release-candidate commit `aff67d386109760e3a5267f3d574707878de1b53` and does not modify the parent RC branch.
+
+It adds four engineering capabilities identified by the real-project root-cause audit:
+1. retain per-cluster vector figure BBoxes during ingest and rasterize them into original-resolution, source-hashed Region assets;
+2. maintain an explicit disposition for every detected vector figure candidate, blocking evidence validation when extraction, triage or Result Unit linkage is missing;
+3. represent actual plotted signal features and their comparisons in the authoritative general scientific-analysis record, including position, width, intensity, area, change type, normalization and uncertainty/readout basis;
+4. record the model, native image attachment references, source asset SHA-256 values and request/response artifacts, then revalidate those receipts and hashes.
+
+These are engineering safeguards, not an instrument-specific scientific ruleset. The model must discover which plotted features and comparisons matter from the supplied evidence; production instructions must not contain any test project's peak positions, sample labels or expected scientific relationships.
+
+**Acceptance state:** implementation branch created; code review and GitHub Actions plus Agent local acceptance remain pending. A passing structural test or invocation receipt does not certify the scientific correctness of peak/band assignments or interpretations. The user must still inspect the resulting real-data analysis.
+
 ## 1. 产品目标与问题定义
 
 Paper_plan 的目标不是把实验图集变成一份更长的目录，也不是只为每一种仪器配置专用清单。目标是：用户给出普通科研材料和研究目标后，Skill 能够自主理解当前项目的证据结构，识别有科学意义的数据关系，分析差异、趋势、收敛、矛盾与异常，将现有证据转化为可追溯的科学判断，再据此组织文献定位、论文主线和研究执行计划。
