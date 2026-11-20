@@ -60,8 +60,25 @@ def assess_vector_figure_review(drawings, page_rect):
     drawing_item_count = sum(
         len(drawing.get("items") or ()) for drawing in drawings
     )
-    page_width = float(page_rect.width)
-    page_height = float(page_rect.height)
+    # PyMuPDF Rect exposes x0/y0/x1/y1 and width/height, while lightweight
+    # geometry fixtures and compatible callers may expose only one form.
+    # Normalize both forms to one explicit page coordinate frame.
+    page_x0 = float(getattr(page_rect, "x0", 0.0))
+    page_y0 = float(getattr(page_rect, "y0", 0.0))
+    raw_page_width = getattr(page_rect, "width", None)
+    raw_page_height = getattr(page_rect, "height", None)
+    raw_page_x1 = getattr(page_rect, "x1", None)
+    raw_page_y1 = getattr(page_rect, "y1", None)
+    page_width = float(
+        raw_page_width if raw_page_width is not None
+        else (float(raw_page_x1) - page_x0 if raw_page_x1 is not None else 0.0)
+    )
+    page_height = float(
+        raw_page_height if raw_page_height is not None
+        else (float(raw_page_y1) - page_y0 if raw_page_y1 is not None else 0.0)
+    )
+    page_x1 = float(raw_page_x1) if raw_page_x1 is not None else page_x0 + page_width
+    page_y1 = float(raw_page_y1) if raw_page_y1 is not None else page_y0 + page_height
     page_area = page_width * page_height
     empty = {
         "drawing_item_count": drawing_item_count,
@@ -100,8 +117,8 @@ def assess_vector_figure_review(drawings, page_rect):
         rect = drawing.get("rect")
         if rect is None:
             continue
-        cx = ((float(rect.x0) + float(rect.x1)) / 2.0 - float(page_rect.x0)) / page_width
-        cy = ((float(rect.y0) + float(rect.y1)) / 2.0 - float(page_rect.y0)) / page_height
+        cx = ((float(rect.x0) + float(rect.x1)) / 2.0 - page_x0) / page_width
+        cy = ((float(rect.y0) + float(rect.y1)) / 2.0 - page_y0) / page_height
         if not (0.04 <= cx <= 0.96 and 0.12 <= cy <= 0.90):
             continue
         cell = (
@@ -158,18 +175,18 @@ def assess_vector_figure_review(drawings, page_rect):
         pad_x = max(page_width * 0.035, 2.0)
         pad_y = max(page_height * 0.055, 2.0)
         crop = [
-            max(float(page_rect.x0), x0-pad_x),
-            max(float(page_rect.y0), y0-pad_y),
-            min(float(page_rect.x1), x1+pad_x),
-            min(float(page_rect.y1), y1+pad_y),
+            max(page_x0, x0-pad_x),
+            max(page_y0, y0-pad_y),
+            min(page_x1, x1+pad_x),
+            min(page_y1, y1+pad_y),
         ]
         if crop[2] <= crop[0] or crop[3] <= crop[1]:
             continue
         normalized = [
-            round((crop[0]-float(page_rect.x0))/page_width, 6),
-            round((crop[1]-float(page_rect.y0))/page_height, 6),
-            round((crop[2]-float(page_rect.x0))/page_width, 6),
-            round((crop[3]-float(page_rect.y0))/page_height, 6),
+            round((crop[0]-page_x0)/page_width, 6),
+            round((crop[1]-page_y0)/page_height, 6),
+            round((crop[2]-page_x0)/page_width, 6),
+            round((crop[3]-page_y0)/page_height, 6),
         ]
         component_records.append({
             "candidate_index": component_index,
