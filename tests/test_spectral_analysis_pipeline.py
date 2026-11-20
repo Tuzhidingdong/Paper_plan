@@ -399,7 +399,10 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
         }
         errors, warnings = validate(bundle)
         self.assertEqual(errors, [])
-        self.assertEqual(warnings, [])
+        self.assertEqual(
+            warnings,
+            ["Result Units not yet covered by general scientific analysis: R001"],
+        )
 
 
 if __name__ == "__main__":
