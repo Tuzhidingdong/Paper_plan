@@ -1679,7 +1679,8 @@
         "result_id",
         "feature_type",
         "description",
-        "evidence_refs"
+        "evidence_refs",
+        "axis_context"
       ],
       "properties": {
         "feature_id": {
@@ -1730,6 +1731,60 @@
           "items": {
             "type": "object"
           }
+        },
+        "series_label": {
+          "type": "string"
+        },
+        "axis_context": {
+          "type": "object",
+          "required": [
+            "x_axis_label",
+            "x_axis_unit",
+            "x_axis_scale",
+            "y_axis_label",
+            "y_axis_unit",
+            "y_axis_scale",
+            "normalization_basis"
+          ],
+          "properties": {
+            "x_axis_label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x_axis_unit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x_axis_scale": {
+              "enum": [
+                "LINEAR",
+                "LOG",
+                "CATEGORICAL",
+                "UNKNOWN"
+              ]
+            },
+            "y_axis_label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "y_axis_unit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "y_axis_scale": {
+              "enum": [
+                "LINEAR",
+                "LOG",
+                "CATEGORICAL",
+                "UNKNOWN"
+              ]
+            },
+            "normalization_basis": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
         }
       },
       "additionalProperties": true
