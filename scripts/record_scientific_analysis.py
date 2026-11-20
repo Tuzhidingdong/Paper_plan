@@ -91,6 +91,8 @@ def _validate_model_invocation(
             if not str(item.get("attachment_reference") or "").strip():
                 raise ValueError(f"model_invocation.attached_assets[{index}] requires the actual attachment reference")
             received.add(pair)
+        if len(received) != len(attached):
+            raise ValueError("model_invocation.attached_assets contains duplicate native image receipts")
         if received != expected:
             missing = sorted(expected - received)
             extra = sorted(received - expected)
