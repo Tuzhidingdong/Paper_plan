@@ -60,7 +60,7 @@ def _validate_model_invocation(
         item for item in request.get("assets", [])
         if item.get("asset_exists") and item.get("asset_sha256")
     ]
-    if has_analyzed_units and any(not item.get("asset_exists") for item in request.get("assets", [])):
+    if workspace is not None and has_analyzed_units and any(not item.get("asset_exists") for item in request.get("assets", [])):
         raise ValueError("ANALYZED coverage is blocked because one or more requested image assets are missing")
     if expected_assets and has_analyzed_units:
         if invocation.get("input_mode") != "NATIVE_IMAGE_ATTACHMENTS":
