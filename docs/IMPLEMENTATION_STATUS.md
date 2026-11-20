@@ -6,6 +6,20 @@ The intended behavior change is that the Agent synthesizes evidence and structur
 
 This branch remains a development candidate until the user completes one fresh local end-to-end run and inspects the actual Markdown/PDF against the separately held project benchmark. Do not mark product acceptance complete from documentation or unit-test results alone.
 
+## General scientific evidence analysis — release candidate in progress
+
+The baseline V5.1 branch already contains reliable source provenance, sample/result structures, individual visual inspection, measurement definitions, condition comparability, calculation audits and a researcher-facing manuscript plan. A Raman/FTIR-specific comparison prototype was also added, but it is not a general scientific discovery capability.
+
+The release-candidate branch adds a domain-neutral analysis stage that:
+- indexes all Result Units and emits candidate evidence relationships without treating metadata links as confirmed comparisons;
+- prepares joint analysis packs containing multiple Result Units, original-resolution assets, sample/series context and source anchors;
+- requires the model to identify scientifically meaningful within-result and cross-result patterns, cross-method convergence, divergence and contradictions;
+- records per-Result-Unit coverage, source-linked observations, comparisons, relationships, interpretations, alternatives and limitations;
+- integrates records into Evidence Bundle validation and compact context;
+- checks model capability before the multimodal scientific-analysis stage.
+
+**Status:** implementation and CI are release-candidate work. The new deterministic tests can establish data plumbing and validation, but they cannot prove scientific reasoning quality. A fresh local black-box run on an ordinary user task is required before this capability can be accepted. Do not mark scientific functional acceptance complete from code presence or CI alone.
+
 # Implementation status — Paper_plan V4 development
 
 ## Branch scope
