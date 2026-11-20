@@ -266,6 +266,17 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                 if evidence_ref.get("result_id") not in compared_ids:
                     errors.append(f"{comparison_id}: band evidence reference is outside its comparison set")
 
+    covered_spectral_result_ids = {
+        result_id for comparison in comparisons.values()
+        for result_id in comparison.get("result_ids", [])
+    }
+    uncovered_spectral_result_ids = sorted(set(spectral_result_ids) - covered_spectral_result_ids)
+    if uncovered_spectral_result_ids:
+        warnings.append(
+            "Raman/FTIR Result Units are not covered by a recorded joint comparison: "
+            + ", ".join(uncovered_spectral_result_ids)
+        )
+
     quality_errors, quality_warnings = validate_evidence_quality(bundle)
     errors.extend(quality_errors)
     warnings.extend(quality_warnings)
