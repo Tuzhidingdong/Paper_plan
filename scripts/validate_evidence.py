@@ -31,6 +31,96 @@ VALID_MAPPING = {"CONFIRMED", "PROBABLE", "AMBIGUOUS", "UNMAPPED", "NOT_APPLICAB
 VISUAL_MARKER = "[Visual Estimate - Raw Data Required]"
 
 
+def validate_figure_candidate_coverage(
+    bundle: dict[str, Any],
+    workspace: Path | None = None,
+) -> tuple[list[str], list[str]]:
+    """Require every ingest-detected vector figure candidate to reach an explicit disposition."""
+    errors: list[str] = []
+    warnings: list[str] = []
+    candidates = bundle.get("figure_candidates", {})
+    expected: dict[str, dict[str, Any]] = {}
+    manifest = None
+    if workspace is not None:
+        manifest_path = workspace_paths(workspace)["manifest"]
+        if manifest_path.is_file():
+            manifest = load_json(manifest_path)
+    if manifest is not None:
+        for page in manifest.get("pages", []):
+            if not page.get("vector_or_text_figure_review"):
+                continue
+            page_number = int(page.get("page_number") or 0)
+            page_candidates = page.get("vector_figure_candidates") or []
+            if not page_candidates and page.get("vector_candidate_bbox_pdf"):
+                page_candidates = [{"candidate_index": 1}]
+            if not page_candidates:
+                errors.append(
+                    f"Page {page_number}: vector-figure review was flagged but no candidate BBox was retained"
+                )
+            for index, _candidate in enumerate(page_candidates, start=1):
+                candidate_id = f"VFIG-P{page_number:04d}-{index:02d}"
+                expected[candidate_id] = {"page_number": page_number}
+                if candidate_id not in candidates:
+                    errors.append(
+                        f"{candidate_id}: detected source figure candidate has no extracted Evidence Bundle record"
+                    )
+    for candidate_id, candidate in candidates.items():
+        if candidate.get("extraction_status") != "EXTRACTED":
+            errors.append(f"{candidate_id}: vector figure extraction is not complete")
+            continue
+        region_id = candidate.get("region_id")
+        region = bundle.get("regions", {}).get(region_id, {})
+        if not region_id or not region:
+            errors.append(f"{candidate_id}: extracted candidate has no registered Region")
+            continue
+        if int(region.get("page_number") or 0) != int(candidate.get("page_number") or 0):
+            errors.append(f"{candidate_id}: candidate and Region page numbers disagree")
+        if region.get("pixel_sha256") != candidate.get("pixel_sha256"):
+            errors.append(f"{candidate_id}: candidate and Region pixel hashes disagree")
+        if workspace is not None:
+            root = workspace.resolve()
+            image_path = Path(str(region.get("image_path") or ""))
+            image_path = image_path if image_path.is_absolute() else root / image_path
+            try:
+                image_path.resolve().relative_to(root)
+            except ValueError:
+                errors.append(f"{candidate_id}: Region image path escapes the workspace")
+                image_path = None
+            if image_path is not None and not image_path.is_file():
+                errors.append(f"{candidate_id}: extracted Region image file is missing")
+        if candidate.get("triage_status") != "REVIEWED":
+            errors.append(f"{candidate_id}: explicit scientific-figure inclusion/exclusion decision is missing")
+            continue
+        disposition = candidate.get("disposition")
+        if disposition == "EXCLUDE_NOT_SCIENTIFIC_FIGURE":
+            if not str(candidate.get("reason") or "").strip():
+                errors.append(f"{candidate_id}: excluded candidate requires a reason")
+        elif disposition == "INCLUDE_AS_SCIENTIFIC_FIGURE":
+            linked_ids = candidate.get("result_ids", [])
+            if not linked_ids:
+                errors.append(f"{candidate_id}: included candidate has no linked Result Units")
+            for result_id in linked_ids:
+                result = bundle.get("result_units", {}).get(result_id)
+                if result is None:
+                    errors.append(f"{candidate_id}: linked Result Unit {result_id} does not exist")
+                    continue
+                linked_regions = set(result.get("region_ids", []) or [])
+                linked_panel_parents = {
+                    bundle.get("panels", {}).get(panel_id, {}).get("parent_region_id")
+                    for panel_id in result.get("panel_ids", []) or []
+                }
+                if region_id not in linked_regions and region_id not in linked_panel_parents:
+                    errors.append(
+                        f"{candidate_id}: source Region {region_id} is not linked to Result Unit {result_id}"
+                    )
+        else:
+            errors.append(f"{candidate_id}: invalid figure-candidate disposition {disposition!r}")
+    unexpected = sorted(set(candidates) - set(expected)) if expected else []
+    if unexpected and manifest is not None:
+        warnings.append("Figure-candidate records not matched to current ingest manifest: " + ", ".join(unexpected))
+    return errors, warnings
+
+
 def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -341,6 +431,10 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             for ref in contradiction.get("evidence_refs", []):
                 if ref.get("result_id") not in result_id_set:
                     errors.append(f"{analysis_id}: contradiction evidence reference is outside its pack")
+
+    figure_errors, figure_warnings = validate_figure_candidate_coverage(bundle, workspace)
+    errors.extend(figure_errors)
+    warnings.extend(figure_warnings)
 
     uncovered_analysis_results = sorted(set(results) - analyzed_result_ids)
     if results and uncovered_analysis_results:
