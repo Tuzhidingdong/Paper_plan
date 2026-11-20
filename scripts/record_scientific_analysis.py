@@ -279,8 +279,25 @@ def validate_record(
         _valid_refs(bundle, expected_ids, refs, f"signal_features[{index}]")
         if any(ref.get("result_id") != feature.get("result_id") for ref in refs):
             raise ValueError(f"signal_features[{index}] evidence must belong to its declared Result Unit")
+        if not str(feature.get("series_label") or "").strip():
+            raise ValueError(f"signal_features[{index}] requires a visible series_label or UNKNOWN")
+        axes = feature.get("axis_context")
+        if not isinstance(axes, dict):
+            raise ValueError(f"signal_features[{index}] requires axis_context")
+        for field in ("x_axis_label", "x_axis_unit", "x_axis_scale",
+                      "y_axis_label", "y_axis_unit", "y_axis_scale", "normalization_basis"):
+            if not str(axes.get(field) or "").strip():
+                raise ValueError(f"signal_features[{index}].axis_context requires {field} (use UNKNOWN when unresolved)")
+        if axes.get("x_axis_scale") not in {"LINEAR", "LOG", "CATEGORICAL", "UNKNOWN"}:
+            raise ValueError(f"signal_features[{index}] has invalid x_axis_scale")
+        if axes.get("y_axis_scale") not in {"LINEAR", "LOG", "CATEGORICAL", "UNKNOWN"}:
+            raise ValueError(f"signal_features[{index}] has invalid y_axis_scale")
         for estimate_name in ("position", "width", "intensity", "area"):
-            _validate_signal_estimate(feature.get(estimate_name), f"signal_features[{index}].{estimate_name}")
+            estimate = feature.get(estimate_name)
+            _validate_signal_estimate(estimate, f"signal_features[{index}].{estimate_name}")
+            if estimate_name in {"intensity", "area"} and isinstance(estimate, dict) and estimate.get("value") is not None:
+                if not str(estimate.get("normalization_basis") or axes.get("normalization_basis") or "").strip():
+                    raise ValueError(f"signal_features[{index}].{estimate_name} requires normalization_basis")
         feature_map[feature_id] = feature
 
     comparison_ids: set[str] = set()
