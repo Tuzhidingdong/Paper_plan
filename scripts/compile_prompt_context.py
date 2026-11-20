@@ -98,6 +98,22 @@ def compile_context(bundle: dict[str, Any]) -> str:
                     f"relative signal: {item.get('relative_signal_comparison', 'not assessed')} "
                     f"(basis: {item.get('signal_basis', 'unspecified')})."
                 )
+                for estimate in item.get("position_estimates", []):
+                    if estimate.get("position_cm1_approx") is not None:
+                        lines.append(
+                            f"    - Approx. {estimate.get('sample_or_series', 'series')} band position: "
+                            f"{estimate.get('position_cm1_approx')} ± {estimate.get('uncertainty_cm1_approx', 'unreported')} cm-1 "
+                            f"[{estimate.get('reading_basis', 'unspecified')}; confidence {estimate.get('confidence', 'unreported')}]."
+                        )
+                if item.get("peak_shift_cm1_approx") is not None:
+                    lines.append(
+                        f"    - Approx. peak shift: {item.get('peak_shift_cm1_approx')} cm-1 "
+                        f"({item.get('shift_direction', 'direction unresolved')})."
+                    )
+                if item.get("relative_signal_trend"):
+                    lines.append(f"    - Relative signal trend: {item['relative_signal_trend']}.")
+                if item.get("apparent_area_trend"):
+                    lines.append(f"    - Apparent band-area trend: {item['apparent_area_trend']}.")
                 if item.get("interpretation"):
                     lines.append(f"    - Interpretation: {item['interpretation']}")
                 if item.get("alternative_explanations"):
@@ -111,6 +127,16 @@ def compile_context(bundle: dict[str, Any]) -> str:
                 lines.append(f"  - Candidate implications: {'; '.join(comparison['candidate_scientific_implications'])}")
             if comparison.get("limitations"):
                 lines.append(f"  - Limitations: {'; '.join(comparison['limitations'])}")
+        covered_spectral_result_ids = {
+            result_id for comparison in comparisons.values()
+            for result_id in comparison.get("result_ids", [])
+        }
+        uncovered_spectral_result_ids = sorted(set(spectral_result_ids) - covered_spectral_result_ids)
+        if uncovered_spectral_result_ids:
+            lines.append(
+                "- Spectral Result Units not yet included in a recorded comparison: "
+                + ", ".join(uncovered_spectral_result_ids)
+            )
     elif spectral_result_ids:
         lines.append(
             "- Spectral Result Units were identified, but no joint cross-sample comparison has been recorded. "
