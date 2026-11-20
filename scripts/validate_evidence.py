@@ -527,6 +527,34 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                     if not str(quantified.get(field) or "").strip():
                         errors.append(f"{analysis_id}: signal_comparisons[{index}] quantified change requires {field}")
 
+        signal_coverage = analysis.get("signal_analysis_coverage", [])
+        signal_coverage_ids = [item.get("result_id") for item in signal_coverage]
+        if set(signal_coverage_ids) != result_id_set or len(signal_coverage_ids) != len(result_id_set):
+            errors.append(f"{analysis_id}: signal_analysis_coverage must disposition each Result Unit exactly once")
+        feature_owner = {}
+        for item in signal_coverage:
+            result_id = item.get("result_id")
+            status = item.get("status")
+            if status not in {"APPLICABLE", "NOT_APPLICABLE", "NOT_ASSESSABLE"}:
+                errors.append(f"{analysis_id}: invalid signal-analysis coverage status for {result_id}")
+            if status in {"NOT_APPLICABLE", "NOT_ASSESSABLE"} and not str(item.get("reason") or "").strip():
+                errors.append(f"{analysis_id}: {result_id} requires a signal-analysis coverage reason")
+            feature_ids = item.get("feature_ids", [])
+            if status == "APPLICABLE" and not feature_ids:
+                errors.append(f"{analysis_id}: {result_id} is APPLICABLE but has no signal_features")
+            if any(feature_id not in signal_feature_map or signal_feature_map[feature_id].get("result_id") != result_id for feature_id in feature_ids):
+                errors.append(f"{analysis_id}: {result_id} references unrelated/unknown signal feature IDs")
+            for feature_id in feature_ids:
+                feature_owner[feature_id] = result_id
+            comparison_ids = item.get("comparison_ids", [])
+            if not set(comparison_ids).issubset(seen_signal_comparisons):
+                errors.append(f"{analysis_id}: {result_id} references unknown signal comparison IDs")
+            if status == "APPLICABLE" and not comparison_ids and not str(item.get("reason") or "").strip():
+                errors.append(f"{analysis_id}: {result_id} must explain why no signal comparison was possible")
+        for feature_id, feature in signal_feature_map.items():
+            if feature_owner.get(feature_id) != feature.get("result_id"):
+                errors.append(f"{analysis_id}: {feature_id} is not linked from its Result Unit signal coverage")
+
         for index, relationship in enumerate(analysis.get("relationships", [])):
             refs = relationship.get("result_ids", [])
             if not refs or not set(refs).issubset(result_id_set):
