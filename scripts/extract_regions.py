@@ -126,6 +126,7 @@ def extract_vector_figure_candidates(document, manifest, workspace: Path, bundle
     Candidate records are durable source-coverage obligations. A candidate is
     not assumed to be a scientific figure until the Agent explicitly triages it.
     """
+    import fitz
     figure_candidates = bundle.setdefault("figure_candidates", {})
     added = 0
     for page_record in manifest.get("pages", []):
