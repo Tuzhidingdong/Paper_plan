@@ -18,7 +18,7 @@ The release-candidate branch adds a domain-neutral analysis stage that:
 - integrates records into Evidence Bundle validation and compact context;
 - checks model capability before the multimodal scientific-analysis stage.
 
-**Status:** implementation and CI are release-candidate work. The new deterministic tests can establish data plumbing and validation, but they cannot prove scientific reasoning quality. A fresh local black-box run on an ordinary user task is required before this capability can be accepted. Do not mark scientific functional acceptance complete from code presence or CI alone.
+**Status:** CODE/CI VERIFIED — SCIENTIFIC BLACK-BOX ACCEPTANCE PENDING. The release-candidate branch passes 155 tests on each of Python 3.10, 3.11 and 3.12. These deterministic tests establish data plumbing and validation, but cannot prove scientific reasoning quality. A fresh local black-box run on an ordinary user task is required before scientific functional acceptance. Do not mark acceptance complete from code presence or CI alone.
 
 # Implementation status — Paper_plan V4 development
 
