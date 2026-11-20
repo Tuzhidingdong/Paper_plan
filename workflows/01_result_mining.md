@@ -71,28 +71,33 @@ Figure-level status and report-level status stay separate. NOT_SHOWN means not s
 - Mark each Result Unit's intended claim role as UNDECIDED, SUPPORTING, CORE or NOT_USED. A numeric CORE result must pass the measurement-definition checks before it can support a central quantitative claim.
 - Compare experimental conditions explicitly before combining or contrasting Result Units. Record matched, mismatched, unknown and not-applicable dimensions rather than assuming like-for-like comparability.
 
-## 7. Joint Raman / FTIR comparison (mandatory when spectral Result Units exist)
+## 7. General cross-result scientific analysis (mandatory)
 
-After Result Units and sample associations have been created, identify every Raman/FTIR Result Unit and run the joint comparison task generator:
+After all Result Units, sample associations, individual visual inspections and measurement definitions have been assembled, perform the general scientific evidence analysis before manuscript synthesis. This stage is domain-neutral and is triggered by the existence of Result Units, not by a user naming a particular technique or comparison.
 
-    python scripts/prepare_spectral_comparison.py --workspace WORKSPACE --auto
+First qualify the active model:
 
-The script creates one original-resolution comparison request per technique and explicit measurement_group. When a measurement_group is absent, the group is marked GROUPING_REQUIRES_MODEL_REVIEW; do not assume that technique alone proves comparability. Inspect all listed image paths together in one visual context. One Result Unit may contain several plotted sample traces and must still be examined for within-figure comparisons.
+    python scripts/check_capability.py --workspace WORKSPACE --task scientific_analysis
 
-The joint visual analysis must:
-- identify visible spectra/series and map them to Result Units, sample IDs/aliases and figure labels without guessing unresolved mappings;
-- assess acquisition mode, axes/units/range/resolution, calibration, sample preparation/state, baseline, normalization, smoothing, vertical offsets, signal basis and replicate basis before comparing;
-- make a band-by-band comparison of approximate positions/shift directions, relative signal or area trends where defensible, and bands that appear/disappear/split/merge/broaden/narrow/remain stable;
-- state approximate peak-position ranges and uncertainty only when original-resolution ticks support them; do not digitize curves into raw datasets or manufacture exact values;
-- explain likely functional-group/bond/coordination changes, keeping observations, interpretations and hypotheses distinct and giving competing assignments/confounders;
-- state candidate scientific implications and what independent Result Units could corroborate them; never invent corroboration;
-- return PARTIAL or NOT_COMPARABLE when sample identity, image quality or measurement conditions prevent a defensible comparison.
+Then prepare a source-linked analysis inventory and joint task packs:
 
-Save the model's structured response to a JSON file following the prepared request's required_output shape, then register it:
+    python scripts/prepare_scientific_analysis.py --workspace WORKSPACE
 
-    python scripts/record_spectral_comparison.py --workspace WORKSPACE --request-json REQUEST_JSON --record-json COMPARISON_RESULT_JSON
+Inspect the generated analysis_index.json and every request JSON under WORKSPACE/cache/scientific_analysis. The index must account for every Result Unit and expose Regions/Panels that have not been linked to a Result Unit. Each pack includes the relevant Result Units, original-resolution assets, sample/series mappings, measurement conditions, existing observations and candidate metadata relationships.
 
-The record is a first-class Evidence Bundle item and is included in cache/prompt_context/evidence_context.md. Do not proceed as though spectral comparison is complete when a spectral Result Unit has only an independent single-image inspection. If there are no Raman/FTIR Result Units, record none and continue.
+The candidate relationship graph is only a navigation aid. The Agent must inspect the underlying evidence map and discover relevant relationships that metadata indexing may not capture. It must consider within-result series and between-result relationships, including cross-sample, cross-condition, temporal, quantitative, cross-method, convergent, divergent, unexpected or contradictory patterns where appropriate. The active Agent decides which comparisons are scientifically meaningful; no fixed instrument- or discipline-specific checklist is imposed.
+
+Open all original-resolution assets in each pack and analyze them jointly with the associated structured evidence. Do not substitute Contact Sheets or isolated single-image captions. Assess relevant comparability dimensions before combining results. Keep observations, quantified/derived differences, interpretations and hypotheses separate; attach source references to each material claim; preserve alternative explanations and limitations.
+
+Every Result Unit must receive exactly one disposition: ANALYZED, NO_COMPARISON_APPLICABLE or NOT_ASSESSABLE. Give a reason for the latter two. If there is no valid comparison, record that result rather than inventing a relationship. For large projects, process packs within the configured size limit and preserve cross-pack links for project-level synthesis.
+
+Save each pack's structured response following its required_output shape and register it:
+
+    python scripts/record_scientific_analysis.py --workspace WORKSPACE --request-json REQUEST_JSON --record-json ANALYSIS_RESULT_JSON
+
+After all packs are recorded, regenerate the compact evidence context. The new scientific_analyses records are first-class Evidence Bundle evidence and must inform later claim selection, literature comparison, manuscript storyline and Figure allocation. Do not treat single-result descriptions as completed scientific synthesis.
+
+If the capability check is blocked, do not quietly substitute text-only reasoning for visual analysis. Mark the affected units NOT_ASSESSABLE and preserve the exact capability blocker. Reuse source-hash-matched extraction and previous analysis records; do not repeat costly work without an evidence gap.
 
 ## 8. Artifact/confounder audit
 
