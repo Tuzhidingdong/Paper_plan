@@ -57,12 +57,25 @@ def _validate_model_invocation(
         raise ValueError("model_invocation.invocation_id is required")
     if has_analyzed_units and invocation.get("status") != "RESPONSE_RECEIVED":
         raise ValueError("ANALYZED coverage requires a completed model invocation receipt")
+    analyzed_result_ids = {
+        item.get("result_id") for item in record.get("coverage", [])
+        if item.get("status") == "ANALYZED"
+    }
+    def applies_to_analyzed_result(asset: dict[str, Any]) -> bool:
+        linked_ids = asset.get("result_ids") or ([asset.get("result_id")] if asset.get("result_id") else [])
+        return not linked_ids or bool(set(linked_ids) & analyzed_result_ids)
+
+    applicable_assets = [
+        item for item in request.get("assets", []) if applies_to_analyzed_result(item)
+    ]
     expected_assets = [
-        item for item in request.get("assets", [])
+        item for item in applicable_assets
         if item.get("asset_exists") and item.get("asset_sha256")
     ]
-    if workspace is not None and has_analyzed_units and any(not item.get("asset_exists") for item in request.get("assets", [])):
-        raise ValueError("ANALYZED coverage is blocked because one or more requested image assets are missing")
+    if workspace is not None and has_analyzed_units and any(
+        not item.get("asset_exists") or not item.get("asset_sha256") for item in applicable_assets
+    ):
+        raise ValueError("ANALYZED coverage is blocked because an image asset for an ANALYZED Result Unit is missing or unhashed")
     if expected_assets and has_analyzed_units:
         if invocation.get("input_mode") != "NATIVE_IMAGE_ATTACHMENTS":
             raise ValueError("image-derived ANALYZED coverage requires confirmed native image attachments")
@@ -387,6 +400,7 @@ def register_analysis(
     saved["request_assets"] = [
         {"image_path": item.get("image_path"), "asset_sha256": item.get("asset_sha256"),
          "region_id": item.get("region_id"), "panel_id": item.get("panel_id"),
+         "result_id": item.get("result_id"), "result_ids": item.get("result_ids", []),
          "asset_exists": item.get("asset_exists")}
         for item in request.get("assets", [])
     ]
