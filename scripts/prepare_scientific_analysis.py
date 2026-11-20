@@ -356,15 +356,19 @@ def build_analysis_pack(
     results = bundle.get("result_units", {})
     selected = []
     assets = []
-    asset_seen: set[str] = set()
+    asset_by_path: dict[str, dict[str, Any]] = {}
     for result_id in result_ids:
         result = results[result_id]
         context = result.get("measurement_context", {})
         result_assets = _asset_records(bundle, result, workspace)
         for asset in result_assets:
-            if asset["image_path"] in asset_seen:
+            image_path = asset["image_path"]
+            if image_path in asset_by_path:
+                existing = asset_by_path[image_path]
+                existing["result_ids"] = sorted(set(existing.get("result_ids", [])) | {result_id})
                 continue
-            asset_seen.add(asset["image_path"])
+            asset["result_ids"] = [result_id]
+            asset_by_path[image_path] = asset
             assets.append(asset)
         selected.append({
             "result_id": result_id,
