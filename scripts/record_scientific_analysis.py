@@ -336,6 +336,7 @@ def register_analysis(
     saved["source_sha256"] = bundle.get("source", {}).get("sha256")
     saved["request_pack_number"] = request.get("pack_number")
     saved["request_asset_count"] = request.get("asset_count")
+    saved["invocation_audit_required"] = bool(request.get("invocation_audit_required"))
     saved["request_assets"] = [
         {"image_path": item.get("image_path"), "asset_sha256": item.get("asset_sha256"),
          "region_id": item.get("region_id"), "panel_id": item.get("panel_id"),
