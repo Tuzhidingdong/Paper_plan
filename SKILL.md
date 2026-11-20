@@ -59,7 +59,7 @@ The Skill may identify that the available evidence does not yet support a defens
 3. Inspect visual evidence before relying on captions/narrative where practical. If the active model has already seen report text, disclose that cognitive blindness is not guaranteed.
 4. Keep FOUND, NOT_SHOWN, NOT_LEGIBLE, UNCERTAIN and NOT_APPLICABLE distinct.
 5. Distinguish exact text/table extraction, vector extraction, visual estimate, qualitative observation and unavailable data.
-6. Low-resolution plots never yield exact values. Visual estimates carry an explicit raw-data-required warning.
+6. Low-resolution plots never yield exact values. Legible original-resolution figures may support bounded visual or semi-quantitative comparisons (for example relative trends, approximate positions or relative signal changes) without requiring native numeric data. Label such readings as image-derived estimates, state their reading basis, confidence and uncertainty, and limit precision to the axis and pixel resolution. Mark raw data as required only when the scientific question needs exact values or calculations that the supplied figure cannot support.
 7. Keep Observed, Interpreted and Hypothesized separate from claim type (Descriptive, Comparative, Associational, Causal, Mechanistic).
 8. Every central quantitative metric must have a verified measurement definition and calculation lineage: measurand, raw signal, method, formula where derived, units, normalization, blank/calibration, uncertainty and parent/source data. The evidence validator blocks a numeric Result Unit marked CORE when this definition is absent or incomplete.
 9. Audit artifacts, confounders, sample identity and comparison-condition compatibility before making causal or mechanistic interpretations. Cross-sample/condition comparisons must have a structured comparability assessment; unknown dimensions remain explicit.
@@ -77,6 +77,19 @@ The Skill may identify that the available evidence does not yet support a defens
 21. Never prescribe local protocols, equipment, parameters, sample amounts, replicate counts or timelines without source evidence and local confirmation.
 22. Student-facing messages must be supportive, concrete and non-accusatory.
 
+## General cross-result scientific analysis
+
+After individual Result Units, sample associations, visual inspections and measurement definitions are recorded, and before literature/mainline synthesis, the Skill MUST complete the domain-neutral scientific-analysis stage defined in workflows/01_result_mining.md and references/scientific_analysis.md.
+
+- Trigger this stage from the presence of Result Units, not from a user naming a technique, figure, sample pair or analysis checklist.
+- Use scripts/prepare_scientific_analysis.py to index every Result Unit, prepare joint analysis packs and expose unassigned Regions/Panels. Use scripts/record_scientific_analysis.py to validate and persist each structured result.
+- The Agent must inspect the original-resolution assets and decide which relationships are scientifically meaningful. Analyze multiple series within a single result as well as relationships across results, samples, conditions, time/order, measured quantities and independent measurement approaches when supported. Do not force comparisons that lack a defensible basis.
+- Treat program-generated relationship candidates as navigation hints, never as proof of scientific comparability. Discover scientifically useful links that the deterministic metadata index did not identify.
+- For each comparison, assess relevant compatibility dimensions, source precision, normalization, calibration, measurement definitions and uncertainties. Keep direct observations, quantified/derived differences, interpretations and hypotheses separate; cite Result Units and physical Region/Panel sources.
+- Every Result Unit must be covered exactly once in its analysis pack as ANALYZED, NO_COMPARISON_APPLICABLE or NOT_ASSESSABLE. The latter two require reasons. Preserve unassigned Regions/Panels as an explicit extraction coverage gap.
+- Compile recorded analyses into the evidence context before the literature frontier and manuscript synthesis. The final researcher-facing plan must explain material cross-result findings, convergence, contradictions, alternative explanations and unresolved limits; do not merely list the internal records.
+- Check the model's scientific_analysis capability profile before using multimodal analysis. If native high-resolution visual input, scientific reasoning, structured output or long-context consistency is not qualified, do not silently replace visual analysis with text-only summaries; mark affected evidence NOT_ASSESSABLE and explain why.
+- Reuse same-source extraction and completed records. Do not start hidden workers, additional model providers or paid jobs. Preserve existing spectral_comparisons only for older-workspace compatibility; the general scientific_analyses workflow is authoritative for new projects.
 ## V4.1 scientific decision-quality rules
 
 23. A Claim evidence reference distinguishes `SUPPORTS_CLAIM`, `CONTRADICTS_CLAIM`, `AUDIT_TARGET` and `CONTEXT_ONLY`. Legacy unlabelled direct Result Unit references default to supporting evidence. Finding-linked Result Units retain their typed list semantics.
