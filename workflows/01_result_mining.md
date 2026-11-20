@@ -24,17 +24,19 @@ The candidate heuristic:
 
 drawing_bbox_area_ratio reports the largest central cluster's grid bounding area, not the union of every page drawing. The legacy whole-page union is retained separately as drawing_full_page_union_bbox_area_ratio.
 
-A candidate flag is only a prompt for page-level review, not semantic chart detection. Review candidate pages against the rendered page before creating a Result Unit. Do not manually register decorative rules as scientific figures.
+A candidate flag is a source-coverage obligation, not a semantic conclusion. For every page flagged by the ingest detector, retain each spatial vector-figure candidate and its PDF-coordinate BBox. Review the full-page render and candidate crop before deciding whether it is a scientific figure. Do not silently discard a candidate because it is unfamiliar or difficult to interpret.
 
 ## 3. Raster extraction and Contact Sheet triage
 
-Run extract_regions.py. It extracts embedded raster image blocks and can render explicit PDF-coordinate BBoxes for vector-only figures.
+Run extract_regions.py. In addition to embedded raster image blocks and any explicitly supplied BBoxes, it automatically rasterizes every vector-figure candidate recorded by ingest_pdf.py using the retained PDF-coordinate BBox (default 300 dpi). Each crop becomes a source-anchored Region and a figure_candidates record with image SHA-256, pixel dimensions and PENDING_TRIAGE status. Multiple spatial plot clusters on one page are preserved as separate candidates. Do not provide hand-authored BBoxes for candidates already detected by the ingest stage.
 
 Repeated near-identical top/footer image blocks are labelled REPEATED_LAYOUT_ASSET only for triage. They remain in the Evidence Bundle and their IDs are not merged or deleted. The default Contact Sheet omits these repeated assets; use --include-layout-assets to inspect all.
 
 Contact Sheets are for orientation only. Never read quantitative values, weak peaks, slopes, close line styles or axes from downscaled sheets. Inspect the original-resolution Region/Panel instead.
 
 When previously registered vector BBoxes or other manual regions exist, reuse them only when source hash, page-coordinate provenance and extraction version match. Do not re-create equivalent crops or repeat completed visual inspections without a documented evidence gap.
+
+Every ingest-detected vector candidate must subsequently receive an explicit disposition using `scripts/record_figure_triage.py --workspace WORKSPACE --decisions-json DECISIONS_JSON`. For an actual scientific figure, use `INCLUDE_AS_SCIENTIFIC_FIGURE` and link the Result Unit(s) that cite its Region (or child Panel). Use `EXCLUDE_NOT_SCIENTIFIC_FIGURE` only when it is demonstrably decorative/non-scientific, with a concise source-based reason. A difficult-to-read or unresolved scientific chart is not an exclusion: register it as evidence and mark its Result Unit NOT_ASSESSABLE with the specific blocker. Record candidate decisions after Result Units exist and before evidence validation. Unreviewed or unlinked candidates are validation errors.
 
 ## 4. Image-first visual inspection
 
@@ -87,7 +89,13 @@ Inspect the generated analysis_index.json and every request JSON under WORKSPACE
 
 The candidate relationship graph is only a navigation aid. The Agent must inspect the underlying evidence map and discover relevant relationships that metadata indexing may not capture. It must consider within-result series and between-result relationships, including cross-sample, cross-condition, temporal, quantitative, cross-method, convergent, divergent, unexpected or contradictory patterns where appropriate. The active Agent decides which comparisons are scientifically meaningful; no fixed instrument- or discipline-specific checklist is imposed.
 
-Open all original-resolution assets in each pack and analyze them jointly with the associated structured evidence. Do not substitute Contact Sheets or isolated single-image captions. Assess relevant comparability dimensions before combining results. Keep observations, quantified/derived differences, interpretations and hypotheses separate; attach source references to each material claim; preserve alternative explanations and limitations.
+Open all original-resolution assets in each pack and analyze them jointly with the associated structured evidence. Attach those assets to the active model invocation as native image inputs; a file path or the text "asset_exists=true" is not evidence that the model saw the image. Never claim an image was inspected from a path alone.
+
+Treat plotted experimental signals as primary evidence. Identify the coordinate axes, units, plotted series and relevant visible features in the actual source image. Where supported by resolution and measurement context, record feature-level observations for peaks, bands, reflections, shoulders, edges, plateaus or other salient signal structures. Compare features within a plot and across compatible samples/conditions/series, including position, width, intensity, area, shape, appearance/disappearance and non-monotonic changes. Do not force a spectroscopy-specific or diffraction-specific checklist on unrelated data; select feature types from the evidence itself. Do not invent exact values from a low-resolution image; record visual estimates with basis, precision, uncertainty and confidence, or mark the metric unresolved. Feature labels/assignments are interpretations, not direct observations.
+
+Use the prepared `signal_features` and `signal_comparisons` fields for source-linked feature records. Every feature and comparison must cite Result Unit and Region/Panel/page. Explicitly separate direct signal change from its interpretation and assess baseline, overlap, normalization, orientation, acquisition settings and other relevant alternatives.
+
+For every model call, persist the actual request and response artifacts in the project workspace and record a `model_invocation` receipt: invocation ID, actual model ID, response status, input mode, each native image attachment's source path and SHA-256, its runtime attachment reference, and request/response artifact paths and SHA-256. The receipt is Agent-reported runtime evidence, not a claim of independent host verification. If native image attachment or the actual request/response cannot be confirmed, mark affected Result Units NOT_ASSESSABLE; do not mark them ANALYZED.
 
 Every Result Unit must receive exactly one disposition: ANALYZED, NO_COMPARISON_APPLICABLE or NOT_ASSESSABLE. Give a reason for the latter two. If there is no valid comparison, record that result rather than inventing a relationship. For large projects, process packs within the configured size limit and preserve cross-pack links for project-level synthesis. After all packs are recorded, inspect analysis_index.json cross_pack_relationships and each record's related_results_outside_pack. Reopen the relevant pack descriptors/assets and perform a project-level review of these links before Stage 2. Confirm only evidence-supported relationships; persist material cross-pack conclusions as Findings using the existing ID registry, with exact Result Unit and Region/Panel references. Do not treat an unreviewed metadata link as a scientific result.
 
@@ -107,7 +115,11 @@ For every relevant factor record whether the report shows it, where that evidenc
 
 ## 9. Validation and context compilation
 
-Run:
+Before evidence validation, create a decisions JSON for every vector figure candidate and record the explicit inclusion/exclusion decisions:
+
+    python scripts/record_figure_triage.py --workspace WORKSPACE --decisions-json FIGURE_TRIAGE_DECISIONS_JSON
+
+Then run:
 
     python scripts/validate_evidence.py --workspace WORKSPACE
     python scripts/validate_samples.py --workspace WORKSPACE
