@@ -634,10 +634,31 @@ def prepare_all(
         item for item in candidates
         if coverage.get(item["result_ids"][0]) != coverage.get(item["result_ids"][1])
     ]
+    figure_candidates = bundle.get("figure_candidates", {})
+    figure_candidate_coverage = [
+        {
+            "candidate_id": candidate_id,
+            "page_number": candidate.get("page_number"),
+            "region_id": candidate.get("region_id"),
+            "extraction_status": candidate.get("extraction_status"),
+            "triage_status": candidate.get("triage_status"),
+            "disposition": candidate.get("disposition"),
+            "result_ids": candidate.get("result_ids", []),
+            "reason": candidate.get("reason"),
+            "asset_sha256": candidate.get("asset_sha256"),
+        }
+        for candidate_id, candidate in sorted(figure_candidates.items())
+    ]
     index = {
         "source_sha256": bundle.get("source", {}).get("sha256"),
         "analysis_mode": "GENERAL_SCIENTIFIC_EVIDENCE_ANALYSIS",
         "result_unit_count": len(result_ids),
+        "figure_candidate_count": len(figure_candidate_coverage),
+        "pending_figure_candidate_ids": [
+            item["candidate_id"] for item in figure_candidate_coverage
+            if item.get("triage_status") != "REVIEWED"
+        ],
+        "figure_candidate_coverage": figure_candidate_coverage,
         "candidate_relationship_count": len(candidates),
         "cross_pack_relationships": cross_pack_relationships,
         "pack_count": len(packs),
@@ -657,6 +678,7 @@ def prepare_all(
             "Candidate relationships are navigation hints, not declarations of scientific comparability.",
             "All Result Units are assigned to a pack; the model must still record ANALYZED, NO_COMPARISON_APPLICABLE or NOT_ASSESSABLE for each.",
             "Regions/Panels not linked to any Result Unit remain explicit extraction-coverage gaps.",
+            "Every detected vector-figure candidate requires an explicit inclusion/exclusion disposition and, when included, a Result Unit link before evidence validation can pass.",
         ],
     }
     return index, packs
