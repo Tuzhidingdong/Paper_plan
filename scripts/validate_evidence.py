@@ -92,7 +92,7 @@ def validate_figure_candidate_coverage(
                 if sha256_file(image_path) != candidate.get("asset_sha256"):
                     errors.append(f"{candidate_id}: extracted Region file SHA-256 does not match its figure-candidate record")
         if candidate.get("triage_status") != "REVIEWED":
-            errors.append(f"{candidate_id}: explicit scientific-figure inclusion/exclusion decision is missing")
+            errors.append(f"{candidate_id}: explicit scientific-figure disposition is missing")
             continue
         disposition = candidate.get("disposition")
         if disposition == "EXCLUDE_NOT_SCIENTIFIC_FIGURE":
