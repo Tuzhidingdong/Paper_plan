@@ -330,7 +330,6 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             errors.append(f"{analysis_id}: coverage must account for each Result Unit exactly once")
         for item in coverage:
             result_id = item.get("result_id")
-            signal_coverage_map[result_id] = item
             status = item.get("status")
             if status not in {"ANALYZED", "NO_COMPARISON_APPLICABLE", "NOT_ASSESSABLE"}:
                 errors.append(f"{analysis_id}: invalid coverage status for {result_id}")
