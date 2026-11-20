@@ -9,12 +9,15 @@ Paper_plan has four connected layers:
 3. Manuscript-development layer: target-journal profile, central contribution, Introduction paragraphs, storyline, Figure/Panel and TOC architecture, Supporting Information plan, and work packages.
 4. Delivery/audit layer: editable reports, verified PDF, cross-bundle validation, human decision records and execution checklists.
 
+A cross-result scientific-analysis stage connects the evidence layer to research decisions. It discovers and records relationships across Result Units, samples, conditions, series and measurement approaches before literature and manuscript synthesis.
+
 ## Data flow
 
     primary report + user-supplied supplemental research data
       -> immutable source inventory and hashes
       -> evidence extraction, visual triage and sample identity
       -> measurement definitions, condition-comparability checks, calculations and data lineage
+      -> general cross-result scientific analysis, relationship discovery and per-Result-Unit coverage
       -> literature frontier and competing-study analysis
       -> defensible candidate directions and central contribution
       -> dated target-journal profile
@@ -26,14 +29,14 @@ Paper_plan has four connected layers:
 
 ## Workspace bundles
 
-- evidence_bundle.json: source references, regions, panels, samples, Result Units, Findings, inspections, audits and discrepancies.
+- evidence_bundle.json: source references, regions, panels, samples, Result Units, Findings, inspections, audits, discrepancies, backward-compatible spectral comparison records and general scientific analyses.
 - literature_bundle.json: search scope, access-tiered records, exact snippets, literature claims and bounded gaps.
 - routes_bundle.json: candidate directions, supporting evidence, recommendation and human decision state.
 - framework_bundle.json: Claims, Data Slots, Data Units, execution tasks and dependency links.
 - manuscript_development_bundle.json: project profile, dated journal sources, central argument, Introduction paragraphs, storyline, TOC, main Figures, SI items, condition-comparability assessments, references to Claims/Data Slots/tasks, manuscript sections and deliverables.
 - state_manifest.json: source hashes, workspace revision, stage, tool versions, bundle references and capability profile.
 
-Search logs and entity revision history belong in append-only JSONL sidecars rather than prompt context.
+Search logs and entity revision history belong in append-only JSONL sidecars rather than prompt context. General scientific analyses are persisted as source-linked bundle records and summarized in the compact evidence context.
 
 ## Permanent IDs and persistence
 
