@@ -184,6 +184,8 @@ def register_analysis(
     saved["source_sha256"] = bundle.get("source", {}).get("sha256")
     saved["request_pack_number"] = request.get("pack_number")
     saved["request_asset_count"] = request.get("asset_count")
+    saved["candidate_relationships"] = request.get("candidate_relationships", [])
+    saved["related_results_outside_pack"] = request.get("related_results_outside_pack", [])
     analyses[analysis_id] = saved
 
 
