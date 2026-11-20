@@ -18,7 +18,22 @@ The release-candidate branch adds a domain-neutral analysis stage that:
 - integrates records into Evidence Bundle validation and compact context;
 - checks model capability before the multimodal scientific-analysis stage.
 
-**Status:** CODE/CI VERIFIED — SCIENTIFIC BLACK-BOX ACCEPTANCE PENDING. The release-candidate branch passes 155 tests on each of Python 3.10, 3.11 and 3.12. These deterministic tests establish data plumbing and validation, but cannot prove scientific reasoning quality. A fresh local black-box run on an ordinary user task is required before scientific functional acceptance. Do not mark acceptance complete from code presence or CI alone.
+**Status:** The parent release-candidate branch is CODE/CI VERIFIED — SCIENTIFIC BLACK-BOX ACCEPTANCE PENDING. Its previous 155-test matrix does not establish spectral analysis quality.
+
+## Follow-on spectral analysis capability — implementation branch
+
+Branch: `feat/spectral-analysis-capability`, based on the unchanged RC commit `aff67d386109760e3a5267f3d574707878de1b53`.
+
+This follow-on implementation addresses the root-cause audit's extraction, coverage, signal-analysis and invocation-audit gaps:
+- the PDF ingest heuristic now retains per-cluster vector plot BBoxes instead of emitting only a page-level review flag;
+- `extract_regions.py` rasterizes each detected vector candidate at the requested DPI into a provenance-linked Region and records an explicit source-figure candidate;
+- `record_figure_triage.py` records inclusion with Result Unit links or reasoned exclusion; unresolved/missing candidates block evidence validation;
+- analysis packs include per-asset SHA-256 manifests and explicitly request feature-level signal observations/comparisons;
+- the analysis recorder validates signal feature identity, position/width/intensity/area estimates, comparison links, native image attachment receipts and request/response log hashes;
+- the evidence validator rechecks persisted signal references, native image receipt correspondence, request/response artifact hashes and source-figure coverage;
+- compact context carries signal features/comparisons, figure-candidate dispositions and model-input audit state.
+
+**Status:** IMPLEMENTATION IN PROGRESS — CI AND AGENT ACCEPTANCE PENDING. These changes improve deterministic ingestion, persistence and auditability; they do not themselves prove that the selected model can correctly interpret diffraction/spectroscopy signals. Do not claim scientific acceptance until the existing Agent runs the targeted regression and a fresh ordinary-prompt black-box test against real material, with no manually supplied analysis targets.
 
 # Implementation status — Paper_plan V4 development
 
