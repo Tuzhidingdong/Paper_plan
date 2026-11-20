@@ -6,7 +6,7 @@ The intended behavior change is that the Agent synthesizes evidence and structur
 
 This branch remains a development candidate until the user completes one fresh local end-to-end run and inspects the actual Markdown/PDF against the separately held project benchmark. Do not mark product acceptance complete from documentation or unit-test results alone.
 
-## General scientific evidence analysis — release candidate in progress
+## General scientific evidence analysis — release candidate prepared; black-box acceptance pending
 
 The baseline V5.1 branch already contains reliable source provenance, sample/result structures, individual visual inspection, measurement definitions, condition comparability, calculation audits and a researcher-facing manuscript plan. A Raman/FTIR-specific comparison prototype was also added, but it is not a general scientific discovery capability.
 
