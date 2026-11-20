@@ -192,6 +192,20 @@ class TestGeneralScientificAnalysis(unittest.TestCase):
                             for item in pack_for["R001"]["candidate_relationships"]))
         self.assertTrue(pack_for["R001"]["related_results_outside_pack"] == [])
 
+    def test_cross_pack_links_survive_recording_and_compilation(self):
+        bundle = bundle_fixture()
+        index, packs = prepare_all(bundle, Path("/workspace"), max_results_per_pack=2)
+        self.assertTrue(index["cross_pack_relationships"])
+        request = next(pack for pack in packs if pack["related_results_outside_pack"])
+        record = valid_record(request)
+        register_analysis(bundle, request, record)
+        saved = bundle["scientific_analyses"][request["analysis_id"]]
+        self.assertTrue(saved["related_results_outside_pack"])
+        context = compile_context(bundle)
+        self.assertIn("Cross-pack candidate link", context)
+        self.assertIn("NOT YET SCIENTIFICALLY CONFIRMED", context)
+        self.assertIn("R003", context)
+
     def test_single_result_multiple_panels_keeps_all_original_assets(self):
         pack = build_analysis_pack(bundle_fixture(), Path("/workspace"), ["R001"], [], 1)
         paths = {asset["image_path"] for asset in pack["assets"]}
