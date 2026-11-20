@@ -12,6 +12,13 @@ from era_core import atomic_write_json, workspace_paths
 REQUIREMENTS = {
     "visual_inspection": {"native_multimodal": "yes", "high_resolution_image_input": "yes"},
     "artifact_audit": {"scientific_reasoning": "yes"},
+    "scientific_analysis": {
+        "native_multimodal": "yes",
+        "high_resolution_image_input": "yes",
+        "scientific_reasoning": "yes",
+        "structured_json_output": "yes",
+        "long_context_consistency": "yes",
+    },
     "literature_screening": {"structured_json_output": "yes", "web_search_access": "yes"},
     "route_synthesis": {"scientific_reasoning": "yes", "long_context_consistency": "yes"},
     "framework_design": {"structured_json_output": "yes", "long_context_consistency": "yes"},
