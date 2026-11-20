@@ -400,6 +400,20 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                         errors.append(f"{analysis_id}: ANALYZED coverage references a missing/unhashed image asset")
                     continue
                 expected_assets.add((asset.get("image_path"), asset.get("asset_sha256")))
+                if workspace is not None and analyzed_units:
+                    asset_path = Path(str(asset.get("image_path") or ""))
+                    asset_path = asset_path if asset_path.is_absolute() else workspace / asset_path
+                    try:
+                        asset_path.resolve().relative_to(workspace.resolve())
+                    except ValueError:
+                        errors.append(f"{analysis_id}: requested image asset path escapes the workspace")
+                        continue
+                    if not asset_path.is_file():
+                        errors.append(f"{analysis_id}: requested image asset is missing: {asset.get('image_path')}")
+                    elif sha256_file(asset_path) != asset.get("asset_sha256"):
+                        errors.append(f"{analysis_id}: requested image asset SHA-256 changed: {asset.get('image_path')}")
+            if analyzed_units and not str(invocation.get("model_id") or "").strip():
+                errors.append(f"{analysis_id}: completed model invocation is missing model_id")
             if analyzed_units and expected_assets:
                 if invocation.get("input_mode") != "NATIVE_IMAGE_ATTACHMENTS":
                     errors.append(f"{analysis_id}: image-derived ANALYZED coverage lacks native image attachments")
@@ -409,6 +423,8 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                     if attached.get("attachment_type") != "NATIVE_IMAGE" or not attached.get("attachment_reference"):
                         errors.append(f"{analysis_id}: native image attachment receipt is incomplete")
                     received_assets.add((attached.get("image_path"), attached.get("asset_sha256")))
+                if len(received_assets) != len(attached_assets):
+                    errors.append(f"{analysis_id}: duplicate native image attachment receipts were recorded")
                 if received_assets != expected_assets:
                     errors.append(f"{analysis_id}: native image attachments do not exactly match requested assets")
             if analyzed_units and workspace is not None:
