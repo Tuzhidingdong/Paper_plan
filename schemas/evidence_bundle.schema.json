@@ -89,6 +89,13 @@
       "additionalProperties": {
         "$ref": "#/$defs/scientific_analysis"
       }
+    },
+    "figure_candidates": {
+      "type": "object",
+      "description": "Ingest-detected source figure candidates, including vector-only plots rasterized with page-coordinate provenance and explicitly triaged.",
+      "additionalProperties": {
+        "$ref": "#/$defs/figure_candidate"
+      }
     }
   },
   "$defs": {
@@ -1505,6 +1512,402 @@
         },
         "request_asset_count": {
           "type": "integer"
+        },
+        "signal_features": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/signal_feature"
+          }
+        },
+        "signal_comparisons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/signal_comparison"
+          }
+        },
+        "model_invocation": {
+          "$ref": "#/$defs/model_invocation_receipt"
+        }
+      },
+      "additionalProperties": true
+    },
+    "figure_candidate": {
+      "type": "object",
+      "required": [
+        "candidate_id",
+        "candidate_type",
+        "page_number",
+        "extraction_status",
+        "triage_status"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string"
+        },
+        "candidate_type": {
+          "type": "string"
+        },
+        "page_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bbox_pdf": {
+          "$ref": "#/$defs/bbox"
+        },
+        "bbox_normalized": {
+          "$ref": "#/$defs/bbox"
+        },
+        "region_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pixel_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "asset_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pixel_width": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "pixel_height": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "extraction_status": {
+          "enum": [
+            "EXTRACTED",
+            "BLOCKED_NO_BBOX",
+            "BLOCKED_INVALID_BBOX",
+            "BLOCKED"
+          ]
+        },
+        "triage_status": {
+          "enum": [
+            "PENDING_TRIAGE",
+            "REVIEWED"
+          ]
+        },
+        "disposition": {
+          "enum": [
+            "INCLUDE_AS_SCIENTIFIC_FIGURE",
+            "EXCLUDE_NOT_SCIENTIFIC_FIGURE",
+            null
+          ]
+        },
+        "result_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewed_at": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "signal_estimate": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "reading_basis": {
+          "type": "string"
+        },
+        "normalization_basis": {
+          "type": "string"
+        },
+        "precision_or_uncertainty": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "High",
+            "Medium",
+            "Low",
+            "Unresolved"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "signal_feature": {
+      "type": "object",
+      "required": [
+        "feature_id",
+        "result_id",
+        "feature_type",
+        "description",
+        "evidence_refs"
+      ],
+      "properties": {
+        "feature_id": {
+          "type": "string"
+        },
+        "result_id": {
+          "type": "string"
+        },
+        "series_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "feature_type": {
+          "enum": [
+            "PEAK",
+            "BAND",
+            "REFLECTION",
+            "EDGE",
+            "SHOULDER",
+            "PLATEAU",
+            "OTHER"
+          ]
+        },
+        "feature_label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "position": {
+          "$ref": "#/$defs/signal_estimate"
+        },
+        "width": {
+          "$ref": "#/$defs/signal_estimate"
+        },
+        "intensity": {
+          "$ref": "#/$defs/signal_estimate"
+        },
+        "area": {
+          "$ref": "#/$defs/signal_estimate"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "signal_comparison": {
+      "type": "object",
+      "required": [
+        "comparison_id",
+        "feature_ids",
+        "result_ids",
+        "change_type",
+        "description",
+        "evidence_refs"
+      ],
+      "properties": {
+        "comparison_id": {
+          "type": "string"
+        },
+        "feature_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "result_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "change_type": {
+          "enum": [
+            "POSITION_SHIFT",
+            "WIDTH_CHANGE",
+            "INTENSITY_CHANGE",
+            "AREA_CHANGE",
+            "APPEARED",
+            "DISAPPEARED",
+            "SHAPE_CHANGE",
+            "OTHER"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction_or_pattern": {
+          "type": "string"
+        },
+        "comparability_status": {
+          "enum": [
+            "COMPARABLE",
+            "PARTIALLY_COMPARABLE",
+            "NOT_COMPARABLE",
+            "NOT_APPLICABLE",
+            "UNKNOWN"
+          ]
+        },
+        "normalization_basis": {
+          "type": "string"
+        },
+        "quantified_change": {
+          "type": "object",
+          "properties": {
+            "metric": {
+              "type": "string"
+            },
+            "value": {
+              "type": [
+                "number",
+                "string",
+                "null"
+              ]
+            },
+            "unit": {
+              "type": "string"
+            },
+            "source_basis": {
+              "type": "string"
+            },
+            "precision_or_uncertainty": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object"
+          }
+        },
+        "interpretation_limits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "model_invocation_receipt": {
+      "type": "object",
+      "required": [
+        "invocation_id",
+        "status",
+        "evidence_level",
+        "input_mode",
+        "attached_assets"
+      ],
+      "properties": {
+        "invocation_id": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "RESPONSE_RECEIVED",
+            "BLOCKED",
+            "UNVERIFIABLE"
+          ]
+        },
+        "model_id": {
+          "type": "string"
+        },
+        "input_mode": {
+          "enum": [
+            "NATIVE_IMAGE_ATTACHMENTS",
+            "TEXT_ONLY_PATHS",
+            "UNVERIFIABLE"
+          ]
+        },
+        "evidence_level": {
+          "const": "AGENT_REPORTED_RUNTIME_RECEIPT"
+        },
+        "attached_assets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "image_path",
+              "asset_sha256",
+              "attachment_type",
+              "attachment_reference"
+            ],
+            "properties": {
+              "image_path": {
+                "type": "string"
+              },
+              "asset_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "attachment_type": {
+                "const": "NATIVE_IMAGE"
+              },
+              "attachment_reference": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "request_log_path": {
+          "type": "string"
+        },
+        "request_log_sha256": {
+          "type": "string"
+        },
+        "response_log_path": {
+          "type": "string"
+        },
+        "response_log_sha256": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": true
