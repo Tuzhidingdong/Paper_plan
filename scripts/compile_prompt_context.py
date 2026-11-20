@@ -79,6 +79,12 @@ def compile_context(bundle: dict[str, Any]) -> str:
                 f"{len(analysis.get('result_ids', []))} Result Units]"
             )
             lines.append(f"  - Scientific summary: {analysis.get('summary', 'not recorded')}")
+            for link in analysis.get("related_results_outside_pack", []):
+                lines.append(
+                    f"  - Cross-pack candidate link (NOT YET SCIENTIFICALLY CONFIRMED): "
+                    f"{', '.join(link.get('result_ids', []))} via "
+                    f"{', '.join(link.get('candidate_reasons', []))}"
+                )
             for observation in analysis.get("observations", []):
                 lines.append(
                     f"  - Observed ({observation.get('confidence', 'unreported')}): "
