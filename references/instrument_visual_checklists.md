@@ -30,6 +30,24 @@ For each field record one state: FOUND, NOT_SHOWN, NOT_LEGIBLE, UNCERTAIN or NOT
 - peak_labels_visible
 - laser_or_acquisition_conditions_visible (where applicable)
 
+### Raman / FTIR cross-sample comparison (required when multiple samples or plotted series are present)
+- spectrum_or_series_identity_and_sample_mapping
+- technique_and_mode (Raman; FTIR; ATR; transmission; reflectance; other)
+- spectral_range_and_wavenumber_calibration
+- spectral_resolution_or_axis_tick_resolution
+- laser_wavelength_power_and_acquisition_settings (Raman, where applicable)
+- scan_count_or_accumulation_and_replicate_basis
+- sample_state_and_preparation
+- baseline_correction_and_smoothing
+- normalization_method_and_reference_band
+- vertical_offsets_or_independent_y_axis_scaling
+- absorbance_transmittance_or_intensity_basis
+- candidate_peak_positions_and_supported_uncertainty
+- relative_peak_intensity_and_area_basis
+- new_missing_split_merged_or_broadened_bands
+
+For each comparison, record matched/mismatched/unknown dimensions before interpreting differences. Approximate visual peak positions may be reported only to the resolution supported by the original image and axis ticks. Compare apparent band area only when a defensible baseline/integration basis is available; otherwise report relative signal trends qualitatively. Distinguish band overlap or reduced visibility from true disappearance. Keep direct spectral observations, functional-group interpretations and mechanistic hypotheses separate.
+
 ## CV / LSV
 - potential_axis_and_unit
 - reference_electrode
