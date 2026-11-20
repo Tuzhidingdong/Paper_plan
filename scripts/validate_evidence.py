@@ -373,6 +373,54 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                 elif any(item.get("result_id") not in observation_result_map.get(obs_id, set()) for obs_id in ids):
                     errors.append(f"{analysis_id}: coverage observation does not cite {item.get('result_id')}")
 
+        if analysis.get("invocation_audit_required"):
+            invocation = analysis.get("model_invocation") or {}
+            analyzed_units = any(item.get("status") == "ANALYZED" for item in coverage)
+            if analyzed_units and invocation.get("status") != "RESPONSE_RECEIVED":
+                errors.append(f"{analysis_id}: ANALYZED coverage requires a completed model invocation receipt")
+            if analyzed_units and invocation.get("evidence_level") != "AGENT_REPORTED_RUNTIME_RECEIPT":
+                errors.append(f"{analysis_id}: model invocation evidence level is missing or misleading")
+            request_assets = analysis.get("request_assets", [])
+            expected_assets = set()
+            for asset in request_assets:
+                if not asset.get("asset_exists") or not asset.get("asset_sha256"):
+                    if analyzed_units:
+                        errors.append(f"{analysis_id}: ANALYZED coverage references a missing/unhashed image asset")
+                    continue
+                expected_assets.add((asset.get("image_path"), asset.get("asset_sha256")))
+            if analyzed_units and expected_assets:
+                if invocation.get("input_mode") != "NATIVE_IMAGE_ATTACHMENTS":
+                    errors.append(f"{analysis_id}: image-derived ANALYZED coverage lacks native image attachments")
+                attached_assets = invocation.get("attached_assets", [])
+                received_assets = set()
+                for attached in attached_assets:
+                    if attached.get("attachment_type") != "NATIVE_IMAGE" or not attached.get("attachment_reference"):
+                        errors.append(f"{analysis_id}: native image attachment receipt is incomplete")
+                    received_assets.add((attached.get("image_path"), attached.get("asset_sha256")))
+                if received_assets != expected_assets:
+                    errors.append(f"{analysis_id}: native image attachments do not exactly match requested assets")
+            if analyzed_units and workspace is not None:
+                for path_field, hash_field in (
+                    ("request_log_path", "request_log_sha256"),
+                    ("response_log_path", "response_log_sha256"),
+                ):
+                    relative = invocation.get(path_field)
+                    expected_hash = invocation.get(hash_field)
+                    if not relative or not expected_hash:
+                        errors.append(f"{analysis_id}: invocation receipt is missing {path_field}/{hash_field}")
+                        continue
+                    artifact = Path(relative)
+                    artifact = artifact if artifact.is_absolute() else workspace / artifact
+                    try:
+                        artifact.resolve().relative_to(workspace.resolve())
+                    except ValueError:
+                        errors.append(f"{analysis_id}: {path_field} escapes the workspace")
+                        continue
+                    if not artifact.is_file():
+                        errors.append(f"{analysis_id}: {path_field} does not exist")
+                    elif sha256_file(artifact) != expected_hash:
+                        errors.append(f"{analysis_id}: {hash_field} does not match {path_field}")
+
         for index, comparison in enumerate(analysis.get("comparisons", [])):
             compare_ids = comparison.get("result_ids", [])
             if len(set(compare_ids)) < 2 or not set(compare_ids).issubset(result_id_set):
@@ -405,6 +453,79 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                 for value in difference.get("values", []):
                     if value.get("result_id") not in compare_ids:
                         errors.append(f"{analysis_id}: quantitative difference references an unrelated Result Unit")
+
+        signal_feature_map = {}
+        for index, feature in enumerate(analysis.get("signal_features", [])):
+            feature_id = feature.get("feature_id")
+            result_id = feature.get("result_id")
+            if not feature_id or feature_id in signal_feature_map:
+                errors.append(f"{analysis_id}: signal_features[{index}] has missing/duplicate feature_id")
+            signal_feature_map[feature_id] = feature
+            if result_id not in result_id_set:
+                errors.append(f"{analysis_id}: signal_features[{index}] cites a Result Unit outside its pack")
+                continue
+            if feature.get("feature_type") not in {"PEAK", "BAND", "REFLECTION", "EDGE", "SHOULDER", "PLATEAU", "OTHER"}:
+                errors.append(f"{analysis_id}: signal_features[{index}] has invalid feature_type")
+            if not str(feature.get("description") or "").strip():
+                errors.append(f"{analysis_id}: signal_features[{index}] requires an observed description")
+            for ref in feature.get("evidence_refs", []):
+                if ref.get("result_id") != result_id:
+                    errors.append(f"{analysis_id}: signal_features[{index}] evidence cites another Result Unit")
+                source_result = results.get(result_id, {})
+                if ref.get("region_id") and ref["region_id"] not in source_result.get("region_ids", []):
+                    errors.append(f"{analysis_id}: signal_features[{index}] cites an unrelated Region")
+                if ref.get("panel_id") and ref["panel_id"] not in source_result.get("panel_ids", []):
+                    errors.append(f"{analysis_id}: signal_features[{index}] cites an unrelated Panel")
+                if not ref.get("region_id") and not ref.get("panel_id"):
+                    errors.append(f"{analysis_id}: signal_features[{index}] lacks a Region/Panel evidence anchor")
+            for metric in ("position", "width", "intensity", "area"):
+                estimate = feature.get(metric) or {}
+                value = estimate.get("value")
+                if value is not None:
+                    if parse_numeric_scalar(value) is None:
+                        errors.append(f"{analysis_id}: signal_features[{index}].{metric} must be finite numeric")
+                    for field in ("unit", "reading_basis", "precision_or_uncertainty"):
+                        if not str(estimate.get(field) or "").strip():
+                            errors.append(f"{analysis_id}: signal_features[{index}].{metric} requires {field}")
+
+        seen_signal_comparisons = set()
+        for index, comparison in enumerate(analysis.get("signal_comparisons", [])):
+            comparison_id = comparison.get("comparison_id")
+            if not comparison_id or comparison_id in seen_signal_comparisons:
+                errors.append(f"{analysis_id}: signal_comparisons[{index}] has missing/duplicate comparison_id")
+            seen_signal_comparisons.add(comparison_id)
+            feature_ids = comparison.get("feature_ids", [])
+            if len(set(feature_ids)) < 2 or not set(feature_ids).issubset(signal_feature_map):
+                errors.append(f"{analysis_id}: signal_comparisons[{index}] must reference at least two recorded signal features")
+            compare_ids = comparison.get("result_ids", [])
+            if not compare_ids or not set(compare_ids).issubset(result_id_set):
+                errors.append(f"{analysis_id}: signal_comparisons[{index}] references Result Units outside its pack")
+            if any(signal_feature_map.get(fid, {}).get("result_id") not in compare_ids for fid in feature_ids):
+                errors.append(f"{analysis_id}: signal_comparisons[{index}] feature/result mapping is inconsistent")
+            if comparison.get("change_type") not in {"POSITION_SHIFT", "WIDTH_CHANGE", "INTENSITY_CHANGE", "AREA_CHANGE", "APPEARED", "DISAPPEARED", "SHAPE_CHANGE", "OTHER"}:
+                errors.append(f"{analysis_id}: signal_comparisons[{index}] has invalid change_type")
+            if comparison.get("comparability_status") not in {"COMPARABLE", "PARTIALLY_COMPARABLE", "NOT_COMPARABLE", "NOT_APPLICABLE", "UNKNOWN"}:
+                errors.append(f"{analysis_id}: signal_comparisons[{index}] has invalid comparability_status")
+            if not str(comparison.get("description") or "").strip():
+                errors.append(f"{analysis_id}: signal_comparisons[{index}] requires an observed description")
+            for ref in comparison.get("evidence_refs", []):
+                if ref.get("result_id") not in compare_ids:
+                    errors.append(f"{analysis_id}: signal_comparisons[{index}] evidence is outside its comparison set")
+                    continue
+                source_result = results.get(ref.get("result_id"), {})
+                if ref.get("region_id") and ref["region_id"] not in source_result.get("region_ids", []):
+                    errors.append(f"{analysis_id}: signal_comparisons[{index}] cites an unrelated Region")
+                if ref.get("panel_id") and ref["panel_id"] not in source_result.get("panel_ids", []):
+                    errors.append(f"{analysis_id}: signal_comparisons[{index}] cites an unrelated Panel")
+                if not ref.get("region_id") and not ref.get("panel_id"):
+                    errors.append(f"{analysis_id}: signal_comparisons[{index}] lacks a Region/Panel evidence anchor")
+            quantified = comparison.get("quantified_change") or {}
+            if quantified.get("value") is not None:
+                if parse_numeric_scalar(quantified.get("value")) is None:
+                    errors.append(f"{analysis_id}: signal_comparisons[{index}] quantified change must be finite numeric")
+                for field in ("unit", "source_basis", "precision_or_uncertainty"):
+                    if not str(quantified.get(field) or "").strip():
+                        errors.append(f"{analysis_id}: signal_comparisons[{index}] quantified change requires {field}")
 
         for index, relationship in enumerate(analysis.get("relationships", [])):
             refs = relationship.get("result_ids", [])
