@@ -20,6 +20,7 @@ ANALYSIS_INSTRUCTIONS = [
     "Inspect each supplied original-resolution image or panel. Where one result contains multiple plotted series, samples, groups, stages or conditions, inspect and compare those within-result elements as well as links across Result Units.",
     "Discover which relationships are scientifically meaningful from the supplied evidence. Consider cross-sample differences, within-sample changes, condition or dose responses, time/order trends, relationships among measured quantities, cross-method convergence, contradictions, outliers and results that do not follow the dominant pattern. Do not force every possible comparison.",
     "Use the supplied relationship candidates only as navigation hints. They are not proof that two results are comparable. Also identify useful relationships that are not listed when supported by shared source labels, sample mappings, conditions, series or scientific context.",
+    "The request omits captions and report narrative, but the active Agent may already have seen source text in prior context. Do not claim a fully caption-blind or cognitively independent review. Separate what is directly observed in the original image from what is learned from text or prior context.",
     "Before combining or contrasting evidence, explicitly assess sample identity, measurement definition, units, acquisition/method conditions, data processing, normalization, calibration, replicate basis and relevant environmental or operational conditions. Mark dimensions MATCHED, MISMATCHED, UNKNOWN or NOT_APPLICABLE with reasons.",
     "Keep direct observations, extracted/transcribed values, derived calculations, interpretations and hypotheses separate. Every material observation or comparison must cite the relevant Result Unit and source Region/Panel/page.",
     "Quantitative differences must preserve units, definitions, normalization basis, source precision and uncertainty. If values are estimated visually from an image, label them as estimates and state the image/axis limitations; do not imply precision beyond the source.",
@@ -118,6 +119,7 @@ def discover_relationship_candidates(bundle: dict[str, Any]) -> list[dict[str, A
         "measurement_signature": defaultdict(list),
         "region": defaultdict(list),
         "condition_field": defaultdict(list),
+        "series": defaultdict(list),
     }
     result_maps: dict[str, dict[str, Any]] = {}
     for result_id, result in sorted(results.items()):
@@ -132,6 +134,14 @@ def discover_relationship_candidates(bundle: dict[str, Any]) -> list[dict[str, A
             _add_index_links(indexes["region"], str(entity_id), result_id)
         for key in _condition_map(result):
             _add_index_links(indexes["condition_field"], _norm(key), result_id)
+        for association in context.get("sample_associations", []) or []:
+            series_id = association.get("series_id")
+            if series_id:
+                _add_index_links(indexes["series"], _norm(series_id), result_id)
+        for observation in result.get("observations", []) or []:
+            series_id = observation.get("series_id")
+            if series_id:
+                _add_index_links(indexes["series"], _norm(series_id), result_id)
 
     pair_reasons: dict[tuple[str, str], set[str]] = defaultdict(set)
     pair_notes: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
@@ -155,6 +165,8 @@ def discover_relationship_candidates(bundle: dict[str, Any]) -> list[dict[str, A
         link_group(ids, "SHARED_SOURCE_REGION")
     for ids in indexes["condition_field"].values():
         link_group(ids, "SHARED_CONDITION_FIELD")
+    for ids in indexes["series"].values():
+        link_group(ids, "SHARED_SERIES_IDENTIFIER")
 
     for pair in list(pair_reasons):
         left, right = pair
@@ -381,7 +393,7 @@ def build_analysis_pack(
         "candidate_relationships": internal_links,
         "related_results_outside_pack": external_links,
         "task_status": "READY" if result_ids else "EMPTY",
-        "caption_and_narrative_context": "WITHHELD_IN_FIRST_PASS; USE_SOURCE_TEXT_ONLY_AFTER_DIRECT_OBSERVATION_WHERE_NEEDED",
+        "caption_and_narrative_context": "NOT_INCLUDED_IN_REQUEST; MODEL_PRIOR_CONTEXT_MAY_HAVE_SEEN_SOURCE_TEXT",
         "instructions": ANALYSIS_INSTRUCTIONS,
         "required_output": {
             "analysis_id": analysis_id,
@@ -494,6 +506,19 @@ def prepare_all(
     }
     unassigned_regions = sorted(set(bundle.get("regions", {})) - assigned_regions)
     unassigned_panels = sorted(set(bundle.get("panels", {})) - assigned_panels)
+    unassigned_region_assets = [{
+        "region_id": region_id,
+        "page_number": bundle.get("regions", {}).get(region_id, {}).get("page_number"),
+        "image_path": bundle.get("regions", {}).get(region_id, {}).get("image_path"),
+        "region_type": bundle.get("regions", {}).get(region_id, {}).get("region_type"),
+        "triage_role": bundle.get("regions", {}).get(region_id, {}).get("triage_role"),
+    } for region_id in unassigned_regions]
+    unassigned_panel_assets = [{
+        "panel_id": panel_id,
+        "parent_region_id": bundle.get("panels", {}).get(panel_id, {}).get("parent_region_id"),
+        "image_path": bundle.get("panels", {}).get(panel_id, {}).get("image_path"),
+        "label": bundle.get("panels", {}).get(panel_id, {}).get("label"),
+    } for panel_id in unassigned_panels]
     coverage = {
         result_id: next(pack["analysis_id"] for pack in packs if result_id in pack["result_ids"])
         for result_id in result_ids
@@ -507,6 +532,8 @@ def prepare_all(
         "coverage_map": coverage,
         "unassigned_region_ids": unassigned_regions,
         "unassigned_panel_ids": unassigned_panels,
+        "unassigned_region_assets": unassigned_region_assets,
+        "unassigned_panel_assets": unassigned_panel_assets,
         "packs": [{
             "analysis_id": pack["analysis_id"],
             "pack_number": pack["pack_number"],
