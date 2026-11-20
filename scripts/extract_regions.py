@@ -120,6 +120,102 @@ def mark_repeated_layout_assets(bundle: dict[str, Any], page_count: int) -> int:
     return marked
 
 
+def extract_vector_figure_candidates(document, manifest, workspace: Path, bundle: dict[str, Any], dpi: int) -> int:
+    """Rasterize every ingest-time vector plot candidate at the requested DPI.
+
+    Candidate records are durable source-coverage obligations. A candidate is
+    not assumed to be a scientific figure until the Agent explicitly triages it.
+    """
+    figure_candidates = bundle.setdefault("figure_candidates", {})
+    added = 0
+    for page_record in manifest.get("pages", []):
+        if not page_record.get("vector_or_text_figure_review"):
+            continue
+        page_number = int(page_record.get("page_number") or 0)
+        if page_number < 1 or page_number > len(document):
+            raise ValueError(f"Invalid vector-candidate page number: {page_number}")
+        page = document[page_number - 1]
+        candidates = page_record.get("vector_figure_candidates") or []
+        if not candidates and page_record.get("vector_candidate_bbox_pdf"):
+            candidates = [{
+                "candidate_index": 1,
+                "bbox_pdf": page_record["vector_candidate_bbox_pdf"],
+                "bbox_normalized": page_record.get("vector_candidate_bbox_normalized"),
+                "reason": page_record.get("vector_review_reason") or "legacy_vector_candidate",
+            }]
+        region_ids = []
+        if not candidates:
+            candidate_id = f"VFIG-P{page_number:04d}-01"
+            figure_candidates[candidate_id] = {
+                "candidate_id": candidate_id,
+                "candidate_type": "VECTOR_PLOT_CLUSTER",
+                "page_number": page_number,
+                "extraction_status": "BLOCKED_NO_BBOX",
+                "triage_status": "PENDING_TRIAGE",
+                "disposition": None,
+                "reason": "The ingest detector flagged this page but did not retain a crop BBox.",
+            }
+            page_record["vector_candidate_extraction_status"] = "BLOCKED_NO_BBOX"
+            continue
+
+        for index, candidate in enumerate(candidates, start=1):
+            candidate_id = f"VFIG-P{page_number:04d}-{index:02d}"
+            bbox_values = candidate.get("bbox_pdf")
+            if not isinstance(bbox_values, (list, tuple)) or len(bbox_values) != 4:
+                figure_candidates[candidate_id] = {
+                    "candidate_id": candidate_id,
+                    "candidate_type": "VECTOR_PLOT_CLUSTER",
+                    "page_number": page_number,
+                    "extraction_status": "BLOCKED_INVALID_BBOX",
+                    "triage_status": "PENDING_TRIAGE",
+                    "disposition": None,
+                    "reason": "The vector candidate has no valid four-coordinate PDF BBox.",
+                }
+                continue
+            rect = fitz.Rect(bbox_values) & page.rect
+            if rect.is_empty or rect.width <= 0 or rect.height <= 0:
+                raise ValueError(f"Vector candidate BBox is empty or outside page {page_number}: {bbox_values}")
+            pix = page.get_pixmap(
+                matrix=fitz.Matrix(dpi / 72, dpi / 72),
+                clip=rect,
+                alpha=False,
+                colorspace=fitz.csRGB,
+            )
+            region = record_region(
+                workspace, bundle, page_number, tuple(rect),
+                float(page.rect.width), float(page.rect.height),
+                pix.tobytes("png"), "vector_plot_candidate", EXTRACTOR_VERSION,
+            )
+            relative = Path(region["image_path"])
+            asset_path = workspace / relative
+            figure_candidates[candidate_id] = {
+                "candidate_id": candidate_id,
+                "candidate_type": "VECTOR_PLOT_CLUSTER",
+                "page_number": page_number,
+                "bbox_pdf": [round(float(value), 3) for value in rect],
+                "bbox_normalized": region["bbox_normalized"],
+                "region_id": region["region_id"],
+                "image_path": region["image_path"],
+                "pixel_sha256": region["pixel_sha256"],
+                "asset_sha256": sha256_file(asset_path),
+                "pixel_width": region["pixel_width"],
+                "pixel_height": region["pixel_height"],
+                "detector_reason": candidate.get("reason"),
+                "extraction_status": "EXTRACTED",
+                "triage_status": "PENDING_TRIAGE",
+                "disposition": None,
+                "result_ids": [],
+                "reason": None,
+            }
+            region_ids.append(region["region_id"])
+            added += 1
+        page_record["vector_candidate_region_ids"] = region_ids
+        page_record["vector_candidate_extraction_status"] = (
+            "EXTRACTED" if region_ids else "BLOCKED"
+        )
+    return added
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, required=True)
@@ -142,6 +238,8 @@ def main() -> int:
         return 2
 
     document = fitz.open(source_pdf)
+    paths = workspace_paths(workspace)
+    manifest = json.loads(paths["manifest"].read_text(encoding="utf-8")) if paths["manifest"].exists() else {"pages": []}
     added = 0
     for page_index, page in enumerate(document):
         page_width, page_height = float(page.rect.width), float(page.rect.height)
@@ -160,6 +258,9 @@ def main() -> int:
             record_region(workspace, bundle, page_index + 1, bbox, page_width, page_height,
                           image_data, "embedded_image_block", EXTRACTOR_VERSION)
             added += 1
+
+    vector_added = extract_vector_figure_candidates(document, manifest, workspace, bundle, args.dpi)
+    added += vector_added
 
     if args.regions_json:
         specs = json.loads(args.regions_json.read_text(encoding="utf-8"))
@@ -183,16 +284,16 @@ def main() -> int:
     repeated = mark_repeated_layout_assets(bundle, page_count)
     paths = workspace_paths(workspace)
     atomic_write_json(paths["bundle"], bundle)
-    manifest = json.loads(paths["manifest"].read_text(encoding="utf-8"))
     manifest["stage"] = "REGIONS_EXTRACTED"
     manifest["region_count"] = len(bundle["regions"])
     manifest["repeated_layout_asset_count"] = repeated
     atomic_write_json(paths["manifest"], manifest)
     print(f"Newly processed regions: {added}")
     print(f"Total known regions: {len(bundle['regions'])}")
+    print(f"Automatically rasterized vector plot candidates: {vector_added}")
+    print(f"Pending source-figure triage decisions: {sum(1 for item in bundle.get('figure_candidates', {}).values() if item.get('triage_status') == 'PENDING_TRIAGE')}")
     print(f"Repeated header/footer assets marked for triage suppression: {repeated}")
-    print("All Regions remain preserved; layout hints do not delete evidence or merge IDs.")
-    print("Reminder: vector-only charts may still require explicit region BBoxes.")
+    print("All Regions remain preserved; vector candidate images retain PDF-coordinate provenance.")
     return 0
 
 
