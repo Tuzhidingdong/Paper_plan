@@ -117,7 +117,7 @@ A PASS is structural only. Surface sample warnings and unresolved mappings. Trig
 
 ## Required outputs
 
-Evidence Bundle, State Manifest, ID Registry, PDF/page inventory, all extracted Regions, Contact Sheets, Result Units, Sample Entities, instrument checklist, joint Raman/FTIR comparison records (when applicable), artifact audit, visual/text discrepancies, validation reports and compact context.
+Evidence Bundle, State Manifest, ID Registry, PDF/page inventory, all extracted Regions, Contact Sheets, Result Units, Sample Entities, instrument checklist, general scientific analyses, per-Result-Unit coverage and unassigned Region/Panel report, artifact audit, visual/text discrepancies, validation reports and compact context.
 
 ## Stop conditions
 
