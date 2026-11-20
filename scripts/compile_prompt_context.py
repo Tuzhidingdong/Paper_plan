@@ -161,7 +161,7 @@ def compile_context(bundle: dict[str, Any]) -> str:
         )
 
     lines.append("")
-    lines.append("## Legacy spectral comparison records (backward compatibility)")
+    lines.append("## Raman / FTIR cross-sample comparisons (legacy compatibility)")
     spectral_result_ids = [
         result_id for result_id, result in bundle.get("result_units", {}).items()
         if re.search(r"\braman\b|\bftir\b|\bft-ir\b|\binfrared\b|\bir spectroscopy\b",
