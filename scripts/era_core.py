@@ -180,6 +180,7 @@ def default_evidence_bundle() -> dict[str, Any]:
         "discrepancies": [],
         "visual_inspections": {},
         "spectral_comparisons": {},
+        "scientific_analyses": {},
     }
 
 
