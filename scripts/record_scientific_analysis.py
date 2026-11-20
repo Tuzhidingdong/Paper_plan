@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from era_core import atomic_write_json, load_evidence_bundle, parse_numeric_scalar, workspace_paths
+from era_core import atomic_write_json, load_evidence_bundle, parse_numeric_scalar, sha256_file, workspace_paths
 
 VALID_ANALYSIS_STATUS = {"COMPLETE", "PARTIAL", "NOT_ASSESSABLE"}
 VALID_COVERAGE = {"ANALYZED", "NO_COMPARISON_APPLICABLE", "NOT_ASSESSABLE"}
