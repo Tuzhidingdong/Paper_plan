@@ -242,9 +242,17 @@ def _analysis_fixture(workspace: Path):
         ],
         "signal_features": [
             {"feature_id": "SIG-1", "result_id": "R001", "series_id": "A", "feature_type": "BAND", "description": "A visible signal band.",
+             "series_label": "Trace A",
+             "axis_context": {"x_axis_label": "Wavenumber", "x_axis_unit": "cm-1", "x_axis_scale": "LINEAR",
+                              "y_axis_label": "Absorbance", "y_axis_unit": "a.u.", "y_axis_scale": "LINEAR",
+                              "normalization_basis": "un-normalized display"},
              "position": {"value": 1000.0, "unit": "cm-1", "reading_basis": "visual axis estimate", "precision_or_uncertainty": "±5 cm-1"},
              "evidence_refs": [{"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1}]},
             {"feature_id": "SIG-2", "result_id": "R002", "series_id": "B", "feature_type": "BAND", "description": "A shifted visible signal band.",
+             "series_label": "Trace B",
+             "axis_context": {"x_axis_label": "Wavenumber", "x_axis_unit": "cm-1", "x_axis_scale": "LINEAR",
+                              "y_axis_label": "Absorbance", "y_axis_unit": "a.u.", "y_axis_scale": "LINEAR",
+                              "normalization_basis": "un-normalized display"},
              "position": {"value": 1010.0, "unit": "cm-1", "reading_basis": "visual axis estimate", "precision_or_uncertainty": "±5 cm-1"},
              "evidence_refs": [{"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 2}]}
         ],
