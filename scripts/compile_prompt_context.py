@@ -126,8 +126,16 @@ def compile_context(bundle: dict[str, Any]) -> str:
                 lines.append(
                     f"  - Signal feature {feature.get('feature_id', 'unidentified')} "
                     f"[{feature.get('feature_type', 'OTHER')} | {result_id} | "
-                    f"{feature.get('series_id') or 'series unspecified'}]: {feature.get('description', '')}"
+                    f"{feature.get('series_label') or feature.get('series_id') or 'series unspecified'}]: {feature.get('description', '')}"
                 )
+                axis_context = feature.get("axis_context") or {}
+                if axis_context:
+                    lines.append(
+                        "    - Axes: "
+                        f"x={axis_context.get('x_axis_label', 'UNKNOWN')} ({axis_context.get('x_axis_unit', 'UNKNOWN')}, {axis_context.get('x_axis_scale', 'UNKNOWN')}); "
+                        f"y={axis_context.get('y_axis_label', 'UNKNOWN')} ({axis_context.get('y_axis_unit', 'UNKNOWN')}, {axis_context.get('y_axis_scale', 'UNKNOWN')}); "
+                        f"normalization={axis_context.get('normalization_basis', 'UNKNOWN')}"
+                    )
                 for label, estimate in (("position", position), ("width", width), ("intensity", intensity), ("area", area)):
                     if estimate.get("value") is not None:
                         lines.append(
