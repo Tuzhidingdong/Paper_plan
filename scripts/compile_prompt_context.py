@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 from typing import Any
 
@@ -64,6 +65,62 @@ def compile_context(bundle: dict[str, Any]) -> str:
             lines.append(f"  - Alternative explanations recorded: {len(finding['alternative_explanations'])}")
         if finding.get("limitations"):
             lines.append(f"  - Limitations: {'; '.join(finding['limitations'])}")
+    lines.append("")
+    lines.append("## Raman / FTIR cross-sample comparisons")
+    spectral_result_ids = [
+        result_id for result_id, result in bundle.get("result_units", {}).items()
+        if re.search(r"\braman\b|\bftir\b|\bft-ir\b|\binfrared\b|\bir spectroscopy\b",
+                     " ".join(str(value or "") for value in (
+                         result.get("data_type"),
+                         result.get("measurement_context", {}).get("technique"),
+                     )), re.I)
+    ]
+    comparisons = bundle.get("spectral_comparisons", {})
+    if comparisons:
+        for comparison_id, comparison in sorted(comparisons.items()):
+            assessment = comparison.get("comparability_assessment", {})
+            lines.append(
+                f"- **{comparison_id}** [{comparison.get('technique', 'unknown')} | "
+                f"{comparison.get('comparison_status', 'unknown')} | "
+                f"{assessment.get('status', 'unknown')} | Result Units: "
+                f"{', '.join(comparison.get('result_ids', []))}]"
+            )
+            lines.append(f"  - Comparative conclusion: {comparison.get('summary', 'not recorded')}")
+            if assessment.get("conclusion"):
+                lines.append(f"  - Comparability: {assessment['conclusion']}")
+            for item in comparison.get("direct_observations", []):
+                lines.append(f"  - Observed: {item.get('description', '')}")
+            for item in comparison.get("band_comparisons", []):
+                label = item.get("feature_id") or item.get("change_type") or "band"
+                lines.append(
+                    f"  - Band {label}: {item.get('observed_change', '')} "
+                    f"Position: {item.get('position_comparison', 'not resolved')}; "
+                    f"relative signal: {item.get('relative_signal_comparison', 'not assessed')} "
+                    f"(basis: {item.get('signal_basis', 'unspecified')})."
+                )
+                if item.get("interpretation"):
+                    lines.append(f"    - Interpretation: {item['interpretation']}")
+                if item.get("alternative_explanations"):
+                    lines.append(f"    - Alternatives: {'; '.join(item['alternative_explanations'])}")
+            for item in comparison.get("functional_group_interpretations", []):
+                lines.append(
+                    f"  - {item.get('epistemic_status', 'Interpretation')}: "
+                    f"{item.get('assignment', 'unassigned')} — {item.get('rationale', '')}"
+                )
+            if comparison.get("candidate_scientific_implications"):
+                lines.append(f"  - Candidate implications: {'; '.join(comparison['candidate_scientific_implications'])}")
+            if comparison.get("limitations"):
+                lines.append(f"  - Limitations: {'; '.join(comparison['limitations'])}")
+    elif spectral_result_ids:
+        lines.append(
+            "- Spectral Result Units were identified, but no joint cross-sample comparison has been recorded. "
+            "Do not treat independent single-spectrum inspections as a completed comparison; prepare and record "
+            "a joint task with scripts/prepare_spectral_comparison.py."
+        )
+        lines.append(f"  - Spectral Result Units: {', '.join(sorted(spectral_result_ids))}")
+    else:
+        lines.append("- No Raman/FTIR Result Units are currently registered.")
+
     lines.append("")
     lines.append("## Human attention")
     if bundle.get("micro_gate", {}).get("triggered"):
