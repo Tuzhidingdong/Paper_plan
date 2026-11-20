@@ -22,7 +22,8 @@ def _grid_components(cell_weights):
     remaining = set(cell_weights)
     components = []
     while remaining:
-        seed = remaining.pop()
+        seed = min(remaining, key=lambda cell: (cell[1], cell[0]))
+        remaining.remove(seed)
         queue = deque([seed])
         component = [seed]
         while queue:
@@ -36,7 +37,15 @@ def _grid_components(cell_weights):
                         remaining.remove(neighbour)
                         queue.append(neighbour)
                         component.append(neighbour)
-        components.append(component)
+        components.append(sorted(component, key=lambda cell: (cell[1], cell[0])))
+    components.sort(
+        key=lambda cells: (
+            min(cell[1] for cell in cells),
+            min(cell[0] for cell in cells),
+            max(cell[1] for cell in cells),
+            max(cell[0] for cell in cells),
+        )
+    )
     return components
 
 
