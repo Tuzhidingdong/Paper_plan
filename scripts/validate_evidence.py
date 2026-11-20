@@ -330,6 +330,7 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             errors.append(f"{analysis_id}: coverage must account for each Result Unit exactly once")
         for item in coverage:
             result_id = item.get("result_id")
+            signal_coverage_map[result_id] = item
             status = item.get("status")
             if status not in {"ANALYZED", "NO_COMPARISON_APPLICABLE", "NOT_ASSESSABLE"}:
                 errors.append(f"{analysis_id}: invalid coverage status for {result_id}")
@@ -535,19 +536,25 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                         errors.append(f"{analysis_id}: signal_features[{index}].{metric} requires normalization_basis")
 
         seen_signal_comparisons = set()
+        signal_comparison_map = {}
         for index, comparison in enumerate(analysis.get("signal_comparisons", [])):
             comparison_id = comparison.get("comparison_id")
             if not comparison_id or comparison_id in seen_signal_comparisons:
                 errors.append(f"{analysis_id}: signal_comparisons[{index}] has missing/duplicate comparison_id")
             seen_signal_comparisons.add(comparison_id)
+            signal_comparison_map[comparison_id] = comparison
             feature_ids = comparison.get("feature_ids", [])
             if len(set(feature_ids)) < 2 or not set(feature_ids).issubset(signal_feature_map):
                 errors.append(f"{analysis_id}: signal_comparisons[{index}] must reference at least two recorded signal features")
             compare_ids = comparison.get("result_ids", [])
             if not compare_ids or not set(compare_ids).issubset(result_id_set):
                 errors.append(f"{analysis_id}: signal_comparisons[{index}] references Result Units outside its pack")
-            if any(signal_feature_map.get(fid, {}).get("result_id") not in compare_ids for fid in feature_ids):
+            feature_result_ids = {signal_feature_map.get(fid, {}).get("result_id") for fid in feature_ids}
+            if feature_result_ids != set(compare_ids):
                 errors.append(f"{analysis_id}: signal_comparisons[{index}] feature/result mapping is inconsistent")
+            evidence_result_ids = {ref.get("result_id") for ref in comparison.get("evidence_refs", [])}
+            if not set(compare_ids).issubset(evidence_result_ids):
+                errors.append(f"{analysis_id}: signal_comparisons[{index}] lacks source evidence for every compared Result Unit")
             if comparison.get("change_type") not in {"POSITION_SHIFT", "WIDTH_CHANGE", "INTENSITY_CHANGE", "AREA_CHANGE", "APPEARED", "DISAPPEARED", "SHAPE_CHANGE", "OTHER"}:
                 errors.append(f"{analysis_id}: signal_comparisons[{index}] has invalid change_type")
             if comparison.get("comparability_status") not in {"COMPARABLE", "PARTIALLY_COMPARABLE", "NOT_COMPARABLE", "NOT_APPLICABLE", "UNKNOWN"}:
@@ -578,6 +585,7 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
         if set(signal_coverage_ids) != result_id_set or len(signal_coverage_ids) != len(result_id_set):
             errors.append(f"{analysis_id}: signal_analysis_coverage must disposition each Result Unit exactly once")
         feature_owner = {}
+        signal_coverage_map = {}
         for item in signal_coverage:
             result_id = item.get("result_id")
             status = item.get("status")
@@ -595,11 +603,17 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             comparison_ids = item.get("comparison_ids", [])
             if not set(comparison_ids).issubset(seen_signal_comparisons):
                 errors.append(f"{analysis_id}: {result_id} references unknown signal comparison IDs")
+            if any(result_id not in signal_comparison_map.get(comparison_id, {}).get("result_ids", []) for comparison_id in comparison_ids):
+                errors.append(f"{analysis_id}: {result_id} references a signal comparison that does not include it")
             if status == "APPLICABLE" and not comparison_ids and not str(item.get("reason") or "").strip():
                 errors.append(f"{analysis_id}: {result_id} must explain why no signal comparison was possible")
         for feature_id, feature in signal_feature_map.items():
             if feature_owner.get(feature_id) != feature.get("result_id"):
                 errors.append(f"{analysis_id}: {feature_id} is not linked from its Result Unit signal coverage")
+        for comparison_id, comparison in signal_comparison_map.items():
+            for result_id in comparison.get("result_ids", []):
+                if comparison_id not in signal_coverage_map.get(result_id, {}).get("comparison_ids", []):
+                    errors.append(f"{analysis_id}: {comparison_id} is not linked from every compared Result Unit signal coverage")
 
         for index, relationship in enumerate(analysis.get("relationships", [])):
             refs = relationship.get("result_ids", [])
