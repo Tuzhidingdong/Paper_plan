@@ -20,6 +20,7 @@ VALID_SIGNAL_CHANGE_TYPES = {
     "POSITION_SHIFT", "WIDTH_CHANGE", "INTENSITY_CHANGE", "AREA_CHANGE",
     "APPEARED", "DISAPPEARED", "SHAPE_CHANGE", "OTHER",
 }
+VALID_SIGNAL_COVERAGE = {"APPLICABLE", "NOT_APPLICABLE", "NOT_ASSESSABLE"}
 
 
 def _validate_signal_estimate(estimate: Any, label: str) -> None:
@@ -312,6 +313,35 @@ def validate_record(
             for field in ("unit", "source_basis", "precision_or_uncertainty"):
                 if not str(quantified.get(field) or "").strip():
                     raise ValueError(f"signal_comparisons[{index}].quantified_change.{field} is required")
+
+    signal_coverage = record.get("signal_analysis_coverage")
+    if not isinstance(signal_coverage, list):
+        raise ValueError("signal_analysis_coverage must explicitly disposition every Result Unit")
+    signal_coverage_ids = [item.get("result_id") for item in signal_coverage]
+    if set(signal_coverage_ids) != expected_ids or len(signal_coverage_ids) != len(expected_ids):
+        raise ValueError("signal_analysis_coverage must account for every Result Unit exactly once")
+    feature_owner: dict[str, str] = {}
+    for item in signal_coverage:
+        result_id = item.get("result_id")
+        if item.get("status") not in VALID_SIGNAL_COVERAGE:
+            raise ValueError(f"{result_id}: invalid signal_analysis_coverage status")
+        if item.get("status") in {"NOT_APPLICABLE", "NOT_ASSESSABLE"} and not str(item.get("reason") or "").strip():
+            raise ValueError(f"{result_id}: signal coverage {item.get('status')} requires a reason")
+        feature_ids = item.get("feature_ids", [])
+        if item.get("status") == "APPLICABLE" and not feature_ids:
+            raise ValueError(f"{result_id}: APPLICABLE signal coverage requires recorded signal_features")
+        if any(feature_id not in feature_map or feature_map[feature_id].get("result_id") != result_id for feature_id in feature_ids):
+            raise ValueError(f"{result_id}: signal_analysis_coverage contains an unrelated or unknown feature_id")
+        for feature_id in feature_ids:
+            feature_owner[feature_id] = result_id
+        comparison_refs = item.get("comparison_ids", [])
+        if not set(comparison_refs).issubset(comparison_ids):
+            raise ValueError(f"{result_id}: signal_analysis_coverage contains an unknown comparison_id")
+        if not comparison_refs and item.get("status") == "APPLICABLE" and not str(item.get("reason") or "").strip():
+            raise ValueError(f"{result_id}: explain why no signal comparison was possible")
+    for feature_id, feature in feature_map.items():
+        if feature_owner.get(feature_id) != feature.get("result_id"):
+            raise ValueError(f"{feature_id}: signal feature is not linked from its Result Unit coverage")
 
     _validate_model_invocation(
         request, record, workspace,
