@@ -66,7 +66,102 @@ def compile_context(bundle: dict[str, Any]) -> str:
         if finding.get("limitations"):
             lines.append(f"  - Limitations: {'; '.join(finding['limitations'])}")
     lines.append("")
-    lines.append("## Raman / FTIR cross-sample comparisons")
+    lines.append("## General cross-result scientific analyses")
+    analyses = bundle.get("scientific_analyses", {})
+    all_result_ids = set(bundle.get("result_units", {}))
+    covered_result_ids = set()
+    if analyses:
+        for analysis_id, analysis in sorted(analyses.items()):
+            coverage = analysis.get("coverage", [])
+            covered_result_ids.update(item.get("result_id") for item in coverage if item.get("result_id"))
+            lines.append(
+                f"- **{analysis_id}** [{analysis.get('analysis_status', 'unknown')} | "
+                f"{len(analysis.get('result_ids', []))} Result Units]"
+            )
+            lines.append(f"  - Scientific summary: {analysis.get('summary', 'not recorded')}")
+            for observation in analysis.get("observations", []):
+                lines.append(
+                    f"  - Observed ({observation.get('confidence', 'unreported')}): "
+                    f"{observation.get('description', '')} "
+                    f"[{', '.join(observation.get('result_ids', []))}]"
+                )
+            for comparison in analysis.get("comparisons", []):
+                lines.append(
+                    f"  - Comparison: {comparison.get('question', '')} "
+                    f"[{comparison.get('comparison_status', 'unknown')}]: "
+                    f"{comparison.get('conclusion', '')}"
+                )
+                for dimension in comparison.get("dimension_assessments", []):
+                    lines.append(
+                        f"    - {dimension.get('dimension', 'dimension')}: "
+                        f"{dimension.get('status', 'UNKNOWN')} — {dimension.get('consequence', '')}"
+                    )
+                for difference in comparison.get("quantitative_differences", []):
+                    values = "; ".join(
+                        f"{value.get('entity_or_group') or value.get('result_id')}: "
+                        f"{value.get('value')} {value.get('unit', '')} "
+                        f"[{value.get('source_basis', 'basis not stated')}]"
+                        for value in difference.get("values", [])
+                    )
+                    lines.append(
+                        f"    - {difference.get('measurand', 'quantity')}: {values}; "
+                        f"pattern: {difference.get('direction_or_pattern', 'not stated')}; "
+                        f"limit: {difference.get('interpretation_limit', 'not stated')}"
+                    )
+                for difference in comparison.get("qualitative_differences", []):
+                    lines.append(f"    - Qualitative difference: {difference}")
+                if comparison.get("limitations"):
+                    lines.append(f"    - Comparison limits: {'; '.join(comparison['limitations'])}")
+            for relationship in analysis.get("relationships", []):
+                lines.append(
+                    f"  - Relationship ({relationship.get('relationship_type', 'OTHER')}, "
+                    f"{relationship.get('strength', 'unresolved')}, "
+                    f"{relationship.get('causal_status', 'NOT_ESTABLISHED')}): "
+                    f"{relationship.get('description', '')} "
+                    f"[{', '.join(relationship.get('result_ids', []))}]"
+                )
+            for interpretation in analysis.get("interpretations", []):
+                lines.append(
+                    f"  - {interpretation.get('epistemic_status', 'Interpretation')}: "
+                    f"{interpretation.get('description', '')}"
+                )
+                if interpretation.get("alternative_explanations"):
+                    lines.append(f"    - Alternatives: {'; '.join(interpretation['alternative_explanations'])}")
+            for contradiction in analysis.get("contradictions", []):
+                lines.append(
+                    f"  - Contradiction ({contradiction.get('resolution_status', 'UNRESOLVED')}): "
+                    f"{contradiction.get('description', '')}"
+                )
+            if analysis.get("candidate_scientific_implications"):
+                lines.append(
+                    f"  - Candidate scientific implications: "
+                    f"{'; '.join(analysis['candidate_scientific_implications'])}"
+                )
+            if analysis.get("unresolved_questions"):
+                lines.append(f"  - Unresolved questions: {'; '.join(analysis['unresolved_questions'])}")
+            if analysis.get("limitations"):
+                lines.append(f"  - Analysis limitations: {'; '.join(analysis['limitations'])}")
+            for item in coverage:
+                if item.get("status") != "ANALYZED":
+                    lines.append(
+                        f"  - Coverage {item.get('result_id')}: {item.get('status')} — "
+                        f"{item.get('reason', 'reason not recorded')}"
+                    )
+        uncovered = sorted(all_result_ids - covered_result_ids)
+        if uncovered:
+            lines.append(
+                "- Result Units not yet covered by a general scientific analysis: "
+                + ", ".join(uncovered)
+            )
+    elif all_result_ids:
+        lines.append(
+            "- No general cross-result scientific analysis has been recorded. "
+            "Do not treat independent single-result descriptions as a completed scientific synthesis. "
+            "Prepare the general analysis packs before manuscript reasoning."
+        )
+
+    lines.append("")
+    lines.append("## Legacy spectral comparison records (backward compatibility)")
     spectral_result_ids = [
         result_id for result_id, result in bundle.get("result_units", {}).items()
         if re.search(r"\braman\b|\bftir\b|\bft-ir\b|\binfrared\b|\bir spectroscopy\b",
