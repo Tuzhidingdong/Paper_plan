@@ -316,19 +316,25 @@ def validate_record(
         feature_map[feature_id] = feature
 
     comparison_ids: set[str] = set()
+    comparison_map: dict[str, dict[str, Any]] = {}
     for index, comparison in enumerate(record.get("signal_comparisons", [])):
         comparison_id = str(comparison.get("comparison_id") or "")
         if not comparison_id or comparison_id in comparison_ids:
             raise ValueError(f"signal_comparisons[{index}] requires a unique comparison_id")
         comparison_ids.add(comparison_id)
+        comparison_map[comparison_id] = comparison
         feature_ids = comparison.get("feature_ids", [])
         if len(set(feature_ids)) < 2 or not set(feature_ids).issubset(feature_map):
             raise ValueError(f"signal_comparisons[{index}] must reference at least two recorded signal features")
         result_ids = comparison.get("result_ids", [])
         if not result_ids or not set(result_ids).issubset(expected_ids):
             raise ValueError(f"signal_comparisons[{index}] must cite Result Units in the prepared pack")
-        if any(feature_map[item]["result_id"] not in result_ids for item in feature_ids):
+        feature_result_ids = {feature_map[item]["result_id"] for item in feature_ids}
+        if feature_result_ids != set(result_ids):
             raise ValueError(f"signal_comparisons[{index}] feature/result links are inconsistent")
+        evidence_result_ids = {ref.get("result_id") for ref in comparison.get("evidence_refs", [])}
+        if not set(result_ids).issubset(evidence_result_ids):
+            raise ValueError(f"signal_comparisons[{index}] must cite source evidence for every compared Result Unit")
         if comparison.get("change_type") not in VALID_SIGNAL_CHANGE_TYPES:
             raise ValueError(f"signal_comparisons[{index}] has an invalid change_type")
         if comparison.get("comparability_status") not in VALID_COMPARISON | {"UNKNOWN"}:
@@ -353,8 +359,10 @@ def validate_record(
     if set(signal_coverage_ids) != expected_ids or len(signal_coverage_ids) != len(expected_ids):
         raise ValueError("signal_analysis_coverage must account for every Result Unit exactly once")
     feature_owner: dict[str, str] = {}
+    signal_coverage_map: dict[str, dict[str, Any]] = {}
     for item in signal_coverage:
         result_id = item.get("result_id")
+        signal_coverage_map[result_id] = item
         if item.get("status") not in VALID_SIGNAL_COVERAGE:
             raise ValueError(f"{result_id}: invalid signal_analysis_coverage status")
         if item.get("status") in {"NOT_APPLICABLE", "NOT_ASSESSABLE"} and not str(item.get("reason") or "").strip():
@@ -369,11 +377,18 @@ def validate_record(
         comparison_refs = item.get("comparison_ids", [])
         if not set(comparison_refs).issubset(comparison_ids):
             raise ValueError(f"{result_id}: signal_analysis_coverage contains an unknown comparison_id")
+        if any(result_id not in comparison_map[comparison_id].get("result_ids", []) for comparison_id in comparison_refs):
+            raise ValueError(f"{result_id}: signal_analysis_coverage references a comparison that does not include this Result Unit")
         if not comparison_refs and item.get("status") == "APPLICABLE" and not str(item.get("reason") or "").strip():
             raise ValueError(f"{result_id}: explain why no signal comparison was possible")
     for feature_id, feature in feature_map.items():
         if feature_owner.get(feature_id) != feature.get("result_id"):
             raise ValueError(f"{feature_id}: signal feature is not linked from its Result Unit coverage")
+    for comparison_id, comparison in comparison_map.items():
+        for result_id in comparison.get("result_ids", []):
+            coverage_item = signal_coverage_map.get(result_id, {})
+            if comparison_id not in coverage_item.get("comparison_ids", []):
+                raise ValueError(f"{comparison_id}: comparison is not linked from every compared Result Unit's signal coverage")
 
     _validate_model_invocation(
         request, record, workspace,
