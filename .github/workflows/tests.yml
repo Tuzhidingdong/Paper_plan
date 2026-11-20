@@ -2,7 +2,7 @@ name: ERA tests
 
 on:
   push:
-    branches: [main, feat/spectral-cross-sample-comparison]
+    branches: [main, v5.1/researcher-facing-product]
   pull_request:
     branches: [main, v5.1/researcher-facing-product]
 
