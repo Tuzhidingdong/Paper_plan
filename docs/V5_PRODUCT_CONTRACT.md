@@ -31,7 +31,7 @@ Internal IDs may support cross-referencing in the workspace but are not a substi
 The exact document architecture and depth depend on the project. A substantive full-paper plan must develop the following capabilities in a connected narrative:
 
 1. **Scientific background and rationale:** explain the field problem, scientific importance, limitations of current knowledge/approaches and the reason the project matters.
-2. **Research diagnosis:** interpret the user's actual evidence, identify robust findings and uncertainties, explain what can and cannot be concluded, and connect data limitations to the paper.
+2. **Research diagnosis:** interpret the user's actual evidence and actively analyze relationships within and across all relevant results; identify robust findings, differences, trends, convergence, contradictions, anomalies and uncertainties; explain what can and cannot be concluded, and connect data limitations to the paper. The user should not have to name the comparisons or candidate patterns for the Skill to discover them.
 3. **Literature frontier and novelty:** discover and compare the closest prior studies, competing explanations and contradictory evidence; define a precise, defensible contribution boundary. Keep the detailed search audit separately.
 4. **Scientific-mainline decision:** evaluate the user's original intended question alongside evidence-led alternatives and stop/defer options; explain the selected scientific question and why it is preferable in ordinary scientific language.
 5. **Introduction and manuscript architecture:** provide a paragraph-level Introduction argument with verified literature support; develop the Results/Discussion story as a connected sequence of scientific questions and conclusions; define abstract and conclusion logic.
@@ -70,7 +70,7 @@ Never describe planned results as observed. Never invent values, thresholds, sam
 
 Metadata is not full-text evidence. A null result from one search provider is not proof of novelty or absence of prior art. Use alternative query formulations, independent discovery routes and citation chasing. Keep the detailed search history and identity-resolution audit separate from the scientific narrative. Verify current journal requirements against official dated sources.
 
-Retain physical source anchors, visual provenance, comparison compatibility, measurement definitions, calculation reproduction, proxy validation, uncertainty separation, task readiness and human approval gates in the internal evidence layer. Explain only the scientific consequences that matter to the reader in the main report.
+Retain physical source anchors, visual provenance, comparison compatibility, measurement definitions, calculation reproduction, proxy validation, uncertainty separation, task readiness and human approval gates in the internal evidence layer. General scientific analysis must also retain per-Result-Unit coverage, source-linked observations and comparisons, cross-result relationships, contradictions, alternatives and limitations before narrative synthesis. Explain only the scientific consequences that matter to the reader in the main report.
 
 ## 6. Researcher-facing language and report boundaries
 
