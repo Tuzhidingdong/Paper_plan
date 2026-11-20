@@ -196,7 +196,7 @@ class TestGeneralScientificAnalysis(unittest.TestCase):
         self.assertEqual(index["unassigned_region_assets"][0]["image_path"], "assets/unassigned.png")
         self.assertEqual(index["coverage_map"].keys(), {"R001", "R002", "R003"})
         self.assertIs(packs[0]["invocation_audit_required"], True)
-        self.assertIs(packs[0]["required_output"]["invocation_audit_required"], True)
+        self.assertIs(packs[0]["invocation_audit"]["required"], True)
 
     def test_cross_method_shared_sample_can_be_in_one_related_pack(self):
         index, packs = prepare_all(bundle_fixture(), Path("/workspace"), max_results_per_pack=10)
