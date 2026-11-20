@@ -15,7 +15,7 @@ class ContextCompilerTests(unittest.TestCase):
         context = compile_context(sample_bundle())
         self.assertIn("Visual_Estimate/Medium", context)
         self.assertIn("Trend_Only", context)
-        self.assertIn("Visual Estimate - Raw Data Required", context)
+        self.assertIn("Image-derived estimate: state reading basis, confidence and figure-resolution limits", context)
         self.assertIn("p1", context)
 
 
