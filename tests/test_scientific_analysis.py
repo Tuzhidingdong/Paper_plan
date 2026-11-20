@@ -105,6 +105,13 @@ def valid_record(request):
         comparison = [{
             "comparison_id": "CMP-1", "question": "Do the measured responses differ?",
             "result_ids": ids[:2], "comparison_status": "PARTIALLY_COMPARABLE",
+            "observation_ids": ["OBS-1", "OBS-2"],
+            "evidence_refs": [
+                {"result_id": ids[0], "region_id": bundle_fixture()["result_units"][ids[0]]["region_ids"][0],
+                 "panel_id": None, "page_number": 1},
+                {"result_id": ids[1], "region_id": bundle_fixture()["result_units"][ids[1]]["region_ids"][0],
+                 "panel_id": None, "page_number": 2}
+            ],
             "dimension_assessments": [{
                 "dimension": "measurement settings", "status": "MISMATCHED",
                 "left_or_group_values": ["low", "high"],
