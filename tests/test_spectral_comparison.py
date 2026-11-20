@@ -108,6 +108,10 @@ class TestSpectralComparison(unittest.TestCase):
             {"S001", "S002"},
         )
         self.assertTrue(any("ONE joint comparison set" in item for item in payload["instructions"]))
+        band_template = payload["required_output"]["band_comparisons"][0]
+        self.assertIn("position_estimates", band_template)
+        self.assertIn("peak_shift_cm1_approx", band_template)
+        self.assertIn("uncertainty_cm1_approx", band_template["position_estimates"][0])
 
     def test_mixed_techniques_are_rejected(self):
         with self.assertRaisesRegex(ValueError, "only one spectral technique"):
@@ -131,6 +135,7 @@ class TestSpectralComparison(unittest.TestCase):
         self.assertIn("relative shift in one band", context)
         self.assertIn("normalization basis is not documented", context)
         self.assertIn("Peak positions are visual estimates", context)
+        self.assertIn("not yet included in a recorded comparison: R002", context)
 
     def test_context_compiler_warns_when_spectral_comparison_is_missing(self):
         context = compile_context(sample_bundle())
