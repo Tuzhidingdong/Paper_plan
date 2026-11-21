@@ -491,6 +491,7 @@ def build_analysis_pack(
                 "limitations": [],
             }],
             "relationships": [{
+                "relationship_id": "REL-1",
                 "relationship_type": "CONVERGENCE | DIVERGENCE | TREND | CONDITION_RESPONSE | CORRELATION_CANDIDATE | STRUCTURE_PROPERTY | TEMPORAL_OR_SEQUENTIAL | OTHER",
                 "description": "",
                 "result_ids": [],
@@ -500,6 +501,7 @@ def build_analysis_pack(
                 "limitations": [],
             }],
             "interpretations": [{
+                "interpretation_id": "INT-1",
                 "description": "",
                 "epistemic_status": "Interpreted | Hypothesized",
                 "supporting_observation_ids": [],
@@ -508,6 +510,7 @@ def build_analysis_pack(
                 "limitations": [],
             }],
             "contradictions": [{
+                "contradiction_id": "CONTRA-1",
                 "description": "",
                 "result_ids": [],
                 "evidence_refs": [],
