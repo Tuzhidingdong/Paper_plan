@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from scientific_quality_gates import validate_evidence_quality
+from scientific_argument_bridge import validate_finding_analysis_refs
 
 from era_core import (
     atomic_write_json,
@@ -714,6 +715,8 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             "Raman/FTIR Result Units are not covered by a recorded joint comparison: "
             + ", ".join(uncovered_spectral_result_ids)
         )
+
+    errors.extend(validate_finding_analysis_refs(bundle))
 
     quality_errors, quality_warnings = validate_evidence_quality(bundle)
     errors.extend(quality_errors)
