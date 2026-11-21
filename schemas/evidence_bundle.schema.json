@@ -1562,6 +1562,18 @@
           "items": {
             "$ref": "#/$defs/signal_analysis_coverage"
           }
+        },
+        "plot_calibrations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/plot_calibration"}
+        },
+        "plot_readings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/plot_reading"}
+        },
+        "plot_reading_audit": {
+          "type": "object",
+          "additionalProperties": true
         }
       },
       "additionalProperties": true
@@ -1667,6 +1679,97 @@
       },
       "additionalProperties": true
     },
+    "plot_axis_calibration": {
+      "type": "object",
+      "required": ["label", "unit", "scale", "tick_anchors"],
+      "properties": {
+        "label": {"type": "string"},
+        "unit": {"type": "string"},
+        "scale": {"enum": ["LINEAR", "LOG", "LOG10", "CATEGORICAL", "UNKNOWN"]},
+        "tick_anchors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["coordinate", "value", "printed_label", "coordinate_uncertainty"],
+            "properties": {
+              "coordinate": {"type": "number"},
+              "value": {"type": "number"},
+              "printed_label": {"type": "string"},
+              "coordinate_uncertainty": {"type": "number", "exclusiveMinimum": 0},
+              "value_uncertainty": {"type": "number", "minimum": 0}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "plot_calibration": {
+      "type": "object",
+      "required": ["calibration_id", "result_id", "plot_type", "coordinate_system", "coordinate_frame",
+                   "plot_area", "evidence_refs", "x_axis", "y_axis", "series", "limitations"],
+      "properties": {
+        "calibration_id": {"type": "string"},
+        "result_id": {"type": "string"},
+        "plot_type": {"enum": ["XY_LINE", "SPECTRUM", "DIFFRACTOGRAM", "SCATTER", "BAR", "HISTOGRAM", "HEATMAP", "OTHER"]},
+        "coordinate_system": {"enum": ["IMAGE_PIXEL", "PDF_CROP_POINT"]},
+        "coordinate_frame": {
+          "type": "object", "required": ["width", "height"],
+          "properties": {"width": {"type": "number", "exclusiveMinimum": 0}, "height": {"type": "number", "exclusiveMinimum": 0}},
+          "additionalProperties": true
+        },
+        "plot_area": {"$ref": "#/$defs/bbox"},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+        "x_axis": {"$ref": "#/$defs/plot_axis_calibration"},
+        "y_axis": {"$ref": "#/$defs/plot_axis_calibration"},
+        "series": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["series_id", "legend_label", "mapping_status"],
+            "properties": {
+              "series_id": {"type": "string"},
+              "legend_label": {"type": "string"},
+              "mapping_status": {"enum": ["CONFIRMED", "PROBABLE", "AMBIGUOUS", "UNRESOLVED"]},
+              "source_path_ids": {"type": "array", "items": {"type": "string"}}
+            },
+            "additionalProperties": true
+          }
+        },
+        "limitations": {"type": "array", "items": {"type": "string"}},
+        "calibration_qc": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "plot_reading": {
+      "type": "object",
+      "required": ["reading_id", "calibration_id", "result_id", "reading_role", "coordinate_source",
+                   "coordinate", "coordinate_uncertainty", "evidence_refs"],
+      "properties": {
+        "reading_id": {"type": "string"},
+        "calibration_id": {"type": "string"},
+        "result_id": {"type": "string"},
+        "series_id": {"type": ["string", "null"]},
+        "feature_id": {"type": ["string", "null"]},
+        "reading_role": {"enum": ["DATA_POINT", "FEATURE_POSITION", "FEATURE_EDGE", "BAR_ENDPOINT", "PLATEAU_BOUNDARY", "OTHER"]},
+        "coordinate_source": {"enum": ["RASTER_IMAGE", "VECTOR_GEOMETRY"]},
+        "coordinate": {
+          "type": "object", "required": ["x", "y"],
+          "properties": {"x": {"type": "number"}, "y": {"type": "number"}},
+          "additionalProperties": true
+        },
+        "coordinate_uncertainty": {
+          "type": "object", "required": ["x", "y"],
+          "properties": {"x": {"type": "number", "exclusiveMinimum": 0}, "y": {"type": "number", "exclusiveMinimum": 0}},
+          "additionalProperties": true
+        },
+        "vector_ref": {"type": ["object", "null"]},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+        "mapped_values": {"type": "object"},
+        "reading_status": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
     "signal_estimate": {
       "type": "object",
       "properties": {
@@ -1677,6 +1780,8 @@
             "null"
           ]
         },
+        "plot_reading_ids": {"type": "array", "items": {"type": "string"}},
+        "calculation": {"type": "object"},
         "unit": {
           "type": "string"
         },
@@ -1737,6 +1842,7 @@
         "feature_label": {
           "type": "string"
         },
+        "plot_reading_ids": {"type": "array", "items": {"type": "string"}},
         "description": {
           "type": "string",
           "minLength": 1
@@ -1899,7 +2005,9 @@
             },
             "precision_or_uncertainty": {
               "type": "string"
-            }
+            },
+            "plot_reading_ids": {"type": "array", "items": {"type": "string"}},
+            "calculation": {"type": "object"}
           },
           "additionalProperties": true
         },

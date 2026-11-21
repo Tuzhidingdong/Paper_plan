@@ -73,6 +73,7 @@ class TestVectorFigureCoverage(unittest.TestCase):
                     y = y0 + index * 0.7
                     page.draw_line((x, y), (x + 12, y + 8), color=(0, 0, 0), width=0.6)
             page.insert_text((80, 90), "Vector plot with axes and labels", fontsize=10)
+            page.insert_text((110, 145), "X ticks 0 10 20", fontsize=8)
             doc.save(source)
             doc.close()
 
@@ -102,6 +103,13 @@ class TestVectorFigureCoverage(unittest.TestCase):
             self.assertTrue((workspace / candidate["image_path"]).is_file())
             self.assertEqual(candidate["asset_sha256"], sha256_file(workspace / candidate["image_path"]))
             self.assertIn(candidate["region_id"], bundle["regions"])
+            geometry_path = workspace / candidate["vector_geometry_path"]
+            self.assertTrue(geometry_path.is_file())
+            self.assertEqual(candidate["vector_geometry_sha256"], sha256_file(geometry_path))
+            geometry = json.loads(geometry_path.read_text(encoding="utf-8"))
+            self.assertEqual(geometry["coordinate_system"], "PDF_CROP_POINT")
+            self.assertGreater(geometry["path_count"], 0)
+            self.assertTrue(any("X ticks 0 10 20" in item["text"] for item in geometry["text_spans"]))
 
     def test_pending_candidate_blocks_evidence_validation_until_explicit_exclusion(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -211,9 +219,12 @@ def _analysis_fixture(workspace: Path):
         "source": {"sha256": source_hash},
         "result_ids": ["R001", "R002"],
         "invocation_audit_required": True,
+        "plot_reading_audit_required": True,
         "assets": [
-            {"image_path": "assets/a.png", "asset_exists": True, "asset_sha256": sha256_file(image_a), "region_id": "REG001", "panel_id": None},
-            {"image_path": "assets/b.png", "asset_exists": True, "asset_sha256": sha256_file(image_b), "region_id": "REG002", "panel_id": None}
+            {"image_path": "assets/a.png", "asset_exists": True, "asset_sha256": sha256_file(image_a), "region_id": "REG001", "panel_id": None,
+             "result_ids": ["R001"], "pixel_width": 1000, "pixel_height": 1000},
+            {"image_path": "assets/b.png", "asset_exists": True, "asset_sha256": sha256_file(image_b), "region_id": "REG002", "panel_id": None,
+             "result_ids": ["R002"], "pixel_width": 1000, "pixel_height": 1000}
         ]
     }
     request_log = workspace / "logs" / "request.json"
@@ -245,20 +256,70 @@ def _analysis_fixture(workspace: Path):
             {"result_id": "R001", "status": "APPLICABLE", "feature_ids": ["SIG-1"], "comparison_ids": ["SIGCMP-1"], "reason": ""},
             {"result_id": "R002", "status": "APPLICABLE", "feature_ids": ["SIG-2"], "comparison_ids": ["SIGCMP-1"], "reason": ""}
         ],
+        "plot_calibrations": [
+            {
+                "calibration_id": "PLOT-1", "result_id": "R001", "plot_type": "SPECTRUM",
+                "coordinate_system": "IMAGE_PIXEL", "coordinate_frame": {"width": 1000, "height": 1000},
+                "plot_area": [100, 100, 900, 900],
+                "evidence_refs": [{"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1}],
+                "x_axis": {"label": "Wavenumber", "unit": "cm-1", "scale": "LINEAR",
+                           "tick_anchors": [
+                               {"coordinate": 100, "value": 980, "printed_label": "980", "coordinate_uncertainty": 0.5},
+                               {"coordinate": 500, "value": 1000, "printed_label": "1000", "coordinate_uncertainty": 0.5},
+                               {"coordinate": 900, "value": 1020, "printed_label": "1020", "coordinate_uncertainty": 0.5}]},
+                "y_axis": {"label": "Absorbance", "unit": "a.u.", "scale": "LINEAR",
+                           "tick_anchors": [
+                               {"coordinate": 100, "value": 1.0, "printed_label": "1.0", "coordinate_uncertainty": 0.5},
+                               {"coordinate": 500, "value": 0.5, "printed_label": "0.5", "coordinate_uncertainty": 0.5},
+                               {"coordinate": 900, "value": 0.0, "printed_label": "0.0", "coordinate_uncertainty": 0.5}]},
+                "series": [{"series_id": "A", "legend_label": "Trace A", "mapping_status": "CONFIRMED"}],
+                "limitations": []
+            },
+            {
+                "calibration_id": "PLOT-2", "result_id": "R002", "plot_type": "SPECTRUM",
+                "coordinate_system": "IMAGE_PIXEL", "coordinate_frame": {"width": 1000, "height": 1000},
+                "plot_area": [100, 100, 900, 900],
+                "evidence_refs": [{"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 2}],
+                "x_axis": {"label": "Wavenumber", "unit": "cm-1", "scale": "LINEAR",
+                           "tick_anchors": [
+                               {"coordinate": 100, "value": 980, "printed_label": "980", "coordinate_uncertainty": 0.5},
+                               {"coordinate": 500, "value": 1000, "printed_label": "1000", "coordinate_uncertainty": 0.5},
+                               {"coordinate": 900, "value": 1020, "printed_label": "1020", "coordinate_uncertainty": 0.5}]},
+                "y_axis": {"label": "Absorbance", "unit": "a.u.", "scale": "LINEAR",
+                           "tick_anchors": [
+                               {"coordinate": 100, "value": 1.0, "printed_label": "1.0", "coordinate_uncertainty": 0.5},
+                               {"coordinate": 500, "value": 0.5, "printed_label": "0.5", "coordinate_uncertainty": 0.5},
+                               {"coordinate": 900, "value": 0.0, "printed_label": "0.0", "coordinate_uncertainty": 0.5}]},
+                "series": [{"series_id": "B", "legend_label": "Trace B", "mapping_status": "CONFIRMED"}],
+                "limitations": []
+            }
+        ],
+        "plot_readings": [
+            {"reading_id": "READ-1", "calibration_id": "PLOT-1", "result_id": "R001", "series_id": "A", "feature_id": "SIG-1",
+             "reading_role": "FEATURE_POSITION", "coordinate_source": "RASTER_IMAGE", "coordinate": {"x": 500, "y": 500},
+             "coordinate_uncertainty": {"x": 1.0, "y": 1.0},
+             "evidence_refs": [{"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1}]},
+            {"reading_id": "READ-2", "calibration_id": "PLOT-2", "result_id": "R002", "series_id": "B", "feature_id": "SIG-2",
+             "reading_role": "FEATURE_POSITION", "coordinate_source": "RASTER_IMAGE", "coordinate": {"x": 700, "y": 500},
+             "coordinate_uncertainty": {"x": 1.0, "y": 1.0},
+             "evidence_refs": [{"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 2}]}
+        ],
         "signal_features": [
             {"feature_id": "SIG-1", "result_id": "R001", "series_id": "A", "feature_type": "BAND", "description": "A visible signal band.",
              "series_label": "Trace A",
              "axis_context": {"x_axis_label": "Wavenumber", "x_axis_unit": "cm-1", "x_axis_scale": "LINEAR",
                               "y_axis_label": "Absorbance", "y_axis_unit": "a.u.", "y_axis_scale": "LINEAR",
                               "normalization_basis": "un-normalized display"},
-             "position": {"value": 1000.0, "unit": "cm-1", "reading_basis": "visual axis estimate", "precision_or_uncertainty": "±5 cm-1"},
+             "position": {"value": 1000.0, "unit": "cm-1", "reading_basis": "CALIBRATED_PLOT_READING", "precision_or_uncertainty": "±5 cm-1",
+                          "plot_reading_ids": ["READ-1"], "calculation": {"operation": "DIRECT", "axis": "x"}},
              "evidence_refs": [{"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1}]},
             {"feature_id": "SIG-2", "result_id": "R002", "series_id": "B", "feature_type": "BAND", "description": "A shifted visible signal band.",
              "series_label": "Trace B",
              "axis_context": {"x_axis_label": "Wavenumber", "x_axis_unit": "cm-1", "x_axis_scale": "LINEAR",
                               "y_axis_label": "Absorbance", "y_axis_unit": "a.u.", "y_axis_scale": "LINEAR",
                               "normalization_basis": "un-normalized display"},
-             "position": {"value": 1010.0, "unit": "cm-1", "reading_basis": "visual axis estimate", "precision_or_uncertainty": "±5 cm-1"},
+             "position": {"value": 1010.0, "unit": "cm-1", "reading_basis": "CALIBRATED_PLOT_READING", "precision_or_uncertainty": "±5 cm-1",
+                          "plot_reading_ids": ["READ-2"], "calculation": {"operation": "DIRECT", "axis": "x"}},
              "evidence_refs": [{"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 2}]}
         ],
         "signal_comparisons": [
@@ -266,7 +327,9 @@ def _analysis_fixture(workspace: Path):
              "change_type": "POSITION_SHIFT", "description": "A visible position shift between the two plotted features.",
              "direction_or_pattern": "higher", "comparability_status": "PARTIALLY_COMPARABLE",
              "normalization_basis": "same displayed axis units",
-             "quantified_change": {"metric": "position shift", "value": 10.0, "unit": "cm-1", "source_basis": "visual axis estimate", "precision_or_uncertainty": "approx. ±7 cm-1"},
+             "quantified_change": {"metric": "position shift", "value": 10.0, "unit": "cm-1", "source_basis": "CALIBRATED_PLOT_READING", "precision_or_uncertainty": "approx. ±7 cm-1",
+                                  "plot_reading_ids": ["READ-1", "READ-2"],
+                                  "calculation": {"operation": "DIFFERENCE", "axis": "x"}},
              "evidence_refs": [
                  {"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1},
                  {"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 2}
@@ -301,6 +364,25 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
             bundle, request, record = _analysis_fixture(workspace)
             record["model_invocation"]["input_mode"] = "TEXT_ONLY_PATHS"
             with self.assertRaisesRegex(ValueError, "native image attachments"):
+                validate_record(bundle, request, record, workspace)
+
+    def test_noncomparable_plot_series_cannot_support_a_quantified_change(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            bundle, request, record = _analysis_fixture(workspace)
+            record["signal_comparisons"][0]["comparability_status"] = "NOT_COMPARABLE"
+            with self.assertRaisesRegex(ValueError, "cannot publish a quantified plot change"):
+                validate_record(bundle, request, record, workspace)
+
+    def test_numeric_intensity_comparison_requires_same_absolute_normalization(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            bundle, request, record = _analysis_fixture(workspace)
+            record["signal_comparisons"][0]["change_type"] = "INTENSITY_CHANGE"
+            record["signal_comparisons"][0]["quantified_change"]["unit"] = "a.u."
+            record["signal_comparisons"][0]["quantified_change"]["calculation"]["axis"] = "y"
+            record["signal_features"][1]["axis_context"]["normalization_basis"] = "vertical offset applied to trace"
+            with self.assertRaisesRegex(ValueError, "absolute normalization basis"):
                 validate_record(bundle, request, record, workspace)
 
     def test_missing_signal_evidence_reference_is_rejected(self):

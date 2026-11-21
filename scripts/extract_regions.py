@@ -120,6 +120,112 @@ def mark_repeated_layout_assets(bundle: dict[str, Any], page_count: int) -> int:
     return marked
 
 
+def _vector_geometry_sidecar(page, crop_rect, candidate_id: str, page_number: int,
+                                source_sha256: str, region_id: str) -> dict[str, Any]:
+    """Preserve PDF-native vector paths and text spans in crop-local PDF points."""
+    import fitz
+
+    def local_point(point):
+        return [round(float(point.x) - float(crop_rect.x0), 4),
+                round(float(point.y) - float(crop_rect.y0), 4)]
+
+    paths = []
+    for drawing in page.get_drawings():
+        drawing_rect = fitz.Rect(drawing.get("rect", crop_rect))
+        if not drawing_rect.intersects(crop_rect):
+            continue
+        items = []
+        for item_index, item in enumerate(drawing.get("items") or []):
+            if not item:
+                continue
+            command = str(item[0])
+            points = []
+            if command == "l" and len(item) >= 3:
+                points = [local_point(item[1]), local_point(item[2])]
+            elif command == "c" and len(item) >= 5:
+                points = [local_point(value) for value in item[1:5]]
+            elif command == "re" and len(item) >= 2:
+                rect = fitz.Rect(item[1])
+                points = [
+                    [round(float(rect.x0) - crop_rect.x0, 4), round(float(rect.y0) - crop_rect.y0, 4)],
+                    [round(float(rect.x1) - crop_rect.x0, 4), round(float(rect.y0) - crop_rect.y0, 4)],
+                    [round(float(rect.x1) - crop_rect.x0, 4), round(float(rect.y1) - crop_rect.y0, 4)],
+                    [round(float(rect.x0) - crop_rect.x0, 4), round(float(rect.y1) - crop_rect.y0, 4)],
+                ]
+            elif command == "qu" and len(item) >= 2:
+                quad = item[1]
+                points = [local_point(getattr(quad, name)) for name in ("ul", "ur", "lr", "ll")]
+            else:
+                continue
+            if points:
+                items.append({"item_index": item_index, "command": command, "points": points})
+        if not items:
+            continue
+        paths.append({
+            "path_id": f"VEC-{len(paths) + 1:06d}",
+            "bbox": [
+                round(float(drawing_rect.x0) - crop_rect.x0, 4),
+                round(float(drawing_rect.y0) - crop_rect.y0, 4),
+                round(float(drawing_rect.x1) - crop_rect.x0, 4),
+                round(float(drawing_rect.y1) - crop_rect.y0, 4),
+            ],
+            "stroke_color": drawing.get("color"),
+            "fill_color": drawing.get("fill"),
+            "stroke_width": drawing.get("width"),
+            "close_path": bool(drawing.get("closePath", False)),
+            "items": items,
+        })
+
+    text_spans = []
+    for block in page.get_text("dict").get("blocks", []):
+        if block.get("type") != 0:
+            continue
+        for line in block.get("lines", []):
+            for span in line.get("spans", []):
+                bbox = span.get("bbox")
+                if not bbox:
+                    continue
+                span_rect = fitz.Rect(bbox)
+                if not span_rect.intersects(crop_rect):
+                    continue
+                text_spans.append({
+                    "text": str(span.get("text") or ""),
+                    "bbox": [
+                        round(float(span_rect.x0) - crop_rect.x0, 4),
+                        round(float(span_rect.y0) - crop_rect.y0, 4),
+                        round(float(span_rect.x1) - crop_rect.x0, 4),
+                        round(float(span_rect.y1) - crop_rect.y0, 4),
+                    ],
+                    "font": span.get("font"),
+                    "font_size": span.get("size"),
+                    "flags": span.get("flags"),
+                })
+    text_spans.sort(key=lambda item: (item["bbox"][1], item["bbox"][0]))
+    return {
+        "schema_version": 1,
+        "geometry_source": "PDF_NATIVE_VECTOR_AND_TEXT",
+        "source_pdf_sha256": source_sha256,
+        "candidate_id": candidate_id,
+        "region_id": region_id,
+        "page_number": page_number,
+        "coordinate_system": "PDF_CROP_POINT",
+        "coordinate_frame": {
+            "width": round(float(crop_rect.width), 4),
+            "height": round(float(crop_rect.height), 4),
+        },
+        "bbox_pdf": [round(float(value), 4) for value in crop_rect],
+        "path_count": len(paths),
+        "text_span_count": len(text_spans),
+        "paths": paths,
+        "text_spans": text_spans,
+        "limitations": [
+            "Vector coordinates preserve PDF drawing geometry, not the instrument's original numeric data.",
+            "Text-span extraction preserves glyph text and location but does not assign tick labels to axes.",
+            "Cubic path control points are not measured data points; use a curve parameter only when the displayed path itself is the intended trace."
+        ],
+    }
+
+
 def extract_vector_figure_candidates(document, manifest, workspace: Path, bundle: dict[str, Any], dpi: int) -> int:
     """Rasterize every ingest-time vector plot candidate at the requested DPI.
 
@@ -189,6 +295,13 @@ def extract_vector_figure_candidates(document, manifest, workspace: Path, bundle
             )
             relative = Path(region["image_path"])
             asset_path = workspace / relative
+            geometry = _vector_geometry_sidecar(
+                page, rect, candidate_id, page_number,
+                str(bundle.get("source", {}).get("sha256") or ""), region["region_id"]
+            )
+            geometry_relative = Path("extracted") / "vector_geometry" / f"{candidate_id}.json"
+            geometry_path = workspace / geometry_relative
+            atomic_write_json(geometry_path, geometry)
             figure_candidates[candidate_id] = {
                 "candidate_id": candidate_id,
                 "candidate_type": "VECTOR_PLOT_CLUSTER",
@@ -201,6 +314,10 @@ def extract_vector_figure_candidates(document, manifest, workspace: Path, bundle
                 "asset_sha256": sha256_file(asset_path),
                 "pixel_width": region["pixel_width"],
                 "pixel_height": region["pixel_height"],
+                "vector_geometry_path": geometry_relative.as_posix(),
+                "vector_geometry_sha256": sha256_file(geometry_path),
+                "vector_geometry_path_count": geometry["path_count"],
+                "vector_geometry_text_span_count": geometry["text_span_count"],
                 "detector_reason": candidate.get("reason"),
                 "extraction_status": "EXTRACTED",
                 "triage_status": "PENDING_TRIAGE",

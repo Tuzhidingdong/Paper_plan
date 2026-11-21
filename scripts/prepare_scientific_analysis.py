@@ -33,13 +33,21 @@ ANALYSIS_INSTRUCTIONS = [
     "Treat plotted signals as primary experimental evidence, not as illustrations. For every relevant plot, identify the axes, units, trace/series identities and visible signal features before interpreting the result.",
     "When the source supports it, record individual peak-like features (for example, peaks, reflections or absorption bands) with their position, width, signal magnitude and apparent area. Use the axis and unit of that plot; do not force a feature type or assign a chemical/structural identity without evidence.",
     "Compare features across the curves, samples, conditions and stages that are actually shown. Record shifts, broadening/narrowing, relative-intensity changes, area changes, new or disappearing features, shoulders, splitting, overlap and non-monotonic responses when resolvable.",
-    "For every numeric signal estimate, state whether it comes from exact source data, printed values or visual reading from an image; preserve axis calibration, resolution, normalization basis, precision and uncertainty. Use null/not-resolvable rather than invented numeric values.",
+    "For every numeric signal estimate, state whether it comes from exact source data, printed values or a calibrated plot reading; preserve axis calibration, resolution, normalization basis, precision and uncertainty. Use null/not-resolvable rather than invented numeric values.",
+    "For every numeric signal feature and quantified signal comparison, use a controlled reading_basis/source_basis: EXACT_SOURCE_DATA, EXACT_TEXT, EXACT_TABLE, PRINTED_FIGURE_VALUE, DERIVED_FROM_EXPLICIT_VALUES, CALIBRATED_PLOT_READING or UNRESOLVED. Do not use free-form wording to disguise an uncalibrated visual estimate.",
     "A list of generic feature assignments is not a completed signal analysis. Explain what changed between the actual plotted series, which changes are robust, and what instrument, processing, overlap, orientation, baseline or sample-state alternatives could produce them.",
     "Before marking any image-derived Result Unit ANALYZED, record whether its original-resolution image was actually attached to the model call as native image input. A file path or text description alone is not an image attachment. If native image delivery cannot be confirmed, mark the affected units NOT_ASSESSABLE and disclose the blocker.",
     "For every Result Unit, explicitly assess whether the source contains plotted/scan/curve signal features that require feature-level analysis. Record exactly one signal_analysis_coverage disposition: APPLICABLE with linked feature IDs, NOT_APPLICABLE with a reason, or NOT_ASSESSABLE with a reason. Do not silently omit this decision; do not force feature extraction onto non-signal evidence.",
     "Persist the actual model request and response artifacts and provide an invocation receipt listing every requested image path, its SHA-256 and the matching native image attachment reference. The receipt is agent-reported evidence and must not be described as an independent host-level verification.",
-    "Assign a unique stable ID to every material relationship (relationship_id), interpretation (interpretation_id) and contradiction (contradiction_id) in this analysis record. Preserve observation_id, comparison_id, feature_id and signal-comparison comparison_id values. These IDs will be cited by downstream Findings; do not reuse an ID for two records of the same type within one analysis."
-]
+    "Assign a unique stable ID to every material relationship (relationship_id), interpretation (interpretation_id) and contradiction (contradiction_id) in this analysis record. Preserve observation_id, comparison_id, feature_id and signal-comparison comparison_id values. These IDs will be cited by downstream Findings; do not reuse an ID for two records of the same type within one analysis.",
+    "For every quantitative plot read, create a plot_calibration with the actual image/PDF coordinate frame, plot-area bounds, visible tick anchors, axis scale and units, plus the visible series-to-identity mapping. Never calibrate an axis from only its title or from an assumed standard range.",
+    "Use at least two visible numeric tick anchors per numeric axis. Prefer three or more distributed anchors so the recorder can check linear/log calibration residuals. Record the coordinate uncertainty of each tick anchor and the printed tick value as visible; do not invent hidden ticks.",
+    "Create plot_readings for each numeric point/feature used by a quantitative conclusion. For raster images, report the pixel coordinate and coordinate uncertainty. For PDF-native vector geometry, cite the sidecar path_id/item_index/point_index (or curve_t for a cubic trace); the recorder will retrieve the coordinates from the source-anchored sidecar. Do not use cubic control points as observed data vertices.",
+    "The recorder independently maps those coordinates through the tick calibration and stores mapped values and graph-reading uncertainty. Graph-reading uncertainty is not experimental standard deviation, replicate variability or instrument uncertainty.",
+    "A plotted numeric estimate may support a bounded quantitative statement only when the axis used for that value is calibrated adequately; an x/y data point requires both axes. Quantitative readings require CONFIRMED series-to-trace mapping. PROBABLE, AMBIGUOUS or UNRESOLVED series mapping permits trend-only/qualitative language, not a numeric comparison. Two-tick calibrations have limited status; low-quality calibration permits trend-only language. Unreadable axes or overlapping traces must remain unresolved.",
+    "Every numeric signal feature read visually from a plot must cite plot_reading_ids. A numeric signal comparison based on a plot must cite the relevant plot_reading_ids and declare a reproducible calculation operation/axis; the recorder recomputes the difference, ratio or percent change and rejects inconsistent values.",
+    "Do not estimate integrated peak/band area from a displayed curve unless a reproducible integration region, baseline method and calibration are explicitly provided. Prefer null/unresolved rather than a visually invented area.",
+    "If native vector geometry is available for a figure, inspect the retained vector path/text sidecar together with the raster image. Use vector path coordinates as a higher-resolution geometric source, but do not mistake path coordinates for original instrument data or infer series identity from line colour alone."\n]
 
 
 def _norm(value: Any) -> str:
@@ -240,6 +248,17 @@ def _asset_exists(image_path: str, workspace: Path) -> bool:
     return candidate.is_file()
 
 
+def _image_dimensions(image_path: Path) -> tuple[int, int] | None:
+    """Read actual raster dimensions so model-reported coordinate frames can be checked."""
+    try:
+        from PIL import Image
+        with Image.open(image_path) as image:
+            width, height = image.size
+        return int(width), int(height)
+    except Exception:
+        return None
+
+
 def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Path) -> list[dict[str, Any]]:
     regions = bundle.get("regions", {})
     panels = bundle.get("panels", {})
@@ -272,7 +291,24 @@ def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Pa
                 "panel_label": panel.get("label"),
                 "pixel_sha256": panel.get("pixel_sha256") or region.get("pixel_sha256"),
                 "resolution_scope": "PANEL" if panel.get("image_path") else "PARENT_REGION",
+                "pixel_width": panel.get("pixel_width") or (region.get("pixel_width") if not panel.get("image_path") else None),
+                "pixel_height": panel.get("pixel_height") or (region.get("pixel_height") if not panel.get("image_path") else None),
             })
+            if asset_exists and (
+                records[-1].get("pixel_width") is None or records[-1].get("pixel_height") is None
+            ):
+                dimensions = _image_dimensions(resolved_asset)
+                if dimensions:
+                    records[-1]["pixel_width"], records[-1]["pixel_height"] = dimensions
+            # Parent-region vector coordinates are reusable only when the model
+            # sees that same parent-region crop; a separately cropped Panel has
+            # its own image coordinate frame and must not inherit parent geometry.
+            if not panel.get("image_path"):
+                candidate = next((item for item in bundle.get("figure_candidates", {}).values()
+                                  if item.get("region_id") == parent_id and item.get("vector_geometry_path")), None)
+                if candidate:
+                    records[-1]["vector_geometry_path"] = candidate.get("vector_geometry_path")
+                    records[-1]["vector_geometry_sha256"] = candidate.get("vector_geometry_sha256")
     if not records:
         for region_id in result.get("region_ids", []) or []:
             region = regions.get(region_id, {})
@@ -294,7 +330,20 @@ def _asset_records(bundle: dict[str, Any], result: dict[str, Any], workspace: Pa
                 "panel_label": None,
                 "pixel_sha256": region.get("pixel_sha256"),
                 "resolution_scope": "REGION",
+                "pixel_width": region.get("pixel_width"),
+                "pixel_height": region.get("pixel_height"),
             })
+            if asset_exists and (
+                records[-1].get("pixel_width") is None or records[-1].get("pixel_height") is None
+            ):
+                dimensions = _image_dimensions(resolved_asset)
+                if dimensions:
+                    records[-1]["pixel_width"], records[-1]["pixel_height"] = dimensions
+            candidate = next((item for item in bundle.get("figure_candidates", {}).values()
+                              if item.get("region_id") == region_id and item.get("vector_geometry_path")), None)
+            if candidate:
+                records[-1]["vector_geometry_path"] = candidate.get("vector_geometry_path")
+                records[-1]["vector_geometry_sha256"] = candidate.get("vector_geometry_sha256")
     for asset in records:
         asset["result_id"] = result.get("result_id")
     return records
@@ -430,6 +479,18 @@ def build_analysis_pack(
         "assets": assets,
         "asset_count": len(assets),
         "invocation_audit_required": True,
+        "plot_reading_audit_required": True,
+        "plot_reading_protocol": {
+            "required": True,
+            "purpose": "Coordinate-calibrated extraction of quantitative values from plots.",
+            "geometry_sidecars": [
+                {"image_path": item["image_path"], "vector_geometry_path": item.get("vector_geometry_path"),
+                 "vector_geometry_sha256": item.get("vector_geometry_sha256"),
+                 "pixel_width": item.get("pixel_width"), "pixel_height": item.get("pixel_height")}
+                for item in assets if item.get("vector_geometry_path")
+            ],
+            "boundary": "A calibrated plot estimate is not an exact source value or experimental uncertainty."
+        },
         "invocation_audit": {
             "required": True,
             "evidence_level": "AGENT_REPORTED_RUNTIME_RECEIPT",
@@ -528,6 +589,34 @@ def build_analysis_pack(
                 "comparison_ids": [],
                 "reason": ""
             } for result_id in result_ids],
+            "plot_calibrations": [{
+                "calibration_id": "PLOT-1",
+                "result_id": "",
+                "plot_type": "XY_LINE | SPECTRUM | DIFFRACTOGRAM | SCATTER | BAR | HISTOGRAM | HEATMAP | OTHER",
+                "coordinate_system": "IMAGE_PIXEL | PDF_CROP_POINT",
+                "coordinate_frame": {"width": 0, "height": 0},
+                "plot_area": [0, 0, 0, 0],
+                "evidence_refs": [{"result_id": "", "region_id": "", "panel_id": None, "page_number": None}],
+                "x_axis": {"label": "", "unit": "", "scale": "LINEAR | LOG10 | CATEGORICAL | UNKNOWN",
+                           "tick_anchors": [{"coordinate": 0, "value": 0, "printed_label": "", "coordinate_uncertainty": 0.5, "value_uncertainty": 0}]},
+                "y_axis": {"label": "", "unit": "", "scale": "LINEAR | LOG10 | CATEGORICAL | UNKNOWN",
+                           "tick_anchors": [{"coordinate": 0, "value": 0, "printed_label": "", "coordinate_uncertainty": 0.5, "value_uncertainty": 0}]},
+                "series": [{"series_id": "", "legend_label": "", "mapping_status": "CONFIRMED | PROBABLE | AMBIGUOUS | UNRESOLVED",
+                            "source_path_ids": []}],
+                "limitations": []
+            }],
+            "plot_readings": [{
+                "reading_id": "READ-1",
+                "calibration_id": "PLOT-1",
+                "result_id": "",
+                "series_id": None,
+                "reading_role": "DATA_POINT | FEATURE_POSITION | FEATURE_EDGE | BAR_ENDPOINT | PLATEAU_BOUNDARY | OTHER",
+                "coordinate_source": "RASTER_IMAGE | VECTOR_GEOMETRY",
+                "coordinate": {"x": 0, "y": 0},
+                "coordinate_uncertainty": {"x": 1.0, "y": 1.0},
+                "vector_ref": {"path_id": "", "item_index": 0, "point_index": 0},
+                "evidence_refs": [{"result_id": "", "region_id": "", "panel_id": None, "page_number": None}]
+            }],
             "signal_features": [{
                 "feature_id": "SIG-1",
                 "result_id": "",
@@ -545,10 +634,10 @@ def build_analysis_pack(
                     "y_axis_scale": "LINEAR | LOG | CATEGORICAL | UNKNOWN",
                     "normalization_basis": "reported basis or UNKNOWN"
                 },
-                "position": {"value": None, "unit": "", "reading_basis": "", "precision_or_uncertainty": "", "confidence": "High | Medium | Low | Unresolved"},
-                "width": {"value": None, "unit": "", "reading_basis": "", "precision_or_uncertainty": ""},
-                "intensity": {"value": None, "unit": "", "reading_basis": "", "normalization_basis": "", "precision_or_uncertainty": ""},
-                "area": {"value": None, "unit": "", "reading_basis": "", "normalization_basis": "", "precision_or_uncertainty": ""},
+                "position": {"value": None, "unit": "", "reading_basis": "CALIBRATED_PLOT_READING | EXACT_SOURCE_DATA | EXACT_TEXT | EXACT_TABLE | PRINTED_FIGURE_VALUE | DERIVED_FROM_EXPLICIT_VALUES | UNRESOLVED", "precision_or_uncertainty": "", "confidence": "High | Medium | Low | Unresolved", "plot_reading_ids": [], "calculation": {"operation": "DIRECT", "axis": "x"}},
+                "width": {"value": None, "unit": "", "reading_basis": "CALIBRATED_PLOT_READING | EXACT_SOURCE_DATA | EXACT_TEXT | EXACT_TABLE | PRINTED_FIGURE_VALUE | DERIVED_FROM_EXPLICIT_VALUES | UNRESOLVED", "precision_or_uncertainty": "", "plot_reading_ids": [], "calculation": {"operation": "DIFFERENCE", "axis": "x"}},
+                "intensity": {"value": None, "unit": "", "reading_basis": "CALIBRATED_PLOT_READING | EXACT_SOURCE_DATA | EXACT_TEXT | EXACT_TABLE | PRINTED_FIGURE_VALUE | DERIVED_FROM_EXPLICIT_VALUES | UNRESOLVED", "normalization_basis": "", "precision_or_uncertainty": "", "plot_reading_ids": [], "calculation": {"operation": "DIRECT", "axis": "y"}},
+                "area": {"value": None, "unit": "", "reading_basis": "EXACT_SOURCE_DATA | EXACT_TEXT | EXACT_TABLE | PRINTED_FIGURE_VALUE | DERIVED_FROM_EXPLICIT_VALUES | UNRESOLVED", "normalization_basis": "", "precision_or_uncertainty": "", "plot_reading_ids": []},
                 "evidence_refs": [{"result_id": "", "region_id": "", "panel_id": None, "page_number": None}]
             }],
             "signal_comparisons": [{
@@ -560,7 +649,8 @@ def build_analysis_pack(
                 "direction_or_pattern": "",
                 "comparability_status": "COMPARABLE | PARTIALLY_COMPARABLE | NOT_COMPARABLE | UNKNOWN",
                 "normalization_basis": "",
-                "quantified_change": {"metric": "", "value": None, "unit": "", "source_basis": "", "precision_or_uncertainty": ""},
+                "quantified_change": {"metric": "", "value": None, "unit": "", "source_basis": "CALIBRATED_PLOT_READING | EXACT_SOURCE_DATA | EXACT_TEXT | EXACT_TABLE | PRINTED_FIGURE_VALUE | DERIVED_FROM_EXPLICIT_VALUES | UNRESOLVED", "precision_or_uncertainty": "",
+                                      "plot_reading_ids": [], "calculation": {"operation": "DIFFERENCE | RATIO | PERCENT_CHANGE", "axis": "x | y"}},
                 "evidence_refs": [{"result_id": "", "region_id": "", "panel_id": None, "page_number": None}],
                 "interpretation_limits": []
             }],

@@ -135,6 +135,36 @@ def compile_context(bundle: dict[str, Any]) -> str:
                 )
                 if signal_status.get("reason"):
                     lines.append(f"    - Signal-review reason: {signal_status['reason']}")
+            plot_audit = analysis.get("plot_reading_audit") or {}
+            if plot_audit:
+                lines.append(
+                    f"  - Plot-reading audit: calibrations={plot_audit.get('calibration_count', 0)} | "
+                    f"coordinate readings={plot_audit.get('reading_count', 0)}"
+                )
+                lines.append(
+                    "    - Boundary: calibrated graph-reading uncertainty is not experimental uncertainty."
+                )
+                for calibration in plot_audit.get("calibrations", []):
+                    lines.append(
+                        f"    - {calibration.get('calibration_id')} [{calibration.get('result_id')}]: "
+                        f"x-axis={calibration.get('x_grade')}; y-axis={calibration.get('y_grade')}; "
+                        f"overall={calibration.get('overall_grade')}"
+                    )
+            for reading in analysis.get("plot_readings", []):
+                mapped = reading.get("mapped_values") or {}
+                def _mapped_label(axis):
+                    item = mapped.get(axis) or {}
+                    if item.get("value") is None:
+                        return "unresolved"
+                    return (
+                        f"{item.get('value')} ± {item.get('uncertainty')} {item.get('unit', '')} "
+                        f"[{item.get('grade')}; {item.get('permitted_use')}]"
+                    )
+                lines.append(
+                    f"  - Calibrated plot read {reading.get('reading_id')} "
+                    f"[{reading.get('result_id')} | {reading.get('series_id') or 'series unresolved'} | "
+                    f"{reading.get('reading_role', 'OTHER')}]: x={_mapped_label('x')}; y={_mapped_label('y')}"
+                )
             for feature in analysis.get("signal_features", []):
                 result_id = feature.get("result_id", "unknown")
                 position = feature.get("position") or {}

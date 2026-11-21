@@ -140,3 +140,10 @@ V4.3 tests use synthetic generic fixtures. The controls do not encode any specif
 
 
 V4.3 fit audits now require a declared `reproduction_status` that the validator cross-checks against recomputed coefficients. The status is separate from statistical-quality diagnostics/uncertainty and from internal, external-independent or prospective validation scope.
+
+
+## Follow-on scientific data-reading capability — 2026-11-21
+
+A new generic plotted-data reading layer is being added after the V5.1 product review. It preserves PDF-native vector/text geometry alongside existing raster evidence; requires explicit axis calibration, tick anchors, plot coordinates, series identity and reading uncertainty for numeric plot estimates; and deterministically recomputes values and differences before accepting them into scientific-analysis records.
+
+The gate distinguishes coordinate-reading uncertainty from experimental uncertainty and blocks uncalibrated visual numbers or extrapolation outside the readable axis range. It does not recover instrument arrays or establish scientific correctness. The implementation remains subject to CI and a later real-project black-box assessment; neither source changes nor passing software tests alone establish improved scientific performance.

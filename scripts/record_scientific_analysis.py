@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from era_core import atomic_write_json, load_evidence_bundle, parse_numeric_scalar, sha256_file, workspace_paths
+from plot_reading import apply_plot_reading_audit
 
 VALID_ANALYSIS_STATUS = {"COMPLETE", "PARTIAL", "NOT_ASSESSABLE"}
 VALID_COVERAGE = {"ANALYZED", "NO_COMPARISON_APPLICABLE", "NOT_ASSESSABLE"}
@@ -390,10 +391,47 @@ def validate_record(
             if comparison_id not in coverage_item.get("comparison_ids", []):
                 raise ValueError(f"{comparison_id}: comparison is not linked from every compared Result Unit's signal coverage")
 
+    calibration_map = {}
+    for index, calibration in enumerate(record.get("plot_calibrations", [])):
+        calibration_id = calibration.get("calibration_id")
+        result_id = calibration.get("result_id")
+        if result_id not in expected_ids:
+            raise ValueError(f"plot_calibrations[{index}] cites a Result Unit outside the prepared pack")
+        refs = calibration.get("evidence_refs", [])
+        _valid_refs(bundle, expected_ids, refs, f"plot_calibrations[{index}]")
+        if any(ref.get("result_id") != result_id for ref in refs):
+            raise ValueError(f"plot_calibrations[{index}] evidence must belong to its declared Result Unit")
+        if calibration_id in calibration_map:
+            raise ValueError(f"plot_calibrations[{index}] requires a unique calibration_id")
+        calibration_map[calibration_id] = calibration
+
+    for index, reading in enumerate(record.get("plot_readings", [])):
+        result_id = reading.get("result_id")
+        if result_id not in expected_ids:
+            raise ValueError(f"plot_readings[{index}] cites a Result Unit outside the prepared pack")
+        refs = reading.get("evidence_refs", [])
+        _valid_refs(bundle, expected_ids, refs, f"plot_readings[{index}]")
+        if any(ref.get("result_id") != result_id for ref in refs):
+            raise ValueError(f"plot_readings[{index}] evidence must belong to its declared Result Unit")
+        calibration = calibration_map.get(reading.get("calibration_id"))
+        if calibration is None or calibration.get("result_id") != result_id:
+            raise ValueError(f"plot_readings[{index}] must resolve to a calibration for the same Result Unit")
+        calibration_refs = {
+            (ref.get("region_id"), ref.get("panel_id"), ref.get("page_number"))
+            for ref in calibration.get("evidence_refs", [])
+        }
+        reading_refs = {
+            (ref.get("region_id"), ref.get("panel_id"), ref.get("page_number"))
+            for ref in refs
+        }
+        if not reading_refs.issubset(calibration_refs):
+            raise ValueError(f"plot_readings[{index}] source must match its axis calibration source")
+
     _validate_model_invocation(
         request, record, workspace,
         has_analyzed_units=any(item.get("status") == "ANALYZED" for item in coverage),
     )
+    apply_plot_reading_audit(request, record, workspace)
 
 
 def register_analysis(
@@ -414,10 +452,14 @@ def register_analysis(
     saved["request_pack_number"] = request.get("pack_number")
     saved["request_asset_count"] = request.get("asset_count")
     saved["invocation_audit_required"] = bool(request.get("invocation_audit_required"))
+    saved["plot_reading_audit_required"] = bool(request.get("plot_reading_audit_required"))
     saved["request_assets"] = [
         {"image_path": item.get("image_path"), "asset_sha256": item.get("asset_sha256"),
          "region_id": item.get("region_id"), "panel_id": item.get("panel_id"),
          "result_id": item.get("result_id"), "result_ids": item.get("result_ids", []),
+         "pixel_width": item.get("pixel_width"), "pixel_height": item.get("pixel_height"),
+         "vector_geometry_path": item.get("vector_geometry_path"),
+         "vector_geometry_sha256": item.get("vector_geometry_sha256"),
          "asset_exists": item.get("asset_exists")}
         for item in request.get("assets", [])
     ]

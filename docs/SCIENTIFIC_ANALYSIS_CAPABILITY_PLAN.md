@@ -283,3 +283,21 @@ Paper_plan 的目标不是把实验图集变成一份更长的目录，也不是
 RC 至少包含通用分析包生成器和结果记录器；Evidence Bundle 可选兼容字段及 Schema；coverage/reference Validator；通用分析上下文编译；能力门控；workflow/reference/product contract/architecture/status 更新；合成测试与全量 CI；本计划的更新状态和本分支变更摘要。
 
 用户最终应能在普通科研任务入口中直接运行 Skill，而不需要再写一份人工分析清单。只有当黑盒验收证明该能力确实由 Skill 自主触发并完成，才可批准合并/发布。
+
+
+## Follow-on implementation: reproducible quantitative plot reading (2026-11-21)
+
+The real-project review exposed a further gap: signal-feature records could contain apparently precise numeric values without preserving the axis calibration and coordinate read from which those values were obtained. The recorder checked numeric syntax, source references and declared precision, but could not independently reproduce a visually estimated position or change.
+
+The follow-on implementation adds a domain-neutral, coordinate-calibrated plot-reading path:
+
+1. Vector-figure extraction preserves a source-PDF-hash-linked sidecar of native PDF drawing paths and text spans, with crop-local PDF-point coordinates. Existing raster crops remain the visual inspection surface. The sidecar is geometric evidence, not original instrument data.
+2. Analysis requests require explicit plot calibration and point/feature reading records when numerical plot estimates are used. Each calibration records the exact source Region/Panel, coordinate system and frame, plot area, axis units/scales, visible tick anchors and uncertainties, plus the series mapping.
+3. The deterministic recorder fits linear/log axes, records calibration residuals and a calibration grade, rejects extrapolation outside the visible tick range, maps source coordinates to plotted values and propagates graph-reading uncertainty.
+4. Visual numeric signal features and comparisons must cite the plotted reading IDs and a declared reproducible calculation. The recorder recomputes direct values, differences, ratios or percentage changes and rejects inconsistent reported values.
+5. Numeric source basis is explicit: exact source data/text/table, printed figure value, derived explicit values, calibrated plot reading or unresolved. Free-form labels cannot be used to disguise an uncalibrated visual estimate.
+6. Low-quality calibration, ambiguous series identity or unresolved axes cannot support precise numeric values. Visual integrated areas remain unresolved unless a reproducible integration procedure is supplied.
+
+This improves reproducibility and bounds the precision of graph-derived estimates; it does not recover the original instrument arrays, replace independent experimental repeats, identify every curve automatically, or prove the scientific interpretation. Graph-reading uncertainty remains distinct from experimental uncertainty, replicate variability and instrument uncertainty.
+
+The implementation is code/CI work only until a fresh normal-entry scientific black-box run demonstrates that the model uses the coordinate protocol correctly on real supplied figures. No discipline-specific example, instrument setting, material, sample, journal or expected scientific conclusion is added to production instructions.

@@ -115,3 +115,8 @@ V4.3 also extends the original image-inspection record: each image-derived obser
 
 
 V4.3 calculation audits now carry a declared reproduction status that is checked against the recomputed result. Statistical-quality/uncertainty assessment and validation scope are stored separately; a matching coefficient calculation does not imply adequate diagnostics or external validation.
+
+
+## Reproducible plotted-data reading
+
+A follow-on scientific-analysis capability preserves source-linked PDF-native vector paths/text geometry and adds coordinate-calibrated readings from plots. Numeric plot estimates must retain axis units/scales, tick anchors, plot coordinates, series identity and coordinate uncertainty; a deterministic recorder recomputes values and changes and blocks unsupported precision or extrapolation. Graph-reading uncertainty is kept separate from experimental uncertainty. This capability bounds and audits visual estimates; it does not reconstruct original instrument arrays or substitute for real scientific black-box acceptance.

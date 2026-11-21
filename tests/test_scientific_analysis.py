@@ -161,6 +161,8 @@ def valid_record(request):
              "reason": "The synthetic tabular fixture does not contain a plotted signal trace."}
             for result_id in ids
         ],
+        "plot_calibrations": [],
+        "plot_readings": [],
         "model_invocation": {
             "invocation_id": "synthetic-test-invocation",
             "status": "RESPONSE_RECEIVED",
@@ -197,6 +199,9 @@ class TestGeneralScientificAnalysis(unittest.TestCase):
         self.assertEqual(index["coverage_map"].keys(), {"R001", "R002", "R003"})
         self.assertIs(packs[0]["invocation_audit_required"], True)
         self.assertIs(packs[0]["invocation_audit"]["required"], True)
+        self.assertIs(packs[0]["plot_reading_audit_required"], True)
+        self.assertIn("plot_calibrations", packs[0]["required_output"])
+        self.assertIn("plot_readings", packs[0]["required_output"])
 
     def test_cross_method_shared_sample_can_be_in_one_related_pack(self):
         index, packs = prepare_all(bundle_fixture(), Path("/workspace"), max_results_per_pack=10)
