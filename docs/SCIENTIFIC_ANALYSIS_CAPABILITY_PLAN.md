@@ -23,6 +23,23 @@ These are engineering safeguards, not an instrument-specific scientific ruleset.
 
 **Acceptance state:** implementation branch created; code review and GitHub Actions plus Agent local acceptance remain pending. A passing structural test or invocation receipt does not certify the scientific correctness of peak/band assignments or interpretations. The user must still inspect the resulting real-data analysis.
 
+## Follow-on implementation: scientific analysis-to-argument bridge (2026-11-21)
+
+The spectral-analysis implementation branch completed local acceptance at commit `7613c5746acf7c859b19281fe5cda875c47b1996`. Its V54 case demonstrates a real spectral-level analysis run, but it does not establish general cross-domain capability.
+
+The next capability gap is the transition from recorded analysis to manuscript argument. Analysis records existed, but the downstream Finding/Claim model did not formally preserve which specific analysis outputs were distilled into the proposed scientific contribution. This made a critical reasoning link depend mainly on free-form model context.
+
+The follow-on bridge now adds:
+1. stable IDs to material relationship, interpretation and contradiction records in new analysis requests, while keeping these fields optional for historical records;
+2. an explicit, reusable analysis-to-Finding synthesis protocol;
+3. optional `analysis_derived` and `scientific_analysis_refs` fields on Findings, with exact analysis ID, record type and record ID;
+4. deterministic checks that each cited analysis record exists and covers the supporting/contradictory Result Units recorded by its Finding;
+5. a non-blocking candidate-route warning when multiple Result Units are combined without an analysis-derived Finding;
+6. a central-Claim gate requiring a cross-result comparative/associational/causal/mechanistic Claim to cite an analysis-derived Finding spanning at least two supporting Result Units;
+7. compact-context, Skill and workflow integration so these Findings become the evidence substrate for the central contribution.
+
+This bridge is deliberately not an automated scientific judge. It checks traceability and argument provenance only. The model/researcher must still assess compatibility, independence, alternative explanations, inference strength and scientific significance. The next acceptance must verify that a normal Skill run autonomously discovers and distils useful cross-result Findings, then uses them to build a coherent and executable paper plan. Do not treat unit tests or V54 spectral results as general product acceptance.
+
 ## 1. 产品目标与问题定义
 
 Paper_plan 的目标不是把实验图集变成一份更长的目录，也不是只为每一种仪器配置专用清单。目标是：用户给出普通科研材料和研究目标后，Skill 能够自主理解当前项目的证据结构，识别有科学意义的数据关系，分析差异、趋势、收敛、矛盾与异常，将现有证据转化为可追溯的科学判断，再据此组织文献定位、论文主线和研究执行计划。
