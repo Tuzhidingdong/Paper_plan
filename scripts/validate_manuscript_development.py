@@ -12,6 +12,7 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 
 from era_core import atomic_write_json, result_is_quantitative, sha256_file, workspace_paths
+from scientific_argument_bridge import validate_core_claim_analysis_bridge
 from scientific_quality_gates import (
     validate_evidence_integrity,
     validate_fit_reproducibility,
@@ -149,6 +150,7 @@ def validate_package(package: dict[str, Any],
     core = package.get("core_argument", {})
     _check_refs("core_argument", "contribution_claim_ids",
                 core.get("contribution_claim_ids", []), claim_ids, errors)
+    errors.extend(validate_core_claim_analysis_bridge(package, framework, evidence))
     # Re-check quantitative measurement definitions at the point where evidence
     # is promoted into the central contribution. This prevents a Result Unit
     # from bypassing the Evidence Bundle's CORE-role gate by being left UNDECIDED.
