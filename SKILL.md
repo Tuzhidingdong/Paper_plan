@@ -29,7 +29,7 @@ The Skill may identify that the available evidence does not yet support a defens
 
 ## V5 product rules — narrative plan is the product
 
-- The controlling product contract is docs/V5_PRODUCT_CONTRACT.md, the controlling full-run workflow is workflows/13_v5_manuscript_development.md, and the researcher-facing writing rules are in docs/V5_1_RESEARCHER_FACING_DELIVERY_STANDARD.md. Use templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md for the primary report and templates/V5_INTERNAL_PRODUCT_QA_REPORT.md only for the separate internal QA record. Also read docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md before a full project.
+- The controlling product contract is docs/V5_PRODUCT_CONTRACT.md, the controlling full-run workflow is workflows/13_v5_manuscript_development.md, and the researcher-facing writing rules are in docs/V5_1_RESEARCHER_FACING_DELIVERY_STANDARD.md. Use templates/V5_INTEGRATED_MANUSCRIPT_PLAN.md for the primary report and templates/V5_INTERNAL_PRODUCT_QA_REPORT.md only for the separate internal QA record. Also read docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md and docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md before a full project. Read references/scientific_argument_synthesis.md after the general scientific-analysis stage and before candidate-route synthesis.
 - Maintain two synchronized representations: structured bundles for provenance, IDs and cross-reference integrity; and a complete narrative plan for the researcher. The narrative is the delivered product. Structured JSON, validator reports and workflow-stage notes are supporting state only.
 - Do not assemble the final plan by concatenating short bundle summaries. Explain scientific reasoning in connected prose, with detailed tables only where they help comparison or assignment.
 - The primary deliverable must read like a professional scientific research proposal and manuscript-development dossier for supervisors, students and collaborators. It is not an Agent activity report, validator report, schema export or checklist.
@@ -76,6 +76,7 @@ The Skill may identify that the available evidence does not yet support a defens
 20. Every essential unsatisfied Data Slot must map to a work package or an explicit reason not to pursue it.
 21. Never prescribe local protocols, equipment, parameters, sample amounts, replicate counts or timelines without source evidence and local confirmation.
 22. Student-facing messages must be supportive, concrete and non-accusatory.
+23. Maintain the source → Result Unit → scientific-analysis record → Finding → Claim → central contribution chain. Analysis-derived Findings cite exact stable analysis-record IDs and retain supporting/counter Result Units. Cross-result central Claims must rely on those Findings; deterministic checks prove traceability only, never scientific truth.
 
 ## General cross-result scientific analysis
 
