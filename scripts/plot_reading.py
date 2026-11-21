@@ -24,7 +24,7 @@ def _number(value: Any, label: str) -> float:
     return result
 
 
-def _linear_fit(xs: list[float], ys: list[float]) -> tuple[float, float, float]:
+def _linear_fit(xs: list[float], ys: list[float]) -> tuple[float, float, float, list[float]]:
     mean_x = sum(xs) / len(xs)
     mean_y = sum(ys) / len(ys)
     denominator = sum((value - mean_x) ** 2 for value in xs)
@@ -34,7 +34,7 @@ def _linear_fit(xs: list[float], ys: list[float]) -> tuple[float, float, float]:
     intercept = mean_y - slope * mean_x
     residuals = [y - (slope * x + intercept) for x, y in zip(xs, ys)]
     rms = math.sqrt(sum(value * value for value in residuals) / len(residuals))
-    return slope, intercept, rms
+    return slope, intercept, rms, residuals
 
 
 def fit_axis_calibration(axis: dict[str, Any], axis_name: str) -> dict[str, Any]:
@@ -92,7 +92,7 @@ def fit_axis_calibration(axis: dict[str, Any], axis_name: str) -> dict[str, Any]
     ):
         raise ValueError(f"{axis_name} tick values must change monotonically with pixel/PDF coordinate")
 
-    slope, intercept, residual_rms = _linear_fit(coordinates, transformed_values)
+    slope, intercept, residual_rms, residuals = _linear_fit(coordinates, transformed_values)
     span_coordinate = max(coordinates) - min(coordinates)
     span_transformed = max(transformed_values) - min(transformed_values)
     relative_rms = residual_rms / span_transformed if span_transformed > 0 else float("inf")
