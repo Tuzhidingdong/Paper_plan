@@ -49,6 +49,12 @@ State the one-sentence contribution and boundary, why it is preferable, why alte
 ## 6. Propagate the decision through the manuscript
 The chosen line must determine the Introduction gap, Results/Discussion questions/transitions, every Figure/Panel, SI, work packages and execution critical path. A validation task may support a scientific contribution but must not silently become the central paper. Every proposed Figure and task must state which claim or decision it advances.
 
+## 6A. Evidence-to-argument traceability
+
+For each serious candidate, trace material cross-result support and counter-evidence through the recorded scientific analyses into Findings, then into the candidate Claim set. A central comparative, associational, causal or mechanistic Claim that synthesizes multiple Result Units should cite an analysis-derived Finding with exact analysis-record references. A direct list of Result Unit IDs is not a substitute for explaining the relationship among them.
+
+Preserve separate support, contradiction, audit-target and context roles. Confirm that every Finding's source Result Units are represented by its cited analysis records. This is a provenance and reasoning-discipline requirement, not a deterministic certificate that the interpretation is true.
+
 ## 7. Required decision record
 Show the original intent (or state none was supplied), candidate lines and evidence/literature basis, nearest-work differences and counter-evidence, why the selected line is stronger than an audit-only fallback where relevant, decisive missing evidence and feasible recovery, recommendation status and conditions that would change it.
 
