@@ -1062,6 +1062,16 @@
           "items": {
             "type": "string"
           }
+        },
+        "analysis_derived": {
+          "type": "boolean"
+        },
+        "scientific_analysis_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/scientific_analysis_ref"
+          }
         }
       },
       "additionalProperties": true
@@ -1468,19 +1478,37 @@
         "relationships": {
           "type": "array",
           "items": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+              "relationship_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
           }
         },
         "interpretations": {
           "type": "array",
           "items": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+              "interpretation_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
           }
         },
         "contradictions": {
           "type": "array",
           "items": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+              "contradiction_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
           }
         },
         "candidate_scientific_implications": {
@@ -2008,6 +2036,36 @@
         }
       },
       "additionalProperties": true
+    },
+    "scientific_analysis_ref": {
+      "type": "object",
+      "required": [
+        "analysis_id",
+        "record_type",
+        "record_id"
+      ],
+      "properties": {
+        "analysis_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_type": {
+          "enum": [
+            "observation",
+            "comparison",
+            "relationship",
+            "interpretation",
+            "contradiction",
+            "signal_feature",
+            "signal_comparison"
+          ]
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
