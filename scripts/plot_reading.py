@@ -591,6 +591,10 @@ def apply_plot_reading_audit(
                 )
             if comparison.get("change_type") == "AREA_CHANGE":
                 raise ValueError("Visual signal area cannot be quantified without a reproducible integration method")
+            if comparison.get("change_type") not in {"POSITION_SHIFT", "WIDTH_CHANGE", "INTENSITY_CHANGE"}:
+                raise ValueError(
+                    f"signal_comparisons[{index}] change_type {comparison.get('change_type')} has no supported numeric plot-reading operation"
+                )
             related_calibrations = [
                 calibration_map[reading_map[read_id]["calibration_id"]]
                 for read_id in ids
@@ -670,9 +674,13 @@ def apply_plot_reading_audit(
             quantified["calculation"]["recomputed_value"] = calculated
             quantified["calculation"]["recomputed_tolerance"] = tolerance
             quantified["value"] = calculated
+            comparison_boundary = (
+                "PARTIALLY_COMPARABLE; descriptive difference only"
+                if comparability == "PARTIALLY_COMPARABLE" else "COMPARABLE"
+            )
             quantified["precision_or_uncertainty"] = (
                 f"coordinate-calibrated graph-reading uncertainty ±{tolerance:g} {quantified.get('unit', '')}; "
-                "not experimental uncertainty"
+                f"{comparison_boundary}; not experimental uncertainty"
             )
         elif basis not in direct_bases:
             raise ValueError(
