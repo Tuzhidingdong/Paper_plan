@@ -1,6 +1,11 @@
+import sys
 import unittest
+from pathlib import Path
 
-from scripts.scientific_argument_bridge import (
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from scientific_argument_bridge import (
     validate_core_claim_analysis_bridge,
     validate_finding_analysis_refs,
     validate_route_analysis_bridge,
@@ -87,6 +92,31 @@ class ScientificArgumentBridgeTests(unittest.TestCase):
         evidence["findings"]["F001"]["scientific_analysis_refs"][0]["record_id"] = "REL-999"
         errors = validate_finding_analysis_refs(evidence)
         self.assertTrue(any("unknown scientific analysis record" in item for item in errors))
+
+    def test_interpretation_reference_resolves_supporting_observations(self):
+        evidence = _base_evidence()
+        evidence["findings"]["F001"]["scientific_analysis_refs"] = [{
+            "analysis_id": "SANA-001",
+            "record_type": "interpretation",
+            "record_id": "INT-001",
+        }]
+        self.assertEqual(validate_finding_analysis_refs(evidence), [])
+
+    def test_legacy_finding_without_analysis_refs_remains_valid(self):
+        evidence = _base_evidence()
+        finding = evidence["findings"]["F001"]
+        finding.pop("analysis_derived")
+        finding.pop("scientific_analysis_refs")
+        self.assertEqual(validate_finding_analysis_refs(evidence), [])
+
+    def test_duplicate_relationship_ids_are_rejected(self):
+        evidence = _base_evidence()
+        evidence["scientific_analyses"]["SANA-001"]["relationships"].append({
+            "relationship_id": "REL-001",
+            "result_ids": ["R001", "R002"],
+        })
+        errors = validate_finding_analysis_refs(evidence)
+        self.assertTrue(any("duplicate relationship record ID" in item for item in errors))
 
     def test_finding_result_units_must_be_covered_by_cited_records(self):
         evidence = _base_evidence()
