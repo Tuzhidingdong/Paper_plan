@@ -19,6 +19,10 @@ The controlling workflow is workflows/13_v5_manuscript_development.md. Read docs
 The release-candidate branch adds a mandatory, domain-neutral analysis stage between evidence extraction and manuscript synthesis. It prepares source-linked joint analysis packs across all Result Units, preserves original-resolution image assets and sample/series context, and requires the Agent to discover meaningful within-result and cross-result relationships without the user supplying an instrument-specific analysis checklist. Results are recorded with source references, compatibility assessments, alternative explanations and explicit coverage for every Result Unit. See docs/SCIENTIFIC_ANALYSIS_CAPABILITY_PLAN.md and references/scientific_analysis.md.
 
 Image-based semi-quantitative comparisons are supported when the original-resolution figure is sufficiently legible; native numeric data are not a universal prerequisite. Estimates must state their basis, confidence, precision and limitations. This software capability remains subject to fresh, user-run scientific black-box acceptance; passing CI alone does not establish scientific correctness.
+
+## Scientific argument synthesis
+
+The analysis layer now has an explicit, domain-neutral bridge into the manuscript argument. Material analysis observations, comparisons, relationships, interpretations and contradictions are distilled into source-linked Findings; each such Finding cites the exact analysis record and preserves supporting and contradictory Result Units. Candidate routes use these Findings as argument evidence, and a cross-result central Claim must cite an analysis-derived Finding. Deterministic validation checks the provenance chain, not the truth of the scientific interpretation. See references/scientific_argument_synthesis.md.
 ## V4 baseline retained under V5
 
 The V4 line preserves the V3.3 deterministic evidence engine and adds a structured Manuscript Development Bundle plus cross-package validation. V5 reuses these capabilities and adds narrative-first synthesis.
