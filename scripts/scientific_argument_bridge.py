@@ -65,7 +65,7 @@ def build_analysis_record_index(
                     continue
 
                 result_ids = _as_ids(record.get("result_ids"))
-                if record.get("result_id"):
+                if isinstance(record.get("result_id"), str) and record["result_id"]:
                     result_ids.add(record["result_id"])
 
                 if record_type == "interpretation":
@@ -77,7 +77,7 @@ def build_analysis_record_index(
 
                 if record_type == "contradiction" and not result_ids:
                     for ref in record.get("evidence_refs", []):
-                        if isinstance(ref, dict) and ref.get("result_id"):
+                        if isinstance(ref, dict) and isinstance(ref.get("result_id"), str) and ref["result_id"]:
                             result_ids.add(ref["result_id"])
 
                 index[key] = result_ids
@@ -105,6 +105,8 @@ def validate_finding_analysis_refs(evidence: dict[str, Any]) -> list[str]:
             continue
 
         analysis_derived = finding.get("analysis_derived", False)
+        if "analysis_derived" in finding and not isinstance(analysis_derived, bool):
+            errors.append(f"{finding_id}: analysis_derived must be boolean")
         if analysis_derived is True and not refs:
             errors.append(
                 f"{finding_id}: analysis-derived Finding requires scientific_analysis_refs"
@@ -176,10 +178,17 @@ def validate_core_claim_analysis_bridge(
 
     findings = evidence.get("findings", {})
     claims = framework.get("claims", {})
-    core_claim_ids = package.get("core_argument", {}).get("contribution_claim_ids", [])
+    core_argument = package.get("core_argument", {})
+    if not isinstance(core_argument, dict) or not isinstance(findings, dict) or not isinstance(claims, dict):
+        return []
+    core_claim_ids = core_argument.get("contribution_claim_ids", [])
+    if not isinstance(core_claim_ids, list):
+        return []
     errors: list[str] = []
 
     for claim_id in core_claim_ids:
+        if not isinstance(claim_id, str):
+            continue
         claim = claims.get(claim_id)
         if not isinstance(claim, dict):
             continue
@@ -195,6 +204,8 @@ def validate_core_claim_analysis_bridge(
             if role != "SUPPORTS_CLAIM":
                 continue
             kind, ref_id = ref.get("kind"), ref.get("id")
+            if not isinstance(ref_id, str) or not ref_id:
+                continue
             if kind == "result_unit":
                 supporting_result_ids.add(ref_id)
             elif kind == "finding":
@@ -230,14 +241,19 @@ def validate_route_analysis_bridge(
     if not evidence.get("scientific_analyses"):
         return []
     findings = evidence.get("findings", {})
+    routes = routes_bundle.get("routes", {})
+    if not isinstance(findings, dict) or not isinstance(routes, dict):
+        return []
     warnings: list[str] = []
-    for route_id, route in routes_bundle.get("routes", {}).items():
+    for route_id, route in routes.items():
+        if not isinstance(route, dict):
+            continue
         result_ids = _as_ids(route.get("supporting_result_ids"))
         if len(result_ids) < 2:
             continue
         linked = [
             findings.get(finding_id, {})
-            for finding_id in route.get("supporting_finding_ids", [])
+            for finding_id in _as_ids(route.get("supporting_finding_ids"))
         ]
         has_bridge = any(
             isinstance(finding, dict)
