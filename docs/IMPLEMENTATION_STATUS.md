@@ -1,3 +1,17 @@
+## 2026-11-21 status update — analysis-to-argument bridge
+
+The V54 Validator defect is closed and locally accepted at branch baseline `7613c5746acf7c859b19281fe5cda875c47b1996` (167-test full regression, targeted tests, compile check and read-only V54 integrity verification). No further Validator repair is planned absent new evidence.
+
+The next product-capability phase adds a source-traceable bridge from general scientific analysis to manuscript argument:
+- analysis records for relationships, interpretations and contradictions receive stable IDs for later citation;
+- analysis-derived Findings cite exact analysis IDs, record types and record IDs while retaining supporting/counter-evidence Result Units;
+- Evidence validation checks those references and source Result Unit alignment;
+- candidate routes receive a warning when they combine multiple Result Units without a cross-result Finding;
+- central comparative/associational/causal/mechanistic Claims spanning multiple Result Units must cite an analysis-derived Finding;
+- the Skill workflow explicitly distils the full analysis set into Findings before literature/mainline selection and propagates them into Claims, Figures and Results/Discussion.
+
+**Current state:** implementation is on `feat/spectral-analysis-capability`; code/test integration is in progress. The traceability gate does not judge scientific truth. General multi-domain black-box acceptance and user review of the resulting researcher-facing plan remain outstanding. No merge, publication or release is authorized.
+
 ## V5 manuscript-planning core (development candidate)
 
 The V5 branch adds a narrative-first full-run controller, product contract, integrated-plan template and local product-acceptance procedure. It preserves the V4.3 evidence/reliability layer rather than treating those controls as the whole product.
