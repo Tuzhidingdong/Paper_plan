@@ -19,6 +19,8 @@ A cross-result scientific-analysis stage connects the evidence layer to research
       -> ingest-detected vector-figure candidate rasterization, source-anchored Regions and explicit candidate dispositions
       -> measurement definitions, condition-comparability checks, calculations and data lineage
       -> general cross-result scientific analysis, signal-feature extraction/comparison, auditable native-image invocation and per-Result-Unit coverage
+      -> source-traceable analysis records distilled into Findings (supporting and contradictory evidence retained)
+      -> candidate routes and central Claims linked back to exact analysis records
       -> literature frontier and competing-study analysis
       -> defensible candidate directions and central contribution
       -> dated target-journal profile
@@ -37,7 +39,7 @@ A cross-result scientific-analysis stage connects the evidence layer to research
 - manuscript_development_bundle.json: project profile, dated journal sources, central argument, Introduction paragraphs, storyline, TOC, main Figures, SI items, condition-comparability assessments, references to Claims/Data Slots/tasks, manuscript sections and deliverables.
 - state_manifest.json: source hashes, workspace revision, stage, tool versions, bundle references and capability profile.
 
-Search logs and entity revision history belong in append-only JSONL sidecars rather than prompt context. General scientific analyses are persisted as source-linked bundle records and summarized in the compact evidence context. For analyzed image evidence, the record includes an Agent-reported invocation receipt mapping source asset SHA-256 values to native image attachment references and request/response artifacts; this is an auditable runtime declaration, not host-level cryptographic attestation that an inference provider received the payload.
+Search logs and entity revision history belong in append-only JSONL sidecars rather than prompt context. General scientific analyses are persisted as source-linked bundle records and summarized in the compact evidence context. Material outputs are distilled into analysis-derived Findings that cite exact analysis IDs, record types and record IDs; downstream cross-result central Claims must cite such Findings. The deterministic bridge checks provenance and Result Unit alignment, not scientific truth. For analyzed image evidence, the record includes an Agent-reported invocation receipt mapping source asset SHA-256 values to native image attachment references and request/response artifacts; this is an auditable runtime declaration, not host-level cryptographic attestation that an inference provider received the payload.
 
 ## Permanent IDs and persistence
 
