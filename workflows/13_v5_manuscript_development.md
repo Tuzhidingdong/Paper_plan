@@ -22,6 +22,8 @@ Explain what the evidence collectively says, what it does not say and why. Do no
 
 Before proceeding to the literature frontier or central-contribution decision, complete the mandatory general scientific-analysis stage in workflow 01. It must analyze the full Result Unit set as a connected dataset, including relevant within-result series and between-result relationships. The model, not the user, selects scientifically meaningful comparisons from the evidence. Record source-linked observations, comparability assessments, quantitative/qualitative differences, cross-result convergence or contradiction, interpretations, alternatives and per-Result-Unit coverage. Do not treat independently described figures as completed scientific synthesis. Every Result Unit must be ANALYZED, explicitly NO_COMPARISON_APPLICABLE or NOT_ASSESSABLE. Compile the analysis records into the context used for Stage 2 onward. A missing or capability-blocked analysis must constrain the scientific claims and be reported honestly; do not bypass the Skill with an ad hoc manual analysis.
 
+**Evidence-to-argument distillation is mandatory before Stage 2.** Read `references/scientific_argument_synthesis.md`. Review the analysis packs together, including cross-pack candidate relationships after evidence review. Distil only material patterns, comparisons, interpretations and contradictions into Findings. Each analysis-derived Finding must cite exact `analysis_id`, `record_type` and stable `record_id` values in `scientific_analysis_refs`, and preserve supporting/contradictory Result Units, alternative explanations and inference limits. Do not turn every observation or metadata link into a Finding.
+
 ## Stage 2 — Literature frontier
 
 Read and follow `docs/V5_1_LITERATURE_FRONTIER_PROTOCOL.md`, plus relevant stage-specific literature procedures. Build query facets from this project's actual system, mechanism, transformation, methods and vocabulary. Use templates/V5_1_LITERATURE_FRONTIER_LEDGER.md to retain a project-specific search-route, exact-query, citation-lead resolution, citation-trail and closest-prior-art audit. Keep the completed ledger under the isolated workspace and reference its path from the narrative plan. Use independent discovery routes and backward/forward citation trails; a failed or empty search endpoint is not a stopping condition.
@@ -35,6 +37,8 @@ Do not substitute a bibliography, search snippet or metadata-only record for a n
 Read and follow `docs/V5_1_SCIENTIFIC_MAINLINE_DECISION.md`. Recover the user's original scientific problem and hypothesis from the current project's own inputs before selecting a paper story. Preserve it as an explicit candidate even when evidence is incomplete. Compare it with materially different evidence-led alternatives, an independently defensible method/measurement contribution where relevant, and a stop/defer option. Candidate count is project-dependent.
 
 Use the nearest-prior-art evidence from Stage 2. Compare candidates on significance, precise difference from closest work, supporting/counter-evidence, mechanistic/causal adequacy, alternative explanations, falsifiability, decisive evidence-recovery needs, feasibility/dependencies and current-project journal fit. Do not use pseudo-precise scores.
+
+For every serious candidate route, trace its supporting and contradictory Findings back to the exact scientific-analysis records. Multi-Result-Unit routes should cite the analysis-derived Findings that establish the proposed relationship; a list of independently supportive Result Units is not itself a cross-result scientific argument.
 
 Do not pivot automatically from the user's intended scientific contribution to a validation/audit paper merely because the current dataset lacks decisive measurements. Determine whether a finite, feasible evidence-recovery path can test the original line and whether it remains differentiated from prior work. A validation route becomes the central contribution only if it independently passes the significance and prior-art test; otherwise it remains a supporting task.
 
@@ -54,7 +58,7 @@ For every paragraph state rhetorical role, reader-facing message, factual premis
 
 ## Stage 6 — Complete storyline
 
-Create an ordered Results/Discussion sequence. For each section or major paragraph cluster state the scientific question; evidence/data and status; responsible observation; interpretation/inference strength; plausible alternative/limitation; role in the central thesis; and transition to the next section.
+Create an ordered Results/Discussion sequence. For each section or major paragraph cluster state the scientific question; evidence/data and status; responsible observation; interpretation/inference strength; plausible alternative/limitation; role in the central thesis; and transition to the next section. For cross-result conclusions, identify the argument-bearing Finding and its underlying analysis records; preserve the distinction between an observed pattern, its interpretation and a proposed mechanism.
 
 Explain why each result is needed and why it appears there. Order by logic of proof and reader comprehension, not instrument or file order. Provide a working title, abstract argument map and conclusion architecture. Draft full text only when the evidence and claim boundaries are ready.
 
@@ -92,7 +96,7 @@ The main deliverable is a professional research proposal and manuscript-developm
 
 ### 11.1 Synthesize before drafting
 
-Build an internal synthesis linking the research materials, evidence, literature frontier, central question, complete manuscript argument, Figures, SI and research tasks. Resolve inconsistencies and identify missing logical connections before writing. Use structured bundles and identifiers for traceability; do not paste their contents into the narrative.
+Build an internal synthesis linking the research materials, evidence, literature frontier, central question, complete manuscript argument, Figures, SI and research tasks. Resolve inconsistencies and identify missing logical connections before writing. Use structured bundles and identifiers for traceability; do not paste their contents into the narrative. Explicitly trace the decisive argument from source evidence through analysis records and Findings to Claims, candidate contribution and manuscript sections. Check that supporting and contradictory evidence has not been lost between stages.
 
 ### 11.2 Write the scientific rationale and current research basis
 
