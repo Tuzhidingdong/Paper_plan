@@ -60,6 +60,14 @@ Every Result Unit in the prepared analysis pack must receive exactly one coverag
 
 A Result Unit must never disappear because it is difficult to interpret or does not fit the emerging story. A project-level analysis is not complete while any Result Unit remains unaccounted for. Regions or Panels not linked to any Result Unit must be surfaced separately for triage.
 
+## From analysis records to argument-bearing Findings
+
+Assign a stable ID to each material relationship, interpretation and contradiction record, using unique identifiers within its analysis record. Existing observation IDs, comparison IDs, signal-feature IDs and signal-comparison IDs remain the source anchors. These IDs allow later Findings to cite the exact analysis outputs rather than an entire pack summary.
+
+After all packs and cross-pack relationships have been reviewed, follow `references/scientific_argument_synthesis.md` to distil only decision-relevant patterns into Findings. Each analysis-derived Finding must cite the exact analysis ID, record type and record ID; carry the relevant supporting and contradictory Result Unit IDs; preserve alternatives and limitations; and retain its epistemic status. Do not create a Finding for every Result Unit, visual feature or routine observation.
+
+These Findings are the bridge into candidate routes and manuscript Claims. A candidate route that combines multiple Result Units should cite the cross-result Findings that justify the combination. A central comparative, associational, causal or mechanistic Claim synthesizing multiple Result Units must cite an analysis-derived Finding covering those sources. Deterministic validation checks references and source consistency only; it does not certify scientific correctness.
+
 ## Output and persistence
 The model returns a structured record using the prepared request's required_output shape. The record includes source-linked observations, comparisons, dimensions assessed, quantitative and qualitative differences, relationships, interpretations, contradictions, candidate implications, unresolved questions and per-Result-Unit coverage.
 
