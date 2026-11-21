@@ -78,6 +78,24 @@ def compile_context(bundle: dict[str, Any]) -> str:
     lines.append("## Findings")
     for finding_id, finding in sorted(bundle.get("findings", {}).items()):
         lines.append(f"- {finding_id} [{finding.get('epistemic_status', 'unknown')}]: {finding.get('description', '')}")
+        if finding.get("analysis_derived"):
+            refs = finding.get("scientific_analysis_refs", [])
+            readable_refs = [
+                f"{item.get('analysis_id')}:{item.get('record_type')}:{item.get('record_id')}"
+                for item in refs if isinstance(item, dict)
+            ]
+            lines.append("  - Analysis-derived Finding: yes")
+            lines.append("  - Source analysis records: " + (
+                "; ".join(readable_refs) if readable_refs else "missing — provenance validation should block"
+            ))
+            lines.append(
+                "  - Supporting Result Units: " +
+                (", ".join(finding.get("supporting_result_ids", [])) or "none")
+            )
+            lines.append(
+                "  - Contradictory Result Units: " +
+                (", ".join(finding.get("contradictory_result_ids", [])) or "none")
+            )
         if finding.get("alternative_explanations"):
             lines.append(f"  - Alternative explanations recorded: {len(finding['alternative_explanations'])}")
         if finding.get("limitations"):
