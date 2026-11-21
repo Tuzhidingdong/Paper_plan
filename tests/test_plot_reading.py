@@ -71,7 +71,13 @@ def _audit_fixture(workspace: Path, x_anchor_coordinates=None):
             "evidence_refs": [{"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1}],
             "x_axis": {"label": "Elapsed time", "unit": "s", "scale": "LINEAR", "tick_anchors": x_ticks},
             "y_axis": _axis([1.0, 0.5, 0.0], "Signal", "a.u."),
-            "series": [{"series_id": "TRACE-A", "legend_label": "Trace A", "mapping_status": "CONFIRMED"}],
+            "series": [{
+                "series_id": "TRACE-A", "legend_label": "Trace A", "mapping_status": "CONFIRMED",
+                "mapping_basis": "Direct legend-to-trace linkage in the source plot.",
+                "mapping_evidence_refs": [{"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1}],
+                "panel_id": None, "panel_mapping_status": "NOT_APPLICABLE",
+                "sample_id": None, "sample_mapping_status": "NOT_APPLICABLE",
+            }],
             "limitations": [],
         }],
         "plot_readings": [{
@@ -207,6 +213,64 @@ class TestPlotCalibration(unittest.TestCase):
             record["plot_readings"][0]["series_id"] = "UNKNOWN-TRACE"
             with self.assertRaisesRegex(ValueError, "series_id is not declared"):
                 apply_plot_reading_audit(request, record, workspace)
+
+    def test_confirmed_series_without_mapping_evidence_is_downgraded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            request, record = _audit_fixture(workspace)
+            series = record["plot_calibrations"][0]["series"][0]
+            series["mapping_basis"] = ""
+            series["mapping_evidence_refs"] = []
+            record["signal_features"][0]["position"]["value"] = None
+            apply_plot_reading_audit(request, record, workspace)
+            self.assertEqual(record["plot_readings"][0]["series_mapping_status"], "UNRESOLVED")
+            self.assertEqual(record["plot_readings"][0]["reading_status"], "TREND_ONLY_OR_UNRESOLVED")
+            self.assertTrue(record["plot_readings"][0]["mapping_limitations"])
+
+    def test_vector_reading_must_match_series_path_item_mapping(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            request, record = _audit_fixture(workspace)
+            sidecar = workspace / "vector.json"
+            sidecar.write_text(json.dumps({
+                "coordinate_frame": {"width": 1000.0, "height": 1000.0},
+                "paths": [{
+                    "path_id": "VEC-1",
+                    "items": [{"item_index": 7, "command": "l", "points": [[300.0, 500.0], [350.0, 500.0]]}],
+                }],
+            }), encoding="utf-8")
+            asset = request["assets"][0]
+            asset["vector_geometry_path"] = "vector.json"
+            asset["vector_geometry_sha256"] = sha256_file(sidecar)
+            calibration = record["plot_calibrations"][0]
+            calibration["coordinate_system"] = "PDF_CROP_POINT"
+            calibration["series"][0]["source_path_refs"] = [
+                {"path_id": "VEC-1", "item_index": 6}
+            ]
+            reading = record["plot_readings"][0]
+            reading["coordinate_source"] = "VECTOR_GEOMETRY"
+            reading.pop("coordinate")
+            reading["vector_ref"] = {"path_id": "VEC-1", "item_index": 7, "point_index": 0}
+            record["signal_features"][0]["position"]["value"] = None
+            apply_plot_reading_audit(request, record, workspace)
+            self.assertEqual(reading["series_mapping_status"], "UNRESOLVED")
+            self.assertEqual(reading["mapped_values"]["x"]["permitted_use"], "TREND_ONLY")
+            self.assertTrue(any("not explicitly assigned" in item for item in reading["mapping_limitations"]))
+
+    def test_data_point_requires_both_axes_to_be_quantified(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            request, record = _audit_fixture(workspace)
+            reading = record["plot_readings"][0]
+            reading["reading_role"] = "DATA_POINT"
+            reading["feature_id"] = None
+            record["signal_features"][0]["position"]["value"] = None
+            y_axis = record["plot_calibrations"][0]["y_axis"]
+            for tick, coordinate in zip(y_axis["tick_anchors"], [100.0, 110.0, 120.0]):
+                tick["coordinate"] = coordinate
+            apply_plot_reading_audit(request, record, workspace)
+            self.assertEqual(reading["reading_status"], "TREND_ONLY_OR_UNRESOLVED")
+            self.assertEqual(reading["mapped_values"]["x"]["permitted_use"], "TREND_ONLY")
 
     def test_vector_sidecar_uses_original_item_index_not_list_offset(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -272,7 +272,13 @@ def _analysis_fixture(workspace: Path):
                                {"coordinate": 100, "value": 1.0, "printed_label": "1.0", "coordinate_uncertainty": 0.5},
                                {"coordinate": 500, "value": 0.5, "printed_label": "0.5", "coordinate_uncertainty": 0.5},
                                {"coordinate": 900, "value": 0.0, "printed_label": "0.0", "coordinate_uncertainty": 0.5}]},
-                "series": [{"series_id": "A", "legend_label": "Trace A", "mapping_status": "CONFIRMED"}],
+                "series": [{
+                    "series_id": "A", "legend_label": "Trace A", "mapping_status": "CONFIRMED",
+                    "mapping_basis": "Direct legend-to-trace linkage.",
+                    "mapping_evidence_refs": [{"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1}],
+                    "panel_id": None, "panel_mapping_status": "NOT_APPLICABLE",
+                    "sample_id": None, "sample_mapping_status": "NOT_APPLICABLE",
+                }],
                 "limitations": []
             },
             {
@@ -290,7 +296,13 @@ def _analysis_fixture(workspace: Path):
                                {"coordinate": 100, "value": 1.0, "printed_label": "1.0", "coordinate_uncertainty": 0.5},
                                {"coordinate": 500, "value": 0.5, "printed_label": "0.5", "coordinate_uncertainty": 0.5},
                                {"coordinate": 900, "value": 0.0, "printed_label": "0.0", "coordinate_uncertainty": 0.5}]},
-                "series": [{"series_id": "B", "legend_label": "Trace B", "mapping_status": "CONFIRMED"}],
+                "series": [{
+                    "series_id": "B", "legend_label": "Trace B", "mapping_status": "CONFIRMED",
+                    "mapping_basis": "Direct legend-to-trace linkage.",
+                    "mapping_evidence_refs": [{"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 2}],
+                    "panel_id": None, "panel_mapping_status": "NOT_APPLICABLE",
+                    "sample_id": None, "sample_mapping_status": "NOT_APPLICABLE",
+                }],
                 "limitations": []
             }
         ],
@@ -425,6 +437,33 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "at least two recorded signal features"):
                 validate_record(bundle, request, record, workspace)
 
+    def test_signal_comparison_requires_reciprocal_general_comparison_link(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            bundle, request, record = _analysis_fixture(workspace)
+            record["comparisons"] = [{
+                "comparison_id": "GENCMP-1",
+                "question": "Compare the two recorded signals.",
+                "result_ids": ["R001", "R002"],
+                "comparison_status": "PARTIALLY_COMPARABLE",
+                "observation_ids": ["OBS-1", "OBS-2"],
+                "evidence_refs": [
+                    {"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1},
+                    {"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 2},
+                ],
+                "dimension_assessments": [{
+                    "dimension": "normalization", "status": "UNKNOWN",
+                    "consequence": "No absolute comparison is made.",
+                }],
+                "conclusion": "A bounded descriptive comparison is retained.",
+            }]
+            record["signal_comparisons"][0]["analysis_comparison_ids"] = ["GENCMP-1"]
+            record["comparisons"][0]["signal_comparison_ids"] = ["SIGCMP-1"]
+            validate_record(bundle, request, record, workspace)
+            record["comparisons"][0]["signal_comparison_ids"] = []
+            with self.assertRaisesRegex(ValueError, "must link reciprocally"):
+                validate_record(bundle, request, record, workspace)
+
     def test_evidence_validator_handles_general_and_signal_coverage_maps(self):
         bundle = {
             "source": {"file_name": "source.pdf", "sha256": "f" * 64, "page_count": 1},
@@ -484,6 +523,62 @@ class TestSignalFeatureAndInvocationAudit(unittest.TestCase):
         errors, warnings = validate(bundle)
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
+
+        # A real two-Result-Unit signal comparison must be reciprocally linked
+        # from both coverage records. This catches an unpopulated lookup map.
+        bundle["regions"]["REG002"] = {
+            "region_id": "REG002", "page_number": 1,
+            "bbox_normalized": [0.1, 0.1, 0.9, 0.9], "image_path": "regions/REG002.png",
+        }
+        bundle["result_units"]["R002"] = {
+            "result_id": "R002", "region_ids": ["REG002"], "panel_ids": [],
+            "data_origin": "Exact_Table", "visual_legibility": "High",
+            "quantitative_permission": "Trend_Only", "epistemic_status": "Observed",
+            "is_visual_estimate": False, "measurement_context": {}, "observations": [],
+        }
+        analysis = bundle["scientific_analyses"]["SANA-TEST"]
+        analysis["result_ids"] = ["R001", "R002"]
+        analysis["coverage"].append({
+            "result_id": "R002", "status": "NOT_ASSESSABLE", "observation_ids": [],
+            "reason": "Synthetic second Result Unit."
+        })
+        axis_context = {
+            "x_axis_label": "Coordinate", "x_axis_unit": "unit-x", "x_axis_scale": "LINEAR",
+            "y_axis_label": "Response", "y_axis_unit": "unit-y", "y_axis_scale": "LINEAR",
+            "normalization_basis": "UNKNOWN",
+        }
+        analysis["signal_features"] = [
+            {"feature_id": "SF-1", "result_id": "R001", "feature_type": "OTHER",
+             "description": "First signal feature.", "series_label": "Trace A",
+             "axis_context": axis_context,
+             "evidence_refs": [{"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1}]},
+            {"feature_id": "SF-2", "result_id": "R002", "feature_type": "OTHER",
+             "description": "Second signal feature.", "series_label": "Trace B",
+             "axis_context": axis_context,
+             "evidence_refs": [{"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 1}]},
+        ]
+        analysis["signal_comparisons"] = [{
+            "comparison_id": "SIGCMP-1", "feature_ids": ["SF-1", "SF-2"],
+            "result_ids": ["R001", "R002"], "change_type": "OTHER",
+            "comparability_status": "PARTIALLY_COMPARABLE",
+            "description": "Synthetic signal comparison.",
+            "evidence_refs": [
+                {"result_id": "R001", "region_id": "REG001", "panel_id": None, "page_number": 1},
+                {"result_id": "R002", "region_id": "REG002", "panel_id": None, "page_number": 1},
+            ],
+        }]
+        analysis["signal_analysis_coverage"] = [
+            {"result_id": "R001", "status": "APPLICABLE", "feature_ids": ["SF-1"],
+             "comparison_ids": ["SIGCMP-1"], "reason": ""},
+            {"result_id": "R002", "status": "APPLICABLE", "feature_ids": ["SF-2"],
+             "comparison_ids": ["SIGCMP-1"], "reason": ""},
+        ]
+        errors, warnings = validate(bundle)
+        self.assertFalse(any("not linked from every compared Result Unit" in item for item in errors))
+        self.assertFalse(any("not linked from every compared Result Unit" in item for item in warnings))
+        analysis["signal_analysis_coverage"][1]["comparison_ids"] = []
+        errors, _ = validate(bundle)
+        self.assertTrue(any("not linked from every compared Result Unit" in item for item in errors))
 
 
 if __name__ == "__main__":

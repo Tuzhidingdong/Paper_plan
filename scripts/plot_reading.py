@@ -401,6 +401,16 @@ def apply_plot_reading_audit(
         series_status = series_entry.get("mapping_status", "UNRESOLVED")
         if series_status not in {"CONFIRMED", "PROBABLE", "AMBIGUOUS", "UNRESOLVED"}:
             raise ValueError(f"plot_readings[{index}] has an invalid series mapping status")
+        mapping_basis = str(series_entry.get("mapping_basis") or "").strip()
+        mapping_evidence_refs = series_entry.get("mapping_evidence_refs", []) or []
+        mapping_limitations = list(series_entry.get("mapping_limitations", []) or [])
+        if series_status == "CONFIRMED" and (not mapping_basis or not mapping_evidence_refs):
+            series_status = "UNRESOLVED"
+            mapping_limitations.append(
+                "A CONFIRMED trace identity requires an explicit mapping basis and source evidence references."
+            )
+        panel_mapping_status = series_entry.get("panel_mapping_status", "UNRESOLVED")
+        sample_mapping_status = series_entry.get("sample_mapping_status", "UNMAPPED")
         reading["series_mapping_status"] = series_status
         feature_id = reading.get("feature_id")
         if reading.get("reading_role") in {"FEATURE_POSITION", "FEATURE_EDGE"} and not feature_id:
@@ -418,8 +428,20 @@ def apply_plot_reading_audit(
                 raise ValueError("VECTOR_GEOMETRY reading requires PDF_CROP_POINT calibration")
             if workspace is None:
                 raise ValueError("Workspace is required for VECTOR_GEOMETRY readings")
-            coordinate = _vector_coordinate(workspace, calibration_assets[calibration_id], reading.get("vector_ref") or {})
+            vector_ref = reading.get("vector_ref") or {}
+            coordinate = _vector_coordinate(workspace, calibration_assets[calibration_id], vector_ref)
             reading["coordinate"] = {"x": coordinate[0], "y": coordinate[1]}
+            declared_path_refs = series_entry.get("source_path_refs", []) or []
+            if series_status == "CONFIRMED" and not any(
+                item.get("path_id") == vector_ref.get("path_id")
+                and item.get("item_index") == vector_ref.get("item_index")
+                for item in declared_path_refs
+            ):
+                series_status = "UNRESOLVED"
+                mapping_limitations.append(
+                    "The selected vector path/item is not explicitly assigned to this plotted series."
+                )
+                reading["series_mapping_status"] = series_status
         elif coordinate_source == "RASTER_IMAGE":
             if coordinate_system != "IMAGE_PIXEL":
                 raise ValueError("RASTER_IMAGE reading requires IMAGE_PIXEL calibration")
@@ -453,13 +475,60 @@ def apply_plot_reading_audit(
                     mapped.setdefault("limitations", []).append(
                         f"Plotted series identity is {series_status}; numeric comparison is blocked."
                     )
+        if reading.get("reading_role") == "DATA_POINT":
+            point_is_quantifiable = (
+                series_status == "CONFIRMED"
+                and all(
+                    item.get("value") is not None
+                    and item.get("permitted_use") in {"QUANTITATIVE_PLOT_ESTIMATE", "BOUNDED_PLOT_ESTIMATE"}
+                    for item in (mapped_x, mapped_y)
+                )
+            )
+            if not point_is_quantifiable:
+                for mapped in (mapped_x, mapped_y):
+                    if mapped.get("value") is not None:
+                        mapped["permitted_use"] = "TREND_ONLY"
+                        mapped.setdefault("limitations", []).append(
+                            "A numeric DATA_POINT requires both x- and y-axis calibration and confirmed series identity."
+                        )
         reading["mapped_values"] = {"x": mapped_x, "y": mapped_y}
-        reading["reading_status"] = (
-            "CALIBRATED_ESTIMATE"
-            if any(item.get("permitted_use") in {"QUANTITATIVE_PLOT_ESTIMATE", "BOUNDED_PLOT_ESTIMATE"}
-                   for item in (mapped_x, mapped_y) if item.get("value") is not None)
-            else "TREND_ONLY_OR_UNRESOLVED"
-        )
+        reading["mapping_basis"] = mapping_basis or None
+        reading["mapping_evidence_refs"] = mapping_evidence_refs
+        reading["mapping_limitations"] = mapping_limitations
+        reading["panel_id"] = series_entry.get("panel_id")
+        reading["panel_mapping_status"] = panel_mapping_status
+        reading["sample_id"] = series_entry.get("sample_id")
+        reading["sample_mapping_status"] = sample_mapping_status
+        if reading.get("reading_role") == "DATA_POINT":
+            reading_quantifiable = all(
+                item.get("permitted_use") in {"QUANTITATIVE_PLOT_ESTIMATE", "BOUNDED_PLOT_ESTIMATE"}
+                and item.get("value") is not None for item in (mapped_x, mapped_y)
+            )
+        else:
+            reading_quantifiable = any(
+                item.get("permitted_use") in {"QUANTITATIVE_PLOT_ESTIMATE", "BOUNDED_PLOT_ESTIMATE"}
+                and item.get("value") is not None for item in (mapped_x, mapped_y)
+            )
+        reading["reading_status"] = "CALIBRATED_ESTIMATE" if reading_quantifiable else "TREND_ONLY_OR_UNRESOLVED"
+        if feature_id:
+            linked_feature = feature_lookup[feature_id]
+            mapping_fields = (
+                ("series_mapping_status", series_status),
+                ("series_mapping_basis", mapping_basis or None),
+                ("series_mapping_evidence_refs", mapping_evidence_refs),
+                ("panel_id", reading.get("panel_id")),
+                ("panel_mapping_status", panel_mapping_status),
+                ("sample_id", reading.get("sample_id")),
+                ("sample_mapping_status", sample_mapping_status),
+            )
+            for field, value in mapping_fields:
+                existing = linked_feature.get(field)
+                if field == "series_mapping_status" and existing == "UNRESOLVED" and value == "CONFIRMED":
+                    existing = None
+                if existing not in (None, "", value) and value not in (None, "", existing):
+                    raise ValueError(f"plot_readings[{index}] {field} conflicts with signal feature {feature_id}")
+                if value is not None:
+                    linked_feature[field] = value
         reading_map[reading_id] = reading
 
     for index, feature in enumerate(record.get("signal_features", [])):

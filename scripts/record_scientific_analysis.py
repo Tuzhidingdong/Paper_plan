@@ -22,6 +22,62 @@ VALID_SIGNAL_CHANGE_TYPES = {
     "APPEARED", "DISAPPEARED", "SHAPE_CHANGE", "OTHER",
 }
 VALID_SIGNAL_COVERAGE = {"APPLICABLE", "NOT_APPLICABLE", "NOT_ASSESSABLE"}
+VALID_SERIES_MAPPING = {"CONFIRMED", "PROBABLE", "AMBIGUOUS", "UNRESOLVED"}
+VALID_SAMPLE_MAPPING = {"CONFIRMED", "PROBABLE", "AMBIGUOUS", "UNMAPPED", "NOT_APPLICABLE"}
+VALID_PANEL_MAPPING = {"CONFIRMED", "PROBABLE", "AMBIGUOUS", "UNRESOLVED", "NOT_APPLICABLE"}
+
+
+def _validate_sample_mapping(
+    bundle: dict[str, Any],
+    result_id: str | None,
+    sample_id: str | None,
+    mapping_status: str,
+    series_id: str | None,
+    label: str,
+) -> None:
+    if mapping_status not in VALID_SAMPLE_MAPPING:
+        raise ValueError(f"{label} has invalid sample_mapping_status")
+    samples = bundle.get("samples", {})
+    if sample_id and sample_id not in samples:
+        raise ValueError(f"{label} references unknown sample_id {sample_id}")
+    if mapping_status == "CONFIRMED":
+        if not sample_id:
+            raise ValueError(f"{label}: CONFIRMED sample mapping requires sample_id")
+        if samples.get(sample_id, {}).get("identity_status") != "CONFIRMED":
+            raise ValueError(f"{label}: CONFIRMED sample mapping requires a CONFIRMED sample identity")
+    if mapping_status in {"UNMAPPED", "NOT_APPLICABLE"} and sample_id:
+        raise ValueError(f"{label}: {mapping_status} sample mapping must not carry sample_id")
+    result = bundle.get("result_units", {}).get(result_id, {})
+    associations = result.get("measurement_context", {}).get("sample_associations", []) or []
+    if series_id:
+        linked = [item for item in associations if item.get("series_id") == series_id]
+        for item in linked:
+            linked_sample = item.get("sample_id")
+            if linked_sample and sample_id and linked_sample != sample_id:
+                raise ValueError(f"{label}: sample_id conflicts with the Result Unit's mapping for series {series_id}")
+            if mapping_status == "CONFIRMED" and item.get("mapping_status") != "CONFIRMED":
+                raise ValueError(f"{label}: series sample mapping conflicts with a non-confirmed Result Unit association")
+
+
+def _validate_panel_mapping(
+    bundle: dict[str, Any],
+    result_id: str,
+    panel_id: str | None,
+    mapping_status: str,
+    label: str,
+) -> None:
+    if mapping_status not in VALID_PANEL_MAPPING:
+        raise ValueError(f"{label} has invalid panel_mapping_status")
+    result = bundle.get("result_units", {}).get(result_id, {})
+    if panel_id:
+        if panel_id not in bundle.get("panels", {}):
+            raise ValueError(f"{label} references unknown panel_id {panel_id}")
+        if panel_id not in set(result.get("panel_ids", []) or []):
+            raise ValueError(f"{label} references a Panel not linked to its Result Unit")
+    elif mapping_status == "CONFIRMED":
+        raise ValueError(f"{label}: CONFIRMED panel mapping requires panel_id")
+    if mapping_status == "NOT_APPLICABLE" and panel_id:
+        raise ValueError(f"{label}: NOT_APPLICABLE panel mapping must not carry panel_id")
 
 
 def _validate_signal_estimate(estimate: Any, label: str) -> None:
@@ -151,6 +207,21 @@ def _valid_refs(
             raise ValueError(f"{label} cites an unrelated Panel {panel_id} for {result_id}")
         if not region_id and not panel_id:
             raise ValueError(f"{label} reference must include region_id or panel_id")
+        regions = bundle.get("regions", {})
+        if region_id and region_id in regions:
+            source_region = regions[region_id]
+            if ref.get("page_number") is not None and source_region.get("page_number") is not None:
+                if int(ref["page_number"]) != int(source_region["page_number"]):
+                    raise ValueError(f"{label} page_number does not match source Region {region_id}")
+        if panel_id:
+            panel = bundle.get("panels", {}).get(panel_id, {})
+            parent_region_id = panel.get("parent_region_id")
+            if region_id and parent_region_id and region_id != parent_region_id:
+                raise ValueError(f"{label} Panel {panel_id} does not belong to Region {region_id}")
+            if ref.get("page_number") is not None and parent_region_id in regions:
+                source_page = regions[parent_region_id].get("page_number")
+                if source_page is not None and int(ref["page_number"]) != int(source_page):
+                    raise ValueError(f"{label} page_number does not match Panel {panel_id}")
 
 
 def validate_record(
@@ -210,6 +281,32 @@ def validate_record(
             raise ValueError(f"observations[{index}] must cite Result Units in the prepared pack")
         observation_result_map[observation_id] = set(refs)
         _valid_refs(bundle, expected_ids, item.get("evidence_refs", []), f"observations[{index}]")
+        sample_id = item.get("sample_id")
+        mapping_status = item.get("mapping_status")
+        if sample_id or mapping_status:
+            _validate_sample_mapping(
+                bundle, refs[0] if len(refs) == 1 else item.get("result_id"),
+                sample_id, mapping_status or ("AMBIGUOUS" if sample_id else "UNMAPPED"),
+                item.get("series_id"), f"observations[{index}]",
+            )
+        numeric_present = item.get("numeric_value") is not None or item.get("numeric_values") is not None
+        if numeric_present:
+            if len(refs) != 1:
+                raise ValueError(f"observations[{index}] numeric measurement must identify exactly one Result Unit")
+            if not str(item.get("measurand") or "").strip():
+                raise ValueError(f"observations[{index}] numeric measurement requires measurand")
+            if not str(item.get("unit") or "").strip():
+                raise ValueError(f"observations[{index}] numeric measurement requires unit")
+            if not str(item.get("data_origin") or "").strip():
+                raise ValueError(f"observations[{index}] numeric measurement requires data_origin")
+            if item.get("numeric_value") is not None and parse_numeric_scalar(item.get("numeric_value")) is None:
+                raise ValueError(f"observations[{index}].numeric_value must be finite numeric")
+            numeric_values = item.get("numeric_values")
+            if numeric_values is not None:
+                if not isinstance(numeric_values, list) or not numeric_values:
+                    raise ValueError(f"observations[{index}].numeric_values must be a non-empty list")
+                if any(parse_numeric_scalar(value) is None for value in numeric_values):
+                    raise ValueError(f"observations[{index}].numeric_values must contain only finite numbers")
 
     for item in coverage:
         if item.get("status") == "ANALYZED":
@@ -219,7 +316,13 @@ def validate_record(
             if any(item["result_id"] not in observation_result_map.get(obs_id, set()) for obs_id in refs):
                 raise ValueError(f"{item['result_id']}: coverage observation does not cite this Result Unit")
 
+    generic_comparison_map: dict[str, dict[str, Any]] = {}
     for index, item in enumerate(record.get("comparisons", [])):
+        generic_id = str(item.get("comparison_id") or "")
+        if generic_id:
+            if generic_id in generic_comparison_map:
+                raise ValueError(f"comparisons[{index}] requires a unique comparison_id")
+            generic_comparison_map[generic_id] = item
         ids = item.get("result_ids", [])
         if len(set(ids)) < 2 or not set(ids).issubset(expected_ids):
             raise ValueError(f"comparisons[{index}] must compare at least two Result Units in the prepared pack")
@@ -239,6 +342,8 @@ def validate_record(
         _valid_refs(bundle, expected_ids, item.get("evidence_refs", []), f"comparisons[{index}]")
         if any(ref.get("result_id") not in ids for ref in item.get("evidence_refs", [])):
             raise ValueError(f"comparisons[{index}] cites evidence outside its compared Result Units")
+        if any(not str(value).strip() for value in item.get("signal_comparison_ids", []) or []):
+            raise ValueError(f"comparisons[{index}] contains an empty signal_comparison_id")
         for difference in item.get("quantitative_differences", []):
             for value in difference.get("values", []):
                 if value.get("result_id") not in ids:
@@ -297,6 +402,23 @@ def validate_record(
             raise ValueError(f"signal_features[{index}] evidence must belong to its declared Result Unit")
         if not str(feature.get("series_label") or "").strip():
             raise ValueError(f"signal_features[{index}] requires a visible series_label or UNKNOWN")
+        if feature.get("series_mapping_status") is not None and feature["series_mapping_status"] not in VALID_SERIES_MAPPING:
+            raise ValueError(f"signal_features[{index}] has invalid series_mapping_status")
+        mapping_evidence = feature.get("series_mapping_evidence_refs", []) or []
+        if mapping_evidence:
+            _valid_refs(bundle, expected_ids, mapping_evidence, f"signal_features[{index}].series_mapping_evidence_refs")
+            if any(ref.get("result_id") != feature.get("result_id") for ref in mapping_evidence):
+                raise ValueError(f"signal_features[{index}] series mapping evidence must belong to its Result Unit")
+        if feature.get("sample_mapping_status") is not None:
+            _validate_sample_mapping(
+                bundle, feature.get("result_id"), feature.get("sample_id"),
+                feature["sample_mapping_status"], feature.get("series_id"), f"signal_features[{index}]",
+            )
+        if feature.get("panel_mapping_status") is not None:
+            _validate_panel_mapping(
+                bundle, feature.get("result_id"), feature.get("panel_id"),
+                feature["panel_mapping_status"], f"signal_features[{index}]",
+            )
         axes = feature.get("axis_context")
         if not isinstance(axes, dict):
             raise ValueError(f"signal_features[{index}] requires axis_context")
@@ -333,6 +455,15 @@ def validate_record(
         feature_result_ids = {feature_map[item]["result_id"] for item in feature_ids}
         if feature_result_ids != set(result_ids):
             raise ValueError(f"signal_comparisons[{index}] feature/result links are inconsistent")
+        generic_ids = comparison.get("analysis_comparison_ids", []) or []
+        if not set(generic_ids).issubset(generic_comparison_map):
+            raise ValueError(f"signal_comparisons[{index}] references an unknown generic comparison_id")
+        for generic_id in generic_ids:
+            generic = generic_comparison_map[generic_id]
+            if comparison_id not in set(generic.get("signal_comparison_ids", []) or []):
+                raise ValueError(f"signal_comparisons[{index}] and generic comparison {generic_id} must link reciprocally")
+            if not set(result_ids).issubset(set(generic.get("result_ids", []) or [])):
+                raise ValueError(f"signal_comparisons[{index}] Result Units fall outside generic comparison {generic_id}")
         evidence_result_ids = {ref.get("result_id") for ref in comparison.get("evidence_refs", [])}
         if not set(result_ids).issubset(evidence_result_ids):
             raise ValueError(f"signal_comparisons[{index}] must cite source evidence for every compared Result Unit")
@@ -352,6 +483,20 @@ def validate_record(
             for field in ("unit", "source_basis", "precision_or_uncertainty"):
                 if not str(quantified.get(field) or "").strip():
                     raise ValueError(f"signal_comparisons[{index}].quantified_change.{field} is required")
+
+    for generic_id, generic in generic_comparison_map.items():
+        for signal_id in generic.get("signal_comparison_ids", []) or []:
+            linked_signal = next(
+                (item for item in record.get("signal_comparisons", [])
+                 if item.get("comparison_id") == signal_id),
+                None,
+            )
+            if linked_signal is None:
+                raise ValueError(f"generic comparison {generic_id} references an unknown signal_comparison_id")
+            if generic_id not in set(linked_signal.get("analysis_comparison_ids", []) or []):
+                raise ValueError(f"generic comparison {generic_id} and signal comparison {signal_id} must link reciprocally")
+            if not set(linked_signal.get("result_ids", [])).issubset(set(generic.get("result_ids", []) or [])):
+                raise ValueError(f"signal comparison {signal_id} Result Units fall outside generic comparison {generic_id}")
 
     signal_coverage = record.get("signal_analysis_coverage")
     if not isinstance(signal_coverage, list):
@@ -404,6 +549,36 @@ def validate_record(
         if calibration_id in calibration_map:
             raise ValueError(f"plot_calibrations[{index}] requires a unique calibration_id")
         calibration_map[calibration_id] = calibration
+        for series_index, series in enumerate(calibration.get("series", []) or []):
+            series_label = f"plot_calibrations[{index}].series[{series_index}]"
+            if series.get("mapping_status") not in VALID_SERIES_MAPPING:
+                raise ValueError(f"{series_label} has invalid mapping_status")
+            mapping_refs = series.get("mapping_evidence_refs", []) or []
+            if mapping_refs:
+                _valid_refs(bundle, expected_ids, mapping_refs, f"{series_label}.mapping_evidence_refs")
+                if any(ref.get("result_id") != result_id for ref in mapping_refs):
+                    raise ValueError(f"{series_label}.mapping_evidence_refs must cite its calibration Result Unit")
+            if series.get("mapping_status") == "CONFIRMED" and (
+                not str(series.get("mapping_basis") or "").strip() or not mapping_refs
+            ):
+                series["mapping_status"] = "UNRESOLVED"
+                series.setdefault("mapping_limitations", []).append(
+                    "Confirmed trace mapping lacks its mapping basis or source evidence and has been downgraded."
+                )
+            series.setdefault("panel_mapping_status", "AMBIGUOUS" if series.get("panel_id") else "UNRESOLVED")
+            series.setdefault("sample_mapping_status", "AMBIGUOUS" if series.get("sample_id") else "UNMAPPED")
+            _validate_panel_mapping(
+                bundle, result_id, series.get("panel_id"),
+                series["panel_mapping_status"], series_label,
+            )
+            _validate_sample_mapping(
+                bundle, result_id, series.get("sample_id"),
+                series["sample_mapping_status"], series.get("series_id"), series_label,
+            )
+            if series["panel_mapping_status"] == "CONFIRMED":
+                panel_id = series.get("panel_id")
+                if not any(ref.get("panel_id") == panel_id for ref in refs):
+                    raise ValueError(f"{series_label}: confirmed panel must be present in calibration evidence_refs")
 
     for index, reading in enumerate(record.get("plot_readings", [])):
         result_id = reading.get("result_id")
@@ -432,6 +607,34 @@ def validate_record(
         has_analyzed_units=any(item.get("status") == "ANALYZED" for item in coverage),
     )
     apply_plot_reading_audit(request, record, workspace)
+
+    # A comparison labelled COMPARABLE must not outrun the identity evidence
+    # attached to each plotted feature's trace, sample and source panel.
+    feature_lookup_after_audit = {
+        item.get("feature_id"): item for item in record.get("signal_features", [])
+        if item.get("feature_id")
+    }
+    for index, comparison in enumerate(record.get("signal_comparisons", [])):
+        if comparison.get("comparability_status") != "COMPARABLE":
+            continue
+        for feature_id in comparison.get("feature_ids", []):
+            feature = feature_lookup_after_audit.get(feature_id, {})
+            if (
+                feature.get("series_mapping_status") != "CONFIRMED"
+                or not str(feature.get("series_mapping_basis") or "").strip()
+                or not feature.get("series_mapping_evidence_refs")
+            ):
+                raise ValueError(
+                    f"signal_comparisons[{index}] cannot be COMPARABLE while feature {feature_id} lacks a source-supported confirmed series identity"
+                )
+            if feature.get("sample_mapping_status") not in {"CONFIRMED", "NOT_APPLICABLE"}:
+                raise ValueError(
+                    f"signal_comparisons[{index}] cannot be COMPARABLE while feature {feature_id} has unresolved sample mapping"
+                )
+            if feature.get("panel_mapping_status") not in {"CONFIRMED", "NOT_APPLICABLE"}:
+                raise ValueError(
+                    f"signal_comparisons[{index}] cannot be COMPARABLE while feature {feature_id} has unresolved panel mapping"
+                )
 
 
 def register_analysis(

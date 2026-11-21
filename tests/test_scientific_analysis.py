@@ -269,6 +269,28 @@ class TestGeneralScientificAnalysis(unittest.TestCase):
         self.assertIn("MISMATCHED", context)
         self.assertIn("A tentative interpretation", context)
 
+    def test_numeric_observation_requires_measurand_unit_and_source_origin(self):
+        bundle = bundle_fixture()
+        _, packs = prepare_all(bundle, Path("/workspace"), max_results_per_pack=10)
+        request = packs[0]
+        record = valid_record(request)
+        record["observations"][0].update({"numeric_value": 2.5, "unit": "unit-x"})
+        with self.assertRaisesRegex(ValueError, "requires measurand"):
+            validate_record(bundle, request, record)
+        record["observations"][0].update({"measurand": "measured quantity", "data_origin": "Exact_Table"})
+        validate_record(bundle, request, record)
+
+    def test_observation_sample_mapping_must_agree_with_series_association(self):
+        bundle = bundle_fixture()
+        _, packs = prepare_all(bundle, Path("/workspace"), max_results_per_pack=10)
+        request = packs[0]
+        record = valid_record(request)
+        record["observations"][0].update({
+            "sample_id": "S002", "mapping_status": "CONFIRMED", "series_id": "trace-1"
+        })
+        with self.assertRaisesRegex(ValueError, "conflicts with the Result Unit"):
+            validate_record(bundle, request, record)
+
     def test_recorder_rejects_missing_result_coverage(self):
         bundle = bundle_fixture()
         _, packs = prepare_all(bundle, Path("/workspace"), max_results_per_pack=10)

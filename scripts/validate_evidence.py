@@ -580,6 +580,30 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
                     if not str(quantified.get(field) or "").strip():
                         errors.append(f"{analysis_id}: signal_comparisons[{index}] quantified change requires {field}")
 
+        generic_comparison_map = {
+            item.get("comparison_id"): item
+            for item in analysis.get("comparisons", [])
+            if item.get("comparison_id")
+        }
+        for generic_id, generic in generic_comparison_map.items():
+            for signal_id in generic.get("signal_comparison_ids", []) or []:
+                signal = signal_comparison_map.get(signal_id)
+                if signal is None:
+                    errors.append(f"{analysis_id}: generic comparison {generic_id} references unknown signal comparison {signal_id}")
+                    continue
+                if generic_id not in set(signal.get("analysis_comparison_ids", []) or []):
+                    errors.append(f"{analysis_id}: generic comparison {generic_id} and signal comparison {signal_id} are not reciprocally linked")
+                if not set(signal.get("result_ids", [])).issubset(set(generic.get("result_ids", []) or [])):
+                    errors.append(f"{analysis_id}: signal comparison {signal_id} Result Units fall outside generic comparison {generic_id}")
+        for signal_id, signal in signal_comparison_map.items():
+            for generic_id in signal.get("analysis_comparison_ids", []) or []:
+                generic = generic_comparison_map.get(generic_id)
+                if generic is None:
+                    errors.append(f"{analysis_id}: signal comparison {signal_id} references unknown generic comparison {generic_id}")
+                    continue
+                if signal_id not in set(generic.get("signal_comparison_ids", []) or []):
+                    errors.append(f"{analysis_id}: signal comparison {signal_id} and generic comparison {generic_id} are not reciprocally linked")
+
         if analysis.get("invocation_audit_required"):
             signal_coverage = analysis.get("signal_analysis_coverage", [])
             signal_coverage_ids = [item.get("result_id") for item in signal_coverage]
@@ -589,6 +613,7 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
             signal_coverage_map = {}
             for item in signal_coverage:
                 result_id = item.get("result_id")
+                signal_coverage_map[result_id] = item
                 status = item.get("status")
                 if status not in {"APPLICABLE", "NOT_APPLICABLE", "NOT_ASSESSABLE"}:
                     errors.append(f"{analysis_id}: invalid signal-analysis coverage status for {result_id}")
