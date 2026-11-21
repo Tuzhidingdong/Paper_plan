@@ -10,6 +10,7 @@ from typing import Any
 
 from era_core import atomic_write_json, workspace_paths
 from scientific_quality_gates import validate_route_selection, validate_proxy_measurement_design
+from scientific_argument_bridge import validate_route_analysis_bridge
 
 
 def _read(path: Path, errors: list[str]) -> dict[str, Any]:
@@ -160,6 +161,8 @@ def validate_bundles(evidence: dict[str, Any], literature: dict[str, Any],
         note = routes_bundle.get("route_generation_note")
         if not note:
             warnings.append("Fewer than three distinct research routes are present and no explanation is recorded; do not fabricate a weak third route.")
+    warnings.extend(validate_route_analysis_bridge(routes_bundle, evidence))
+
     recommended_route = routes_bundle.get("recommended_route_id")
     framework_route = framework.get("recommended_route_id")
     if recommended_route and not framework_route:
