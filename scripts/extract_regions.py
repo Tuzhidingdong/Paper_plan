@@ -137,7 +137,7 @@ def main() -> int:
     workspace = args.workspace.expanduser().resolve()
     source_pdf = get_source_pdf(workspace)
     bundle = load_evidence_bundle(workspace)
-    if sha256_file(source_pdf) != bundle.get("source", {}).get("sha256"):
+    if sha256_file(source_pdf) != (bundle.get("source") or {}).get("sha256"):
         print("Source PDF hash mismatch. Do not continue with stale workspace state.", file=sys.stderr)
         return 2
 

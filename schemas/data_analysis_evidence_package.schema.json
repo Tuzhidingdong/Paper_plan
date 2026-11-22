@@ -1,0 +1,643 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Tuzhidingdong/Data_analysis/schemas/evidence_package.schema.json",
+  "title": "Compact scientific evidence package",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "evidence_package_id",
+    "dataset_count",
+    "datasets",
+    "battery_report_count",
+    "battery_reports",
+    "statistics_report_count",
+    "statistics_reports",
+    "interpretation_rules",
+    "omission_policy",
+    "xrd_report_count",
+    "xrd_reports",
+    "xanes_report_count",
+    "xanes_reports",
+    "eis_report_count",
+    "eis_reports",
+    "cross_modal_report_count",
+    "cross_modal_reports"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "evidence_package_id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "question": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dataset_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "datasets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "dataset_id",
+          "source_sha256",
+          "summary_sha256",
+          "columns",
+          "row_count",
+          "warnings"
+        ],
+        "properties": {
+          "dataset_id": {
+            "type": "string"
+          },
+          "source_artifact_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "summary_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "source_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "row_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "delimiter": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "encoding": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "has_header": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "decimal_comma_candidate": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "decimal_comma_applied": {
+            "type": "boolean"
+          },
+          "column_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "omitted_column_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "irregular_row_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "irregular_rows_sample": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "interpretation_rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "omission_policy": {
+      "type": "string"
+    },
+    "battery_report_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "battery_reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "analysis_run_id",
+          "operation_id",
+          "source_sha256",
+          "summary_sha256",
+          "cycle_count",
+          "selected_cycles",
+          "capacity_retention_percent_last_vs_first"
+        ],
+        "properties": {
+          "analysis_run_id": {
+            "type": "string"
+          },
+          "operation_id": {
+            "const": "battery.cycle_metrics"
+          },
+          "source_artifact_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "summary_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "cycle_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "complete_cycle_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "incomplete_cycle_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "first_complete_discharge_capacity_mAh": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "last_complete_discharge_capacity_mAh": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "capacity_retention_percent_last_vs_first": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "coulombic_efficiency_summary_percent": {
+            "type": "object"
+          },
+          "selected_cycles": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "statistics_report_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "statistics_reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "analysis_run_id",
+          "operation_id",
+          "source_sha256",
+          "summary_sha256",
+          "group_count",
+          "groups"
+        ],
+        "properties": {
+          "analysis_run_id": {
+            "type": "string"
+          },
+          "operation_id": {
+            "const": "statistics.descriptive"
+          },
+          "source_artifact_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "summary_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "input_row_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "group_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "omitted_group_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "xrd_report_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "xanes_report_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "xrd_reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "analysis_run_id",
+          "operation_id",
+          "source_sha256",
+          "summary_sha256",
+          "peak_count",
+          "selected_peaks"
+        ],
+        "properties": {
+          "analysis_run_id": {
+            "type": "string"
+          },
+          "operation_id": {
+            "const": "xrd.profile"
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "summary_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "point_count": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "peak_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "omitted_peak_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "selected_peaks": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "xanes_reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "analysis_run_id",
+          "operation_id",
+          "source_sha256",
+          "summary_sha256",
+          "edge_energy_eV",
+          "edge_step"
+        ],
+        "properties": {
+          "analysis_run_id": {
+            "type": "string"
+          },
+          "operation_id": {
+            "const": "xas.xanes_normalization"
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "summary_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "edge_energy_eV": {
+            "type": "number"
+          },
+          "edge_step": {
+            "type": "number"
+          },
+          "pre_edge_range_eV": {
+            "type": "array"
+          },
+          "post_edge_range_eV": {
+            "type": "array"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "eis_report_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "eis_reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "analysis_run_id",
+          "operation_id",
+          "source_sha256",
+          "summary_sha256"
+        ],
+        "properties": {
+          "analysis_run_id": {
+            "type": "string"
+          },
+          "operation_id": {
+            "enum": [
+              "eis.screening_metrics",
+              "eis.equivalent_circuit_fit"
+            ]
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "summary_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "point_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "frequency_min_hz": {
+            "type": "number"
+          },
+          "frequency_max_hz": {
+            "type": "number"
+          },
+          "circuit": {
+            "type": "string"
+          },
+          "fitted_parameters": {
+            "type": "object"
+          },
+          "rmse_complex_ohm": {
+            "type": "number"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "cross_modal_report_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cross_modal_reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "cross_modal_evidence_id",
+          "operation_id",
+          "study_id",
+          "manifest_sha256",
+          "summary_sha256",
+          "record_count",
+          "group_count",
+          "matched_group_count",
+          "groups"
+        ],
+        "properties": {
+          "cross_modal_evidence_id": {
+            "type": "string"
+          },
+          "operation_id": {
+            "const": "evidence.cross_modal_link"
+          },
+          "study_id": {
+            "type": "string"
+          },
+          "manifest_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "summary_sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "record_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "group_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "matched_group_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unmatched_group_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "omitted_group_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "source_hashes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "modality_counts": {
+            "type": "object"
+          },
+          "link_policy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "properties": {
+            "dataset_count": {
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "battery_report_count": {
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "statistics_report_count": {
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "xrd_report_count": {
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "xanes_report_count": {
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "eis_report_count": {
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "cross_modal_report_count": {
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

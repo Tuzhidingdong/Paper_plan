@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from scientific_quality_gates import validate_evidence_quality
+from external_evidence import validate_external_source_ref
 
 from era_core import (
     atomic_write_json,
@@ -21,8 +22,8 @@ from era_core import (
     workspace_paths,
 )
 
-VALID_ORIGINS = {"Exact_Text", "Exact_Table", "Vector_Extracted", "Visual_Estimate", "Qualitative_Observation", "Unavailable"}
-VALID_LEGIBILITY = {"High", "Medium", "Low", "Unassessable"}
+VALID_ORIGINS = {"Exact_Text", "Exact_Table", "Vector_Extracted", "Visual_Estimate", "Qualitative_Observation", "Unavailable", "Structured_Analysis"}
+VALID_LEGIBILITY = {"High", "Medium", "Low", "Unassessable", "NOT_APPLICABLE"}
 VALID_PERMISSION = {"Exact_Values", "Trend_Only", "Qualitative_Only", "None"}
 VALID_EPISTEMIC = {"Observed", "Interpreted", "Hypothesized"}
 VALID_VISIBILITY = {"FOUND", "NOT_SHOWN", "NOT_LEGIBLE", "UNCERTAIN", "NOT_APPLICABLE"}
@@ -103,9 +104,27 @@ def validate(bundle: dict[str, Any], workspace: Path | None = None) -> tuple[lis
         if result.get("result_id") != result_id:
             errors.append(f"Result key/id mismatch: {result_id}")
         check_registry(result_id, "R", "result_slot")
+        evidence_source = result.get("evidence_source", "PDF_REPORT")
+        if evidence_source not in {"PDF_REPORT", "STRUCTURED_ANALYSIS", "MIXED"}:
+            errors.append(f"{result_id}: invalid evidence_source")
         region_ids = result.get("region_ids", [])
-        if not region_ids:
-            errors.append(f"{result_id}: at least one region_id is required")
+        refs = result.get("external_source_refs", [])
+        if evidence_source in {"PDF_REPORT", "MIXED"} and not region_ids:
+            errors.append(f"{result_id}: {evidence_source} requires at least one real PDF region_id")
+        if evidence_source == "STRUCTURED_ANALYSIS" and region_ids:
+            errors.append(f"{result_id}: STRUCTURED_ANALYSIS must not contain fabricated PDF Region IDs")
+        if evidence_source in {"STRUCTURED_ANALYSIS", "MIXED"} and not refs:
+            errors.append(f"{result_id}: {evidence_source} requires external_source_refs")
+        if evidence_source == "STRUCTURED_ANALYSIS":
+            if result.get("data_origin") != "Structured_Analysis":
+                errors.append(f"{result_id}: STRUCTURED_ANALYSIS requires data_origin Structured_Analysis")
+            if result.get("visual_legibility") != "NOT_APPLICABLE":
+                errors.append(f"{result_id}: non-visual structured evidence requires visual_legibility NOT_APPLICABLE")
+            if result.get("is_visual_estimate", False):
+                errors.append(f"{result_id}: structured evidence cannot be marked as a visual estimate")
+        if workspace is not None:
+            for ref in refs:
+                errors.extend(f"{result_id}: {message}" for message in validate_external_source_ref(workspace, ref))
         for region_id in region_ids:
             if region_id not in regions:
                 errors.append(f"{result_id}: unknown region {region_id}")
@@ -230,13 +249,25 @@ def main() -> int:
     errors, warnings = validate(bundle, workspace)
     paths = workspace_paths(workspace)
     try:
-        source_pdf = workspace / "source" / "original_report.pdf"
-        if not source_pdf.is_file():
-            errors.append("Original source PDF is missing")
-        elif sha256_file(source_pdf) != bundle.get("source", {}).get("sha256"):
-            errors.append("Original source PDF hash does not match Evidence Bundle")
+        source = bundle.get("source")
+        has_pdf_evidence = any(
+            item.get("evidence_source", "PDF_REPORT") in {"PDF_REPORT", "MIXED"}
+            for item in bundle.get("result_units", {}).values()
+        )
+        if isinstance(source, dict) and source:
+            source_pdf = workspace / "source" / "original_report.pdf"
+            if not source_pdf.is_file():
+                errors.append("Original source PDF is missing")
+            elif sha256_file(source_pdf) != source.get("sha256"):
+                errors.append("Original source PDF hash does not match Evidence Bundle")
+        elif has_pdf_evidence:
+            errors.append("PDF Result Units exist but the Evidence Bundle source is null/empty")
+        elif bundle.get("result_units"):
+            registry_file = workspace_paths(workspace)["external_sources"] / "registry.json"
+            if not registry_file.is_file():
+                errors.append("Structured-only Evidence Bundle has no external source registry")
     except OSError as exc:
-        errors.append(f"Could not verify source PDF: {exc}")
+        errors.append(f"Could not verify source provenance: {exc}")
     report = {"status": "ERROR" if errors else ("WARNING" if warnings else "PASS"), "errors": errors, "warnings": warnings}
     atomic_write_json(args.report or paths["state"] / "validation_evidence.json", report)
     if paths["manifest"].exists():

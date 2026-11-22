@@ -23,7 +23,15 @@
       "type": "string"
     },
     "source": {
-      "$ref": "#/$defs/source"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/source"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Null only for workspaces whose evidence is entirely imported structured analysis; never synthesize PDF metadata."
     },
     "regions": {
       "type": "object",
@@ -445,7 +453,8 @@
             "Vector_Extracted",
             "Visual_Estimate",
             "Qualitative_Observation",
-            "Unavailable"
+            "Unavailable",
+            "Structured_Analysis"
           ]
         }
       },
@@ -473,8 +482,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "minItems": 1
+          }
         },
         "panel_ids": {
           "type": "array",
@@ -492,7 +500,8 @@
             "Vector_Extracted",
             "Visual_Estimate",
             "Qualitative_Observation",
-            "Unavailable"
+            "Unavailable",
+            "Structured_Analysis"
           ]
         },
         "visual_legibility": {
@@ -500,7 +509,8 @@
             "High",
             "Medium",
             "Low",
-            "Unassessable"
+            "Unassessable",
+            "NOT_APPLICABLE"
           ]
         },
         "is_visual_estimate": {
@@ -721,6 +731,29 @@
             }
           },
           "additionalProperties": true
+        },
+        "evidence_source": {
+          "enum": [
+            "PDF_REPORT",
+            "STRUCTURED_ANALYSIS",
+            "MIXED"
+          ],
+          "description": "Evidence provenance class. Missing means legacy PDF_REPORT."
+        },
+        "external_source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/external_source_ref"
+          }
+        },
+        "source_lineage_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Explicitly source-backed shared raw-source identifiers; never infer from numeric similarity."
         }
       },
       "calculation_audits": {
@@ -980,7 +1013,122 @@
           "additionalProperties": false
         }
       },
-      "additionalProperties": true
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "evidence_source": {
+                "const": "PDF_REPORT"
+              }
+            },
+            "required": [
+              "evidence_source"
+            ]
+          },
+          "then": {
+            "properties": {
+              "region_ids": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "evidence_source": {
+                "const": "STRUCTURED_ANALYSIS"
+              }
+            },
+            "required": [
+              "evidence_source"
+            ]
+          },
+          "then": {
+            "properties": {
+              "region_ids": {
+                "maxItems": 0
+              },
+              "external_source_refs": {
+                "minItems": 1
+              },
+              "data_origin": {
+                "const": "Structured_Analysis"
+              },
+              "visual_legibility": {
+                "const": "NOT_APPLICABLE"
+              },
+              "is_visual_estimate": {
+                "const": false
+              }
+            },
+            "required": [
+              "external_source_refs"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "evidence_source": {
+                "const": "MIXED"
+              }
+            },
+            "required": [
+              "evidence_source"
+            ]
+          },
+          "then": {
+            "properties": {
+              "region_ids": {
+                "minItems": 1
+              },
+              "external_source_refs": {
+                "minItems": 1
+              }
+            },
+            "required": [
+              "external_source_refs"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "evidence_source": {
+                "const": "PDF_REPORT"
+              }
+            },
+            "required": [
+              "evidence_source"
+            ]
+          },
+          "then": {
+            "properties": {
+              "region_ids": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "required": [
+                "evidence_source"
+              ]
+            }
+          },
+          "then": {
+            "properties": {
+              "region_ids": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
     },
     "finding": {
       "type": "object",
@@ -1234,6 +1382,114 @@
         }
       },
       "additionalProperties": false
+    },
+    "external_source_ref": {
+      "type": "object",
+      "required": [
+        "source_system",
+        "contract_id",
+        "contract_version",
+        "evidence_package_id",
+        "entity_type",
+        "entity_id",
+        "summary_sha256",
+        "package_sha256"
+      ],
+      "properties": {
+        "source_system": {
+          "const": "Data_analysis"
+        },
+        "contract_id": {
+          "const": "scientific-evidence-export"
+        },
+        "contract_version": {
+          "const": "1.0.0"
+        },
+        "evidence_package_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entity_type": {
+          "enum": [
+            "dataset",
+            "battery_report",
+            "statistics_report",
+            "xrd_report",
+            "xanes_report",
+            "eis_report",
+            "cross_modal_report"
+          ]
+        },
+        "entity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "analysis_run_id": {
+          "type": "string"
+        },
+        "dataset_id": {
+          "type": "string"
+        },
+        "artifact_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "observation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "source_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          }
+        },
+        "summary_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "operation_id": {
+          "type": "string"
+        },
+        "package_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "source_sha256"
+          ]
+        },
+        {
+          "required": [
+            "source_hashes"
+          ]
+        }
+      ],
+      "additionalProperties": true
     }
   },
   "additionalProperties": false

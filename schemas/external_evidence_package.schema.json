@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tuzhidingdong.github.io/Paper_plan/schemas/external_evidence_package.schema.json",
+  "title": "Paper_plan scientific-evidence-export v1.0.0 contract",
+  "allOf": [
+    {
+      "$ref": "https://github.com/Tuzhidingdong/Data_analysis/schemas/evidence_package.schema.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "contract_id",
+        "contract_version",
+        "source_system"
+      ],
+      "properties": {
+        "contract_id": {
+          "const": "scientific-evidence-export"
+        },
+        "contract_version": {
+          "const": "1.0.0"
+        },
+        "source_system": {
+          "const": "Data_analysis"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "evidence_package_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  ]
+}

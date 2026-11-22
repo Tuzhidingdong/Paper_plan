@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from era_core import atomic_write_json, load_evidence_bundle, register_anchor, register_named_sample, workspace_paths
+from external_evidence import validate_external_source_ref
 
 
 def main() -> int:
@@ -20,8 +21,10 @@ def main() -> int:
     sample.add_argument("--prep-json", type=Path)
     sample.add_argument("--batch-note")
 
-    result = sub.add_parser("result-slot", help="Reserve a Result Unit ID for a known region")
-    result.add_argument("--parent-region-id", required=True)
+    result = sub.add_parser("result-slot", help="Reserve a Result Unit ID for a PDF Region or imported structured source")
+    source_group = result.add_mutually_exclusive_group(required=True)
+    source_group.add_argument("--parent-region-id")
+    source_group.add_argument("--external-source-ref-json", type=Path)
     result.add_argument("--slot-index", type=int, required=True)
 
     finding = sub.add_parser("finding-slot", help="Reserve a Finding ID before writing a finding card")
@@ -51,11 +54,24 @@ def main() -> int:
     if args.slot_index < 1:
         parser.error("--slot-index must be >= 1")
     if args.kind == "result-slot":
-        if args.parent_region_id not in bundle["regions"]:
-            parser.error(f"Unknown parent region: {args.parent_region_id}")
         prefix, entity_type = "R", "result_slot"
-        anchor_key = f"result-slot:{args.parent_region_id}:{args.slot_index:03d}"
-        metadata = {"parent_region_id": args.parent_region_id, "slot_index": args.slot_index, "status": "RESERVED"}
+        if args.parent_region_id:
+            if args.parent_region_id not in bundle["regions"]:
+                parser.error(f"Unknown parent region: {args.parent_region_id}")
+            anchor_key = f"result-slot:{args.parent_region_id}:{args.slot_index:03d}"
+            metadata = {"parent_region_id": args.parent_region_id, "slot_index": args.slot_index, "status": "RESERVED"}
+        else:
+            try:
+                external_ref = json.loads(args.external_source_ref_json.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                parser.error(f"Cannot read external source reference JSON: {exc}")
+            ref_errors = validate_external_source_ref(workspace, external_ref)
+            if ref_errors:
+                parser.error("; ".join(ref_errors))
+            import hashlib
+            canonical = json.dumps(external_ref, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+            anchor_key = f"structured-result:{hashlib.sha256(canonical.encode('utf-8')).hexdigest()[:24]}:{args.slot_index:03d}"
+            metadata = {"external_source_ref": external_ref, "slot_index": args.slot_index, "status": "RESERVED"}
     else:
         prefix, entity_type = "F", "finding_slot"
         anchor_key = f"finding-slot:{args.slot_index:03d}"

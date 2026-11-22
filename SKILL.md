@@ -92,6 +92,18 @@ The Skill may identify that the available evidence does not yet support a defens
 
 45. For every image-derived Result Unit, record during the original-resolution CAPTION_BLIND inspection a structured visual metadata assessment for modality, magnification/pixel size, scale/spatial calibration, specimen state/preparation, image processing/contrast and field selection/sampling. Each dimension must contain an observed value with source location/method/confidence or an explicit NOT_PRESENT, NOT_LEGIBLE, NOT_APPLICABLE or UNKNOWN state with a reason. A scale-bar value read from the crop is a human visual read, not an automatic image-reading claim. Later comparability assessments must reuse this provenance; never infer missing metadata from captions or other panels.
 
+## Evidence source modes
+
+Paper_plan supports three independent entry modes without making Data_analysis a dependency:
+
+- **PDF-only:** retain the existing PDF ingestion, Region/Panel extraction, visual inspection and evidence workflow. Legacy Result Units without an explicit source mode are interpreted as `PDF_REPORT`.
+- **Structured-only:** import a Data_analysis `evidence_package.json` using `scripts/import_analysis_evidence.py`. The importer registers the package and its provenance but never auto-creates Result Units, Findings or Claims. A structured-only workspace has `source: null`, `source_pdf: null`, no synthetic page count and no fabricated Region IDs.
+- **Mixed:** preserve PDF and Data_analysis as separate source identities. A Result Unit marked `MIXED` must retain real PDF Region IDs and explicit external source references; never relabel structured results as PDF-extracted content.
+
+The exchange envelope is `contract_id=scientific-evidence-export`, `contract_version=1.0.0`, `source_system=Data_analysis`. The imported package is retained byte-for-byte with its own SHA-256. Raw data files are not copied or registered. Package registration is not scientific interpretation: select individual entities only when relevant, allocate a Paper_plan Result Unit ID with `assign_entity_ids.py`, and persist it with `upsert_result_unit.py`. Structured Result Units use `region_ids: []`, `data_origin: Structured_Analysis` and `visual_legibility: NOT_APPLICABLE`, and must cite the exact imported package/entity/hash. Preserve report warnings and limitations. Do not infer sample identity, independent replicates or experimental conditions from numeric similarity.
+
+Run `validate_evidence.py`, `validate_samples.py`, `validate_planning.py` and `validate_bundle_schemas.py` after mapping. Continue to use the existing Claim → Data Slot → Data Unit → Figure/SI → Work Package model; Data Units retain source Result Unit IDs and common source-lineage/independence groups. When documented, retain matching original source SHA-256 or exact shared artifact identifiers in `source_lineage_ids`; numeric similarity alone never establishes common lineage or independence. Schema PASS is structural only.
+
 ## Entry and commands
 
 Read workflows/07_full_run.md first. Use workflows/01–06 for evidence and research-frontier stages, then workflows/08–12 for journal positioning, argument, Figure/SI design, work-package handoff and product audit. Load only stage-specific reference files.
@@ -99,6 +111,7 @@ Read workflows/07_full_run.md first. Use workflows/01–06 for evidence and rese
     python -m pip install -r requirements.txt
     python -m unittest discover -s tests -v
     python scripts/ingest_pdf.py "REPORT.pdf" --workspace "WORKSPACE"
+    python scripts/import_analysis_evidence.py --workspace "WORKSPACE" --package "evidence_package.json"
     python scripts/extract_regions.py --workspace "WORKSPACE"
     python scripts/build_contact_sheet.py --workspace "WORKSPACE"
     python scripts/validate_evidence.py --workspace "WORKSPACE"

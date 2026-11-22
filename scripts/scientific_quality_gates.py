@@ -174,8 +174,10 @@ def validate_evidence_integrity(bundle: dict[str, Any]) -> tuple[list[str], list
             layout_occurrences.setdefault(
                 (fingerprint_type, str(fingerprint), zone, geometry), []
             ).append(region_id)
+    source = bundle.get("source")
+    source_page_count = source.get("page_count", 0) if isinstance(source, dict) else 0
     minimum_repeated_pages = max(
-        3, int(math.ceil((bundle.get("source", {}).get("page_count") or 0) * 0.15))
+        3, int(math.ceil((source_page_count or 0) * 0.15))
     )
     inferred_repeated_regions = set()
     for region_ids_for_layout in layout_occurrences.values():
