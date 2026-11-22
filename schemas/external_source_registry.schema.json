@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Paper_plan external source registry",
+  "type": "object",
+  "required": ["schema_version", "source_system", "contract_id", "contract_version", "packages"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "source_system": {"const": "Data_analysis"},
+    "contract_id": {"const": "scientific-evidence-export"},
+    "contract_version": {"const": "1.0.0"},
+    "packages": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["evidence_package_id", "package_sha256", "package_path", "status", "categories", "source_hashes", "warnings", "limitations", "unverifiable_fields"],
+        "properties": {
+          "evidence_package_id": {"type": "string", "minLength": 1},
+          "package_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "package_path": {"type": "string", "minLength": 1},
+          "status": {"const": "IMPORTED_STRUCTURAL_ONLY"},
+          "categories": {"type": "object"},
+          "source_hashes": {"type": "array", "items": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"}},
+          "warnings": {"type": "array", "items": {"type": "string"}},
+          "limitations": {"type": "array", "items": {"type": "string"}},
+          "unverifiable_fields": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -156,12 +156,14 @@ def workspace_paths(workspace: Path) -> dict[str, Path]:
         "pages": extracted / "pages",
         "contact_sheets": extracted / "contact_sheets",
         "cache": workspace / "cache" / "prompt_context",
+        "external_sources": state / "external_sources",
+        "external_packages": workspace / "sources" / "data_analysis" / "packages",
     }
 
 
 def ensure_workspace_dirs(workspace: Path) -> dict[str, Path]:
     paths = workspace_paths(workspace)
-    for key in ("source", "state", "history", "regions", "panels", "pages", "contact_sheets", "cache"):
+    for key in ("source", "state", "history", "regions", "panels", "pages", "contact_sheets", "cache", "external_sources", "external_packages"):
         paths[key].mkdir(parents=True, exist_ok=True)
     return paths
 
@@ -170,7 +172,7 @@ def default_evidence_bundle() -> dict[str, Any]:
     return {
         "schema_version": 1,
         "workspace_revision": "0.1.0",
-        "source": {},
+        "source": None,
         "regions": {},
         "panels": {},
         "samples": {},

@@ -22,8 +22,8 @@ def refresh(workspace: Path) -> dict:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     source_hash = sha256_file(source_pdf)
     expected = (
-        manifest.get("source_pdf", {}).get("sha256")
-        or manifest.get("source", {}).get("sha256")
+        (manifest.get("source_pdf") or {}).get("sha256")
+        or (manifest.get("source") or {}).get("sha256")
     )
     if expected != source_hash:
         raise ValueError("Source PDF hash differs from workspace manifest; refusing to refresh stale page diagnostics")

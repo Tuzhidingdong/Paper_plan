@@ -41,7 +41,7 @@ def main() -> int:
     if not parent:
         raise KeyError(f"Unknown parent_region_id: {parent_id}")
     source_pdf = get_source_pdf(workspace)
-    if sha256_file(source_pdf) != bundle.get("source", {}).get("sha256"):
+    if sha256_file(source_pdf) != (bundle.get("source") or {}).get("sha256"):
         raise RuntimeError("Source PDF hash mismatch")
 
     document = fitz.open(source_pdf)

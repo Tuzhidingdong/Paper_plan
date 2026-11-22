@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from era_core import atomic_write_json, workspace_paths
+from external_evidence import validate_external_registry
 
 
 BUNDLES = {
@@ -16,6 +17,9 @@ BUNDLES = {
     "framework_bundle.json": "framework_bundle.schema.json",
     "manuscript_development_bundle.json": "manuscript_development_bundle.schema.json",
     "state_manifest.json": "state_manifest.schema.json",
+}
+OPTIONAL_BUNDLES = {
+    "external_sources/registry.json": "external_source_registry.schema.json",
 }
 
 
@@ -31,8 +35,10 @@ def validate_workspace(workspace: Path) -> dict:
     root = Path(__file__).resolve().parents[1]
     state = workspace_paths(workspace)["state"]
     errors, validated = [], []
-    for bundle_name, schema_name in BUNDLES.items():
+    for bundle_name, schema_name in {**BUNDLES, **OPTIONAL_BUNDLES}.items():
         bundle_path = state / bundle_name
+        if bundle_name in OPTIONAL_BUNDLES and not bundle_path.is_file():
+            continue
         schema_path = root / "schemas" / schema_name
         if not bundle_path.is_file():
             errors.append(f"Missing bundle: {bundle_path}")
@@ -52,6 +58,7 @@ def validate_workspace(workspace: Path) -> dict:
             validated.append(bundle_name)
         except (OSError, json.JSONDecodeError, Exception) as exc:
             errors.append(f"{bundle_name}: {exc}")
+    errors.extend(validate_external_registry(workspace))
     return {"status": "ERROR" if errors else "PASS", "errors": errors, "validated": validated}
 
 

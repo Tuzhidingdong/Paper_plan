@@ -1,20 +1,110 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "title":"ERA State Manifest",
-  "type":"object",
-  "required":["schema_version","workspace_revision","stage","source_pdf","bundles"],
-  "properties":{
-    "schema_version":{"const":1,"type":"integer"},
-    "workspace_revision":{"type":"string"},
-    "stage":{"enum":["INGESTED","REGIONS_EXTRACTED","EVIDENCE_DRAFTED","EVIDENCE_AUDITED","BLOCKED_BY_CAPABILITY","NEEDS_HUMAN_CONFIRMATION"]},
-    "source_pdf":{"type":"object","required":["path","sha256","page_count"],"properties":{"path":{"type":"string"},"sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"page_count":{"type":"integer","minimum":1}}},
-    "bundles":{"type":"object"},
-    "tools":{"type":"object"},
-    "validation":{"type":"object"},
-    "capability_profile":{"type":["object","null"]},
-    "pages":{"type":"array","items":{"type":"object"}},
-    "region_count":{"type":"integer","minimum":0},
-    "panel_count":{"type":"integer","minimum":0}
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ERA State Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "workspace_revision",
+    "stage",
+    "source_pdf",
+    "bundles"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "type": "integer"
+    },
+    "workspace_revision": {
+      "type": "string"
+    },
+    "stage": {
+      "enum": [
+        "INGESTED",
+        "REGIONS_EXTRACTED",
+        "EVIDENCE_DRAFTED",
+        "EVIDENCE_AUDITED",
+        "BLOCKED_BY_CAPABILITY",
+        "NEEDS_HUMAN_CONFIRMATION"
+      ]
+    },
+    "source_pdf": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256",
+            "page_count"
+          ],
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "page_count": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Null is valid for a structured-only workspace; no placeholder PDF metadata is permitted."
+    },
+    "bundles": {
+      "type": "object"
+    },
+    "tools": {
+      "type": "object"
+    },
+    "validation": {
+      "type": "object"
+    },
+    "capability_profile": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "region_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "panel_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "external_sources": {
+      "type": "object",
+      "properties": {
+        "registry_path": {
+          "type": "string"
+        },
+        "package_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "last_imported_package_id": {
+          "type": "string"
+        },
+        "last_imported_package_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        }
+      },
+      "additionalProperties": true
+    }
   },
-  "additionalProperties":true
+  "additionalProperties": true
 }

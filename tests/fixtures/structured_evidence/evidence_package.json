@@ -1,0 +1,245 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_package_id": "EV-SYNTHETIC-0001",
+  "contract_id": "scientific-evidence-export",
+  "contract_version": "1.0.0",
+  "source_system": "Data_analysis",
+  "created_at": "2026-11-22T00:00:00Z",
+  "question": "Synthetic integration fixture only",
+  "dataset_count": 1,
+  "datasets": [
+    {
+      "dataset_id": "DATASET-SYN-001",
+      "source_artifact_ids": [
+        "ARTIFACT-SYN-001"
+      ],
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source_name": "synthetic.csv",
+      "row_count": 2,
+      "decimal_comma_applied": false,
+      "column_count": 1,
+      "omitted_column_count": 0,
+      "columns": [
+        {
+          "name": "signal",
+          "non_empty": 2,
+          "missing_count": 0,
+          "numeric_fraction": 1,
+          "minimum": 1,
+          "maximum": 2,
+          "mean": 1.5,
+          "sample_std": 0.707
+        }
+      ],
+      "irregular_row_count": 0,
+      "warnings": [
+        "Synthetic parser warning"
+      ],
+      "analysis_run_id": null,
+      "operation_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null,
+      "limitations": []
+    }
+  ],
+  "battery_report_count": 1,
+  "battery_reports": [
+    {
+      "analysis_run_id": "ANALYSIS-SYN-BAT-001",
+      "operation_id": "battery.cycle_metrics",
+      "source_artifact_ids": [
+        "ARTIFACT-SYN-001"
+      ],
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "cycle_count": 2,
+      "complete_cycle_count": 2,
+      "incomplete_cycle_count": 0,
+      "first_complete_discharge_capacity_mAh": 1,
+      "last_complete_discharge_capacity_mAh": 0.9,
+      "capacity_retention_percent_last_vs_first": 90,
+      "selected_cycles": [
+        {
+          "cycle_id": "CYCLE-SYN-001",
+          "discharge_capacity_mAh": 1
+        }
+      ],
+      "warnings": [
+        "Synthetic QC warning"
+      ],
+      "limitations": [
+        "Synthetic limitation"
+      ],
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null
+    }
+  ],
+  "statistics_report_count": 1,
+  "statistics_reports": [
+    {
+      "analysis_run_id": "ANALYSIS-SYN-STAT-001",
+      "operation_id": "statistics.descriptive",
+      "source_artifact_ids": [
+        "ARTIFACT-SYN-001"
+      ],
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "input_row_count": 2,
+      "group_count": 1,
+      "omitted_group_count": 0,
+      "groups": [
+        {
+          "group_id": "GROUP-SYN-001",
+          "variables": [
+            {
+              "variable": "signal",
+              "mean": 1.5
+            }
+          ]
+        }
+      ],
+      "warnings": [
+        "Synthetic descriptive-only warning"
+      ],
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null,
+      "limitations": []
+    }
+  ],
+  "xrd_report_count": 1,
+  "xrd_reports": [
+    {
+      "analysis_run_id": "ANALYSIS-SYN-XRD-001",
+      "operation_id": "xrd.profile",
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "point_count": 3,
+      "peak_count": 1,
+      "omitted_peak_count": 0,
+      "selected_peaks": [
+        {
+          "peak_position": 10,
+          "intensity": 100
+        }
+      ],
+      "configuration": {
+        "axis": "synthetic"
+      },
+      "warnings": [
+        "Synthetic peak-screening warning"
+      ],
+      "limitations": [
+        "No phase assignment in this fixture"
+      ],
+      "source_artifact_ids": null,
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null
+    }
+  ],
+  "xanes_report_count": 1,
+  "xanes_reports": [
+    {
+      "analysis_run_id": "ANALYSIS-SYN-XANES-001",
+      "operation_id": "xas.xanes_normalization",
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "edge_energy_eV": 10000,
+      "edge_step": 1,
+      "pre_edge_range_eV": [
+        9990,
+        9995
+      ],
+      "post_edge_range_eV": [
+        10010,
+        10020
+      ],
+      "warnings": [
+        "Synthetic normalization warning"
+      ],
+      "limitations": [
+        "Synthetic fitting-window limitation"
+      ],
+      "source_artifact_ids": null,
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null
+    }
+  ],
+  "eis_report_count": 1,
+  "eis_reports": [
+    {
+      "analysis_run_id": "ANALYSIS-SYN-EIS-001",
+      "operation_id": "eis.screening_metrics",
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "point_count": 3,
+      "frequency_min_hz": 1,
+      "frequency_max_hz": 1000,
+      "warnings": [
+        "Synthetic EIS warning"
+      ],
+      "source_artifact_ids": null,
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null,
+      "limitations": []
+    }
+  ],
+  "cross_modal_report_count": 1,
+  "cross_modal_reports": [
+    {
+      "cross_modal_evidence_id": "CROSSMODAL-SYN-001",
+      "operation_id": "evidence.cross_modal_link",
+      "study_id": "STUDY-SYN-001",
+      "manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "record_count": 1,
+      "group_count": 1,
+      "matched_group_count": 1,
+      "unmatched_group_count": 0,
+      "omitted_group_count": 0,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "groups": [
+        {
+          "group_id": "GROUP-SYN-001",
+          "cross_modal_match": true
+        }
+      ],
+      "modality_counts": {
+        "synthetic": 1
+      },
+      "link_policy": [
+        "Synthetic exact-key join only"
+      ],
+      "source_artifact_ids": null,
+      "dataset_id": null,
+      "analysis_run_id": null,
+      "source_sha256": null,
+      "analysis_parameters": null,
+      "warnings": [],
+      "limitations": []
+    }
+  ],
+  "interpretation_rules": [
+    "Synthetic fixture; no scientific interpretation is implied."
+  ],
+  "omission_policy": "No raw source data are present in this fixture."
+}

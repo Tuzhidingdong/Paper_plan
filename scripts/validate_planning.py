@@ -10,6 +10,7 @@ from typing import Any
 
 from era_core import atomic_write_json, workspace_paths
 from scientific_quality_gates import validate_route_selection, validate_proxy_measurement_design
+from external_evidence import result_source_hashes
 
 
 def _read(path: Path, errors: list[str]) -> dict[str, Any]:
@@ -230,10 +231,30 @@ def validate_bundles(evidence: dict[str, Any], literature: dict[str, Any],
         source_ids = unit.get("source_result_ids", [])
         if not source_ids:
             errors.append(f"{unit_id}: source_result_ids cannot be empty")
+        lineage_owners: dict[str, list[str]] = defaultdict(list)
         for result_id in source_ids:
             if result_id not in evidence_results:
                 errors.append(f"{unit_id}: unknown source Result Unit {result_id}")
+            else:
+                for source_hash in result_source_hashes(evidence_results[result_id], evidence):
+                    lineage_owners[source_hash].append(result_id)
             root_usage[result_id].append(unit_id)
+        shared_hashes = {
+            digest: sorted(set(result_ids)) for digest, result_ids in lineage_owners.items()
+            if len(set(result_ids)) > 1
+        }
+        if shared_hashes:
+            group_id = unit.get("independence_group_id")
+            if not group_id:
+                warnings.append(
+                    f"{unit_id}: source Result Units share underlying source hash(es); "
+                    "do not count them as independent experiments and record a common independence_group_id"
+                )
+            else:
+                warnings.append(
+                    f"{unit_id}: Result Units share underlying source hash(es) and are grouped as "
+                    f"{group_id}; treat them as one source lineage, not independent experiments"
+                )
         if not unit.get("transformation") and unit.get("derived", False):
             errors.append(f"{unit_id}: derived Data Unit requires a transformation description")
     for result_id, units in root_usage.items():
