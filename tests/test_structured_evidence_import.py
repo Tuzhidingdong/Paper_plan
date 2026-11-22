@@ -21,6 +21,15 @@ from validate_bundle_schemas import validate_workspace as validate_schemas
 from validate_planning import validate_bundles
 
 FIXTURE = ROOT / "tests" / "fixtures" / "structured_evidence" / "evidence_package.json"
+PRODUCTION_DATASET_ONLY = ROOT / "tests" / "fixtures" / "structured_evidence" / "production_examples" / "dataset_only_evidence_package.json"
+PRODUCTION_BATTERY_ONLY = ROOT / "tests" / "fixtures" / "structured_evidence" / "production_examples" / "battery_only_evidence_package.json"
+SCHEMA_SYNC = ROOT / "docs" / "DATA_ANALYSIS_EVIDENCE_CONTRACT_SYNC.json"
+COUNT_FIELDS = {
+    "datasets": "dataset_count", "battery_reports": "battery_report_count",
+    "statistics_reports": "statistics_report_count", "xrd_reports": "xrd_report_count",
+    "xanes_reports": "xanes_report_count", "eis_reports": "eis_report_count",
+    "cross_modal_reports": "cross_modal_report_count",
+}
 
 
 class StructuredEvidenceImportTests(unittest.TestCase):
@@ -78,6 +87,111 @@ class StructuredEvidenceImportTests(unittest.TestCase):
             "claim_role": "UNDECIDED",
             "uncertainty_note": "Synthetic fixture; not a scientific conclusion.",
         }
+
+    def _load_synthetic_package(self):
+        return json.loads(FIXTURE.read_text(encoding="utf-8"))
+
+    def _write_package(self, package, filename="evidence_package.json"):
+        path = self.root / filename
+        path.write_text(json.dumps(package, ensure_ascii=False, indent=2) + chr(10), encoding="utf-8")
+        return path
+
+    def test_production_dataset_only_example_imports_byte_for_byte(self):
+        import hashlib
+        raw = PRODUCTION_DATASET_ONLY.read_bytes()
+        self.package_path.write_bytes(raw)
+        result = import_package(self.workspace, self.package_path)
+        self.assertEqual(result["status"], "IMPORTED")
+        self.assertEqual(result["package_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(result["entity_counts"]["datasets"], 1)
+        self.assertTrue(all(result["entity_counts"][key] == 0 for key in COUNT_FIELDS if key != "datasets"))
+        self.assertEqual((self.workspace / result["package_path"]).read_bytes(), raw)
+
+    def test_production_battery_only_example_imports_with_empty_datasets(self):
+        import hashlib
+        raw = PRODUCTION_BATTERY_ONLY.read_bytes()
+        self.package_path.write_bytes(raw)
+        result = import_package(self.workspace, self.package_path)
+        self.assertEqual(result["status"], "IMPORTED")
+        self.assertEqual(result["package_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(result["entity_counts"]["datasets"], 0)
+        self.assertEqual(result["entity_counts"]["battery_reports"], 1)
+        self.assertEqual((self.workspace / result["package_path"]).read_bytes(), raw)
+
+    def test_report_only_categories_import_with_empty_datasets(self):
+        for index, chosen in enumerate(("battery_reports", "statistics_reports", "xrd_reports", "xanes_reports", "eis_reports", "cross_modal_reports")):
+            with self.subTest(category=chosen):
+                package = self._load_synthetic_package()
+                package["evidence_package_id"] = f"EV-SYN-REPORT-ONLY-{index}"
+                package["datasets"] = []
+                package["dataset_count"] = 0
+                for collection, count_key in COUNT_FIELDS.items():
+                    if collection != chosen:
+                        package[collection] = []
+                    package[count_key] = len(package[collection])
+                path = self._write_package(package, f"{chosen}.json")
+                result = import_package(self.root / f"workspace-{chosen}", path)
+                self.assertEqual(result["status"], "IMPORTED")
+                self.assertEqual(result["entity_counts"]["datasets"], 0)
+                self.assertEqual(result["entity_counts"][chosen], 1)
+
+    def test_statistics_plus_xanes_report_only_package_imports(self):
+        package = self._load_synthetic_package()
+        package["evidence_package_id"] = "EV-SYN-STATISTICS-XANES"
+        package["datasets"] = []
+        package["dataset_count"] = 0
+        for collection, count_key in COUNT_FIELDS.items():
+            if collection not in ("statistics_reports", "xanes_reports"):
+                package[collection] = []
+            package[count_key] = len(package[collection])
+        path = self._write_package(package, "statistics_xanes.json")
+        result = import_package(self.root / "workspace-statistics-xanes", path)
+        self.assertEqual(result["status"], "IMPORTED")
+        self.assertEqual(result["entity_counts"]["statistics_reports"], 1)
+        self.assertEqual(result["entity_counts"]["xanes_reports"], 1)
+        self.assertEqual(result["entity_counts"]["datasets"], 0)
+
+    def test_all_seven_count_fields_must_match_their_arrays(self):
+        for index, (collection, count_key) in enumerate(COUNT_FIELDS.items()):
+            with self.subTest(collection=collection):
+                package = self._load_synthetic_package()
+                package[count_key] = len(package[collection]) + 1
+                path = self._write_package(package, f"wrong-count-{index}.json")
+                with self.assertRaisesRegex(ValueError, f"{count_key} does not match {collection} length"):
+                    import_package(self.root / f"workspace-wrong-count-{index}", path)
+
+    def test_seven_empty_categories_are_rejected(self):
+        package = self._load_synthetic_package()
+        package["evidence_package_id"] = "EV-SYN-EMPTY-REJECT"
+        for collection, count_key in COUNT_FIELDS.items():
+            package[collection] = []
+            package[count_key] = 0
+        path = self._write_package(package, "empty-package.json")
+        with self.assertRaisesRegex(ValueError, "at least one non-empty evidence category"):
+            import_package(self.workspace, path)
+        self.assertFalse((self.workspace / "state" / "external_sources" / "registry.json").exists())
+
+    def test_production_snapshot_matches_pinned_schema_sha256_and_sync_record(self):
+        import hashlib
+        sync = json.loads(SCHEMA_SYNC.read_text(encoding="utf-8"))
+        snapshot = ROOT / sync["consumer_snapshot_path"]
+        digest = hashlib.sha256(snapshot.read_bytes()).hexdigest()
+        self.assertEqual(digest, sync["producer_schema_sha256"])
+        self.assertEqual(digest, sync["consumer_snapshot_sha256"])
+        self.assertEqual(sync["producer_commit"], "a19c98a51c574b6d2abb4c6debae8aa4d51b39d0")
+        self.assertEqual(sync["contract_id"], "scientific-evidence-export")
+        self.assertEqual(sync["contract_version"], "1.0.0")
+
+    def test_external_schema_uses_relative_pinned_snapshot_reference(self):
+        schema = json.loads((ROOT / "schemas" / "external_evidence_package.schema.json").read_text(encoding="utf-8"))
+        self.assertEqual(schema["allOf"][0]["$ref"], "data_analysis_evidence_package.schema.json")
+
+    def test_schema_sync_checker_detects_a_new_producer_schema_candidate(self):
+        candidate = self.root / "candidate-production-schema.json"
+        candidate.write_text('{"title":"changed upstream schema"}', encoding="utf-8")
+        checked = subprocess.run([sys.executable, str(SCRIPTS / "verify_data_analysis_schema_sync.py"), "--candidate", str(candidate)], capture_output=True, text=True)
+        self.assertNotEqual(checked.returncode, 0)
+        self.assertIn("candidate production schema differs", checked.stdout + checked.stderr)
 
     def test_valid_package_imports_all_seven_categories_without_raw_data(self):
         result = self.import_fixture()
@@ -221,6 +335,8 @@ class StructuredEvidenceImportTests(unittest.TestCase):
         ref = self.external_ref()
         self.assertEqual(validate_external_source_ref(self.workspace, ref), [])
         wrong_run = dict(ref, analysis_run_id="ANALYSIS-SYN-OTHER")
+        unknown_entity = dict(ref, entity_id="ANALYSIS-SYN-UNKNOWN")
+        self.assertTrue(validate_external_source_ref(self.workspace, unknown_entity))
         self.assertTrue(any("AnalysisRun identity mismatch" in item
                             for item in validate_external_source_ref(self.workspace, wrong_run)))
         wrong_source_hash = dict(ref, source_sha256="c" * 64)

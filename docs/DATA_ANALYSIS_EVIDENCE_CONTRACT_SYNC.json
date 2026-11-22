@@ -1,0 +1,14 @@
+{
+  "contract_id": "scientific-evidence-export",
+  "contract_version": "1.0.0",
+  "source_system": "Data_analysis",
+  "producer_repository": "Tuzhidingdong/Data_analysis",
+  "producer_branch": "feat/managed-data-interoperability",
+  "producer_commit": "a19c98a51c574b6d2abb4c6debae8aa4d51b39d0",
+  "producer_schema_path": "schemas/evidence_package.schema.json",
+  "producer_schema_sha256": "d6a925f608044fad0ed7bfe350de6485d4098d7804c72a77a8021fe6ab847a14",
+  "consumer_snapshot_path": "schemas/data_analysis_evidence_package.schema.json",
+  "consumer_snapshot_sha256": "d6a925f608044fad0ed7bfe350de6485d4098d7804c72a77a8021fe6ab847a14",
+  "synchronization_mode": "byte-identical UTF-8 snapshot from the pinned producer commit",
+  "note": "Paper_plan wrapper adds only the external contract envelope; the payload schema remains unmodified."
+}

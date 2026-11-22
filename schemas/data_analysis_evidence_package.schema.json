@@ -42,11 +42,12 @@
     },
     "dataset_count": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "MUST equal the number of items in datasets."
     },
     "datasets": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "items": {
         "type": "object",
         "required": [
@@ -55,16 +56,27 @@
           "summary_sha256",
           "columns",
           "row_count",
-          "warnings"
+          "warnings",
+          "source_artifact_ids",
+          "analysis_run_id",
+          "operation_id",
+          "source_hashes",
+          "analysis_parameters",
+          "limitations"
         ],
         "properties": {
           "dataset_id": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "source_artifact_ids": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             }
           },
           "source_sha256": {
@@ -140,13 +152,52 @@
             }
           },
           "warnings": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
           "notes": {
             "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "analysis_run_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "operation_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "source_hashes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          },
+          "analysis_parameters": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "limitations": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -166,7 +217,8 @@
     },
     "battery_report_count": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "MUST equal the number of items in battery_reports."
     },
     "battery_reports": {
       "type": "array",
@@ -179,19 +231,34 @@
           "summary_sha256",
           "cycle_count",
           "selected_cycles",
-          "capacity_retention_percent_last_vs_first"
+          "capacity_retention_percent_last_vs_first",
+          "source_artifact_ids",
+          "dataset_id",
+          "source_hashes",
+          "analysis_parameters",
+          "warnings",
+          "limitations"
         ],
         "properties": {
           "analysis_run_id": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
           },
           "operation_id": {
-            "const": "battery.cycle_metrics"
+            "type": "string",
+            "minLength": 1
           },
           "source_artifact_ids": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             }
           },
           "source_sha256": {
@@ -242,16 +309,42 @@
             }
           },
           "warnings": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
           "limitations": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
+          },
+          "dataset_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "source_hashes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          },
+          "analysis_parameters": {
+            "type": [
+              "object",
+              "null"
+            ]
           }
         },
         "additionalProperties": true
@@ -259,7 +352,8 @@
     },
     "statistics_report_count": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "MUST equal the number of items in statistics_reports."
     },
     "statistics_reports": {
       "type": "array",
@@ -271,19 +365,34 @@
           "source_sha256",
           "summary_sha256",
           "group_count",
-          "groups"
+          "groups",
+          "source_artifact_ids",
+          "dataset_id",
+          "source_hashes",
+          "analysis_parameters",
+          "warnings",
+          "limitations"
         ],
         "properties": {
           "analysis_run_id": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
           },
           "operation_id": {
-            "const": "statistics.descriptive"
+            "type": "string",
+            "minLength": 1
           },
           "source_artifact_ids": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             }
           },
           "source_sha256": {
@@ -316,7 +425,39 @@
             }
           },
           "warnings": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "dataset_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "source_hashes": {
             "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          },
+          "analysis_parameters": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "limitations": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -327,11 +468,13 @@
     },
     "xrd_report_count": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "MUST equal the number of items in xrd_reports."
     },
     "xanes_report_count": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "MUST equal the number of items in xanes_reports."
     },
     "xrd_reports": {
       "type": "array",
@@ -343,14 +486,25 @@
           "source_sha256",
           "summary_sha256",
           "peak_count",
-          "selected_peaks"
+          "selected_peaks",
+          "source_artifact_ids",
+          "dataset_id",
+          "source_hashes",
+          "analysis_parameters",
+          "warnings",
+          "limitations"
         ],
         "properties": {
           "analysis_run_id": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
           },
           "operation_id": {
-            "const": "xrd.profile"
+            "type": "string",
+            "minLength": 1
           },
           "source_sha256": {
             "type": "string",
@@ -381,7 +535,49 @@
             }
           },
           "warnings": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_artifact_ids": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "dataset_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "source_hashes": {
             "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          },
+          "analysis_parameters": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "limitations": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -400,14 +596,25 @@
           "source_sha256",
           "summary_sha256",
           "edge_energy_eV",
-          "edge_step"
+          "edge_step",
+          "source_artifact_ids",
+          "dataset_id",
+          "source_hashes",
+          "analysis_parameters",
+          "warnings",
+          "limitations"
         ],
         "properties": {
           "analysis_run_id": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
           },
           "operation_id": {
-            "const": "xas.xanes_normalization"
+            "type": "string",
+            "minLength": 1
           },
           "source_sha256": {
             "type": "string",
@@ -430,7 +637,49 @@
             "type": "array"
           },
           "warnings": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_artifact_ids": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "dataset_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "source_hashes": {
             "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          },
+          "analysis_parameters": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "limitations": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -441,7 +690,8 @@
     },
     "eis_report_count": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "MUST equal the number of items in eis_reports."
     },
     "eis_reports": {
       "type": "array",
@@ -451,17 +701,25 @@
           "analysis_run_id",
           "operation_id",
           "source_sha256",
-          "summary_sha256"
+          "summary_sha256",
+          "source_artifact_ids",
+          "dataset_id",
+          "source_hashes",
+          "analysis_parameters",
+          "warnings",
+          "limitations"
         ],
         "properties": {
           "analysis_run_id": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
           },
           "operation_id": {
-            "enum": [
-              "eis.screening_metrics",
-              "eis.equivalent_circuit_fit"
-            ]
+            "type": "string",
+            "minLength": 1
           },
           "source_sha256": {
             "type": "string",
@@ -491,7 +749,49 @@
             "type": "number"
           },
           "warnings": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_artifact_ids": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "dataset_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "source_hashes": {
             "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          },
+          "analysis_parameters": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "limitations": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -502,7 +802,8 @@
     },
     "cross_modal_report_count": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "MUST equal the number of items in cross_modal_reports."
     },
     "cross_modal_reports": {
       "type": "array",
@@ -517,14 +818,23 @@
           "record_count",
           "group_count",
           "matched_group_count",
-          "groups"
+          "groups",
+          "source_artifact_ids",
+          "dataset_id",
+          "analysis_run_id",
+          "source_hashes",
+          "analysis_parameters",
+          "warnings",
+          "limitations",
+          "source_sha256"
         ],
         "properties": {
           "cross_modal_evidence_id": {
             "type": "string"
           },
           "operation_id": {
-            "const": "evidence.cross_modal_link"
+            "type": "string",
+            "minLength": 1
           },
           "study_id": {
             "type": "string"
@@ -578,10 +888,74 @@
             "items": {
               "type": "string"
             }
+          },
+          "source_artifact_ids": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "dataset_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "analysis_run_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "analysis_parameters": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "limitations": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "warnings": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_sha256": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[a-fA-F0-9]{64}$"
           }
         },
         "additionalProperties": true
       }
+    },
+    "contract_id": {
+      "const": "scientific-evidence-export"
+    },
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "source_system": {
+      "const": "Data_analysis"
     }
   },
   "additionalProperties": true,
@@ -639,5 +1013,6 @@
         }
       ]
     }
-  ]
+  ],
+  "$comment": "The seven report counts MUST equal the lengths of their corresponding arrays. JSON Schema Draft 2020-12 cannot compare sibling array lengths; producers and consumers must enforce this application-level invariant. The allOf/anyOf below enforces that at least one category count is greater than zero."
 }

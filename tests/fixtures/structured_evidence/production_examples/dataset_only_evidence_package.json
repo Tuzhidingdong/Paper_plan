@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "scientific-evidence-export",
+  "contract_version": "1.0.0",
+  "source_system": "Data_analysis",
+  "evidence_package_id": "EV-0dd0cfc1c07efb1f",
+  "created_at": "2026-11-22T00:00:00+00:00",
+  "question": null,
+  "dataset_count": 1,
+  "datasets": [
+    {
+      "dataset_id": "DS-EXAMPLE",
+      "source_artifact_ids": null,
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary_sha256": "4199c71c174d67956afd7bcf42d09703b0e9d3c608081f3a959b9241e36d61c2",
+      "source_name": "input.csv",
+      "row_count": 4,
+      "delimiter": ",",
+      "encoding": null,
+      "has_header": true,
+      "decimal_comma_candidate": null,
+      "decimal_comma_applied": false,
+      "columns": [
+        {
+          "name": "potential_V",
+          "non_empty": 4,
+          "missing_count": 0,
+          "numeric_fraction": 1,
+          "numeric_candidate": true,
+          "minimum": 0.1,
+          "maximum": 0.4,
+          "mean": 0.25,
+          "sample_std": 0.1
+        }
+      ],
+      "column_count": 1,
+      "omitted_column_count": 0,
+      "irregular_row_count": 0,
+      "irregular_rows_sample": [],
+      "warnings": [],
+      "notes": [
+        "Column summaries are parser screening statistics, not scientific QC or hypothesis tests.",
+        "Raw rows and large numerical arrays are intentionally omitted from this evidence package."
+      ],
+      "analysis_run_id": null,
+      "operation_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null,
+      "limitations": null
+    }
+  ],
+  "battery_report_count": 0,
+  "battery_reports": [],
+  "statistics_report_count": 0,
+  "statistics_reports": [],
+  "xrd_report_count": 0,
+  "xrd_reports": [],
+  "xanes_report_count": 0,
+  "xanes_reports": [],
+  "eis_report_count": 0,
+  "eis_reports": [],
+  "cross_modal_report_count": 0,
+  "cross_modal_reports": [],
+  "interpretation_rules": [
+    "Separate source observations from script-derived statistics and scientific interpretation.",
+    "Do not infer units, sample identity, independent replicates or experimental conditions from filenames.",
+    "Do not interpret parse success as data-quality acceptance.",
+    "State uncertainty and unresolved metadata before proposing explanations."
+  ],
+  "omission_policy": "No raw rows, complete spectra, image pixels, trajectories, model checkpoints or large arrays are embedded."
+}

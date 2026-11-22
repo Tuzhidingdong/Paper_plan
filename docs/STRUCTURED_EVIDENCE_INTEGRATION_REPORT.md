@@ -13,7 +13,7 @@
 
 The work is limited to Paper_plan. No Data_analysis or Data_manager files are modified.
 
-## 2. Data_analysis main-branch compatibility audit
+## 2. Historical pre-v1.0.0 Data_analysis main-branch audit (superseded by Section 12)
 
 Data_analysis `main` was inspected at `5684c6a762ac09caf24661c987b2e7a97eb0e2e7`.
 
@@ -21,7 +21,7 @@ The production schema is `schemas/evidence_package.schema.json`; the producer im
 
 **Important compatibility boundary:** the inspected Data_analysis main branch does not emit `contract_id`, `contract_version` or `source_system`. Paper_plan therefore requires the user-specified v1.0.0 exchange envelope as top-level contract metadata, while validating the remaining payload against a vendored, unchanged snapshot of Data_analysis's current production schema. A separate, synthetic seven-category fixture demonstrates the agreed envelope; it is not represented as a production Data_analysis export. No producer fields were invented or written back to Data_analysis.
 
-The original Data_analysis schema also requires `datasets.minItems=1`, while the builder implementation can be called with no dataset summaries when report files are provided. Paper_plan preserves and validates the schema as published rather than silently relaxing this production constraint. Such report-only packages need a producer-side schema/contract decision before being accepted.
+This statement described the earlier snapshot and is superseded: the pinned v1.0.0 production Schema sets `datasets.minItems=0`, preserves seven-way `anyOf`, and accepts report-only packages when at least one category is present. The importer separately enforces every count/array length pair because standard JSON Schema cannot compare sibling values.
 
 ## 3. Files changed and added
 
@@ -139,9 +139,29 @@ Compilation passed on all three Python versions in the same run. Earlier CI atte
 
 ## 11. Limitations and producer coordination
 
-1. Data_analysis main must add the three agreed top-level exchange metadata fields before raw producer output is directly accepted without an envelope adapter.
+1. The earlier PR #7 baseline lacked the exchange envelope. This synchronization targets the explicit Data_analysis feature-branch commit and v1.0.0 Schema; the importer requires exact envelope values.
 2. Current Evidence Packages include digest strings but not the original raw data/report bytes; Paper_plan cannot recompute the underlying `source_sha256` or `summary_sha256` from the package alone. It verifies the exact package bytes and digest syntax/identity consistency, then records these limits.
 3. The current package schema does not export stable Observation IDs. Paper_plan never fabricates them.
-4. The published Data_analysis schema's `datasets.minItems=1` restriction conflicts with the builder's report-only call path and requires a Data_analysis-side schema/contract decision.
+4. The earlier consumer snapshot's `datasets.minItems=1` restriction is removed by the pinned v1.0.0 synchronization. The production Schema allows empty `datasets` while preserving the seven-way non-empty evidence constraint.
 5. Sample identity, true experimental independence, sample pairing and condition comparability remain human scientific judgments unless explicit, source-linked information is supplied.
 6. The GitHub Actions matrix is development self-check only; the user's synchronized local Skill and real workspace remain the final instance acceptance.
+
+## 12. Data_analysis Evidence Export v1.0.0 production-contract synchronization
+
+This section supersedes the historical pre-sync baseline notes in Sections 2 and 11.
+
+- Producer repository/branch: `Tuzhidingdong/Data_analysis` / `feat/managed-data-interoperability`
+- Producer commit: `a19c98a51c574b6d2abb4c6debae8aa4d51b39d0`
+- Producer Schema: `schemas/evidence_package.schema.json`
+- Independently recalculated producer Schema SHA-256: `d6a925f608044fad0ed7bfe350de6485d4098d7804c72a77a8021fe6ab847a14`
+- Consumer byte-identical snapshot: `schemas/data_analysis_evidence_package.schema.json`
+- Consumer wrapper: `schemas/external_evidence_package.schema.json`
+- Local importer reference handling: `scripts/import_analysis_evidence.py`
+- Sync record and drift checker: `docs/DATA_ANALYSIS_EVIDENCE_CONTRACT_SYNC.json`, `scripts/verify_data_analysis_schema_sync.py`
+
+The wrapper references the adjacent snapshot by relative filename. The importer loads that file locally and registers its resource URI in an in-memory JSON Schema registry. The payload Schema is not independently narrowed. The wrapper adds only exact required values for `contract_id`, `contract_version` and `source_system`.
+
+The two producer Dataset-only and Battery-only examples are preserved byte-for-byte as test fixtures. Synthetic report-only cases exercise Battery, XRD, Statistics, XANES, EIS and Cross-modal with `datasets=[]`; Statistics + XANES, all-seven-category, all-seven-empty rejection and each of the seven count/array mismatches are covered. Existing PDF-only, STRUCTURED_ONLY, MIXED, source-lineage, identity/hash, no-auto-promotion and immutable-registry checks remain in the integration suite.
+
+The drift utility verifies the local pinned snapshot and can compare a candidate future producer Schema file without a network request. The synchronization tests and CI have not yet run for this update. No cross-repository interface acceptance is claimed; PR #7 remains open and unmerged.
+

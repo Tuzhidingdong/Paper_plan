@@ -35,7 +35,14 @@
       "irregular_row_count": 0,
       "warnings": [
         "Synthetic parser warning"
-      ]
+      ],
+      "analysis_run_id": null,
+      "operation_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null,
+      "limitations": []
     }
   ],
   "battery_report_count": 1,
@@ -65,7 +72,12 @@
       ],
       "limitations": [
         "Synthetic limitation"
-      ]
+      ],
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null
     }
   ],
   "statistics_report_count": 1,
@@ -94,7 +106,13 @@
       ],
       "warnings": [
         "Synthetic descriptive-only warning"
-      ]
+      ],
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null,
+      "limitations": []
     }
   ],
   "xrd_report_count": 1,
@@ -121,7 +139,13 @@
       ],
       "limitations": [
         "No phase assignment in this fixture"
-      ]
+      ],
+      "source_artifact_ids": null,
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null
     }
   ],
   "xanes_report_count": 1,
@@ -146,7 +170,13 @@
       ],
       "limitations": [
         "Synthetic fitting-window limitation"
-      ]
+      ],
+      "source_artifact_ids": null,
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null
     }
   ],
   "eis_report_count": 1,
@@ -161,7 +191,14 @@
       "frequency_max_hz": 1000,
       "warnings": [
         "Synthetic EIS warning"
-      ]
+      ],
+      "source_artifact_ids": null,
+      "dataset_id": null,
+      "source_hashes": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "analysis_parameters": null,
+      "limitations": []
     }
   ],
   "cross_modal_report_count": 1,
@@ -191,7 +228,14 @@
       },
       "link_policy": [
         "Synthetic exact-key join only"
-      ]
+      ],
+      "source_artifact_ids": null,
+      "dataset_id": null,
+      "analysis_run_id": null,
+      "source_sha256": null,
+      "analysis_parameters": null,
+      "warnings": [],
+      "limitations": []
     }
   ],
   "interpretation_rules": [

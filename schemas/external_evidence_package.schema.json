@@ -4,7 +4,7 @@
   "title": "Paper_plan scientific-evidence-export v1.0.0 contract",
   "allOf": [
     {
-      "$ref": "https://github.com/Tuzhidingdong/Data_analysis/schemas/evidence_package.schema.json"
+      "$ref": "data_analysis_evidence_package.schema.json"
     },
     {
       "type": "object",
@@ -22,13 +22,6 @@
         },
         "source_system": {
           "const": "Data_analysis"
-        },
-        "schema_version": {
-          "const": "1.0.0"
-        },
-        "evidence_package_id": {
-          "type": "string",
-          "minLength": 1
         }
       }
     }

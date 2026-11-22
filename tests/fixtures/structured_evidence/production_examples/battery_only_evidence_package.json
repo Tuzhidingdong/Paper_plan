@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "scientific-evidence-export",
+  "contract_version": "1.0.0",
+  "source_system": "Data_analysis",
+  "evidence_package_id": "EV-36c1876e958e86c9",
+  "created_at": "2026-11-22T00:00:00+00:00",
+  "question": null,
+  "dataset_count": 0,
+  "datasets": [],
+  "battery_report_count": 1,
+  "battery_reports": [
+    {
+      "analysis_run_id": "BA-ABC",
+      "operation_id": "battery.cycle_metrics",
+      "source_artifact_ids": [
+        "ART-BAT"
+      ],
+      "source_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "summary_sha256": "5c356bc0d80ba80504bedd95d8136518bbdb0044182df493134a4d65f06ab882",
+      "cycle_count": 3,
+      "complete_cycle_count": 3,
+      "incomplete_cycle_count": 0,
+      "capacity_unit": "mAh",
+      "energy_unit": "mWh",
+      "first_complete_discharge_capacity_mAh": 100,
+      "last_complete_discharge_capacity_mAh": 90,
+      "capacity_retention_percent_last_vs_first": 90,
+      "coulombic_efficiency_summary_percent": {
+        "count": 3,
+        "mean": 98,
+        "median": 98,
+        "minimum": 97,
+        "maximum": 99
+      },
+      "selected_cycles": [
+        {
+          "cycle_id": "1",
+          "discharge_capacity_mAh": 100,
+          "capacity_retention_percent": 100,
+          "coulombic_efficiency_percent": 99,
+          "energy_efficiency_percent": null,
+          "quality_flags": []
+        },
+        {
+          "cycle_id": "2",
+          "discharge_capacity_mAh": 95,
+          "capacity_retention_percent": 95,
+          "coulombic_efficiency_percent": 98,
+          "energy_efficiency_percent": null,
+          "quality_flags": []
+        },
+        {
+          "cycle_id": "3",
+          "discharge_capacity_mAh": 90,
+          "capacity_retention_percent": 90,
+          "coulombic_efficiency_percent": 97,
+          "energy_efficiency_percent": null,
+          "quality_flags": []
+        }
+      ],
+      "warnings": [],
+      "limitations": [
+        "sample test"
+      ],
+      "notes": [
+        "Cycle sampling is deterministic and only supports compact trend inspection.",
+        "Capacity retention uses the first complete cycle as denominator; verify that this is the intended baseline for the study.",
+        "This summary does not establish cell-to-cell reproducibility or independent replicate count."
+      ],
+      "dataset_id": "DS-BAT",
+      "source_hashes": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "analysis_parameters": {
+        "capacity_unit": "mAh"
+      }
+    }
+  ],
+  "statistics_report_count": 0,
+  "statistics_reports": [],
+  "xrd_report_count": 0,
+  "xrd_reports": [],
+  "xanes_report_count": 0,
+  "xanes_reports": [],
+  "eis_report_count": 0,
+  "eis_reports": [],
+  "cross_modal_report_count": 0,
+  "cross_modal_reports": [],
+  "interpretation_rules": [
+    "Separate source observations from script-derived statistics and scientific interpretation.",
+    "Do not infer units, sample identity, independent replicates or experimental conditions from filenames.",
+    "Do not interpret parse success as data-quality acceptance.",
+    "State uncertainty and unresolved metadata before proposing explanations."
+  ],
+  "omission_policy": "No raw rows, complete spectra, image pixels, trajectories, model checkpoints or large arrays are embedded."
+}

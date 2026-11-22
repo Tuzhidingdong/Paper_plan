@@ -9,6 +9,7 @@ import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urljoin, urlparse
 from typing import Any
 
 from era_core import atomic_write_json, default_evidence_bundle, default_registry, ensure_workspace_dirs, sha256_file, workspace_paths
@@ -45,34 +46,51 @@ def _validate_package(package: dict[str, Any], schema_path: Path) -> list[str]:
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
         Draft202012Validator.check_schema(schema)
         source_schema_path = schema_path.parent / "data_analysis_evidence_package.schema.json"
-        source_schema = json.loads(source_schema_path.read_text(encoding="utf-8"))
-        registry = Registry().with_resource(source_schema["$id"], Resource.from_contents(source_schema))
-        validator = Draft202012Validator(schema, registry=registry, format_checker=FormatChecker())
-        errors.extend(
-            f"schema {'.'.join(str(part) for part in item.absolute_path) or '<root>'}: {item.message}"
-            for item in sorted(validator.iter_errors(package), key=lambda item: list(map(str, item.absolute_path)))
-        )
+        if not source_schema_path.is_file():
+            errors.append(f"Pinned Data_analysis Schema snapshot is missing: {source_schema_path}")
+        else:
+            source_schema = json.loads(source_schema_path.read_text(encoding="utf-8"))
+            Draft202012Validator.check_schema(source_schema)
+            source_ref = schema.get("allOf", [{}])[0].get("$ref")
+            if source_ref != source_schema_path.name:
+                errors.append("external Evidence Package Schema must reference the adjacent pinned data_analysis_evidence_package.schema.json using a relative local $ref")
+            elif urlparse(source_ref).scheme or urlparse(source_ref).netloc:
+                errors.append("Data_analysis Schema $ref must not use a remote URL")
+            else:
+                local_ref_uri = urljoin(schema["$id"], source_ref)
+                resource = Resource.from_contents(source_schema)
+                registry = Registry().with_resource(local_ref_uri, resource)
+                if source_schema.get("$id"):
+                    registry = registry.with_resource(source_schema["$id"], resource)
+                validator = Draft202012Validator(schema, registry=registry, format_checker=FormatChecker())
+                errors.extend(
+                    f"schema {'.'.join(str(part) for part in item.absolute_path) or '<root>'}: {item.message}"
+                    for item in sorted(validator.iter_errors(package), key=lambda item: list(map(str, item.absolute_path)))
+                )
     except ImportError:
         errors.append("jsonschema is required; install requirements.txt")
-    except (OSError, json.JSONDecodeError, Exception) as exc:
+    except Exception as exc:
         errors.append(f"cannot validate Evidence Package schema: {exc}")
+    count_fields = {
+        "datasets": "dataset_count", "battery_reports": "battery_report_count",
+        "statistics_reports": "statistics_report_count", "xrd_reports": "xrd_report_count",
+        "xanes_reports": "xanes_report_count", "eis_reports": "eis_report_count",
+        "cross_modal_reports": "cross_modal_report_count",
+    }
+    category_lengths: list[int] = []
+    for collection, count_key in count_fields.items():
+        items = package.get(collection, [])
+        if isinstance(items, list):
+            category_lengths.append(len(items))
+            if package.get(count_key) != len(items):
+                errors.append(f"{count_key} does not match {collection} length")
+    if len(category_lengths) == len(count_fields) and not any(category_lengths):
+        errors.append("Evidence Package must contain at least one non-empty evidence category")
     for entity_type, (collection, id_field) in CATEGORY_TYPES.items():
-        values = [item.get(id_field) for item in package.get(collection, [])]
+        values = [item.get(id_field) for item in package.get(collection, []) if isinstance(item, dict)]
         if len(values) != len(set(values)):
             errors.append(f"{collection} contains duplicate {id_field} identities")
-    for collection in CATEGORIES:
-        items = package.get(collection, [])
-        # Explicit count-field names in the exporter are not a uniform plural transform.
-        count_key = {
-            "datasets": "dataset_count", "battery_reports": "battery_report_count",
-            "statistics_reports": "statistics_report_count", "xrd_reports": "xrd_report_count",
-            "xanes_reports": "xanes_report_count", "eis_reports": "eis_report_count",
-            "cross_modal_reports": "cross_modal_report_count",
-        }[collection]
-        if isinstance(items, list) and package.get(count_key) != len(items):
-            errors.append(f"{count_key} does not match {collection} length")
     return errors
-
 
 def _identity_and_hash_audit(package: dict[str, Any]) -> tuple[dict[str, list[str]], list[str], list[str]]:
     identities: dict[str, list[str]] = {name: [] for name in CATEGORIES}
