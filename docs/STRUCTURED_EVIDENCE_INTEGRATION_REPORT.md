@@ -6,8 +6,10 @@
 - Original branch: `main`
 - Original HEAD: `146cd26718d789584bd6059c195b9c77d780bb59`
 - Development branch: `feat/structured-analysis-evidence-import`
-- Final commit: pending final branch commit
-- Pull request: pending PR creation; do not merge into `main`.
+- Final implementation/test commit validated by CI: `5749267caa8c2005b489737915a158946fb6dda4`
+- Pull request: [#7](https://github.com/Tuzhidingdong/Paper_plan/pull/7), open against `main`; do not merge into `main`.
+- CI run for the implementation/test commit: [ERA tests #44985405203](https://github.com/Tuzhidingdong/Paper_plan/actions/runs/44985405203), all matrix jobs passed.
+- The report is finalized in a documentation-only follow-up commit after the successful implementation/test commit; the implementation files and tests are unchanged.
 
 The work is limited to Paper_plan. No Data_analysis or Data_manager files are modified.
 
@@ -31,10 +33,11 @@ The original Data_analysis schema also requires `datasets.minItems=1`, while the
 - `scripts/era_core.py` — adds external-source/package workspace paths and structured-only defaults.
 - `scripts/scientific_quality_gates.py` — handles a null PDF source without weakening existing visual checks.
 - `scripts/assign_entity_ids.py` — reserves R IDs against either a real PDF Region or a verified external-source reference.
-- `scripts/validate_evidence.py` — validates PDF / structured / mixed provenance, external package references and nullable PDF source workspaces.
+- `scripts/validate_evidence.py` — validates PDF / structured / mixed provenance, external package references, registry/package integrity and nullable PDF source workspaces.
 - `scripts/compile_prompt_context.py` — compiles imported package summaries, provenance, methods/operations, warnings, limitations and unverifiable fields; null PDF source is safe.
-- `scripts/validate_bundle_schemas.py` — validates the external-source registry when present, without making it mandatory for PDF-only workspaces.
+- `scripts/validate_bundle_schemas.py` — validates the external-source registry and its manifest/package-count/hash cross-links when present or declared, without making it mandatory for PDF-only workspaces.
 - `scripts/validate_planning.py` — flags shared raw-source hashes or explicitly shared artifact lineage IDs in a Data Unit so PDF and report views are not treated as independent measurements.
+- `scripts/external_evidence.py` — resolves original entity IDs, checks package hash and entity/report identity, and validates imported Registry references and shared-source lineage.
 - `scripts/extract_regions.py`, `scripts/segment_panels.py`, `scripts/refresh_vector_candidates.py` — make source metadata lookups null-safe for workspaces that do not carry an ingested PDF.
 
 ### Added
@@ -82,7 +85,7 @@ An external reference records:
 - `summary_sha256`;
 - copied `warnings` and `limitations`.
 
-The validator resolves every structured reference against the imported registry, verifies the stored package-byte hash, locates the named entity in the original package category, and compares the source/summary digest and AnalysisRun/operation identity. Unknown Observation IDs are rejected rather than generated. Paper_plan IDs are allocated separately by its Python ID Registry.
+The validator resolves every structured reference against the imported registry, verifies the stored package-byte hash, locates the named entity in the original package category, and compares the source/summary digest and AnalysisRun/operation identity. Registry validation also checks that the State Manifest package count and last-imported pointer agree with the Registry, that every immutable package copy still matches its recorded hash, and that each category ID list still matches the stored package. Unknown Observation IDs are rejected rather than generated. Paper_plan IDs are allocated separately by its Python ID Registry.
 
 ## 6. PDF source optionality and workspace initialization
 
@@ -108,21 +111,23 @@ The existing Claim, Data Slot and Data Unit semantics are unchanged. Data Units 
 
 ## 9. Tests
 
-Targeted command:
+Targeted module command (for an isolated run):
 
-`python -m unittest tests.test_structured_evidence_import -v`
+`python -m unittest discover -s tests -p "test_structured_evidence_import.py" -v`
 
-The 12 synthetic cases cover: seven-category import; package-byte hash registry; idempotent reimport; changed-content collision rejection; unknown contract version; invalid source hash/schema rejection; duplicate source identity rejection; structured Result Unit with no Region; required external refs; PDF Region mandatory behavior; mixed provenance; structured-only workspace/schema initialization; null-source context compilation; tampered package detection; and shared-source Data Unit lineage.
+The module contains 12 synthetic integration test methods. All 12 ran and passed as part of the full-suite command in each successful CI matrix job; Actions did not run this module as a separate step. Coverage includes: all seven import categories, no automatic Result Unit promotion, package-byte hashing, idempotency and changed-content collision rejection, contract/schema/hash/duplicate-identity rejection, AnalysisRun/source/summary digest identity checks, tampered package detection, registry/manifest integrity, Python-issued R ID allocation and reserved-source persistence, structured Result Unit without Region, PDF Region requirement, mixed provenance, structured-only initialization/context compilation and shared artifact/source lineage.
 
 Full regression command:
 
 `python -m unittest discover -s tests -v`
 
+<badge>Final CI: PASS</badge> 149/149 tests passed on each of Python 3.10, 3.11 and 3.12 (447 successful test executions across the matrix). This was GitHub Actions run [44985405203](https://github.com/Tuzhidingdong/Paper_plan/actions/runs/44985405203).
+
 Compilation command:
 
 `python -m compileall -q scripts tests`
 
-Test execution is reported from the GitHub Actions pull-request matrix after the branch commit is pushed. CI results are not represented as local execution. Schema validation is structural and is not scientific validation.
+Compilation passed on all three Python versions in the same run. Earlier CI attempts exposed two test-fixture setup errors; both were corrected before this final successful run. No local workstation test run is claimed. Schema validation is structural and is not scientific validation.
 
 ## 10. Backward compatibility and workspace protection
 
