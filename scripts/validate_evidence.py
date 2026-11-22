@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from scientific_quality_gates import validate_evidence_quality
-from external_evidence import validate_external_source_ref
+from external_evidence import validate_external_source_ref, validate_external_registry
 
 from era_core import (
     atomic_write_json,
@@ -248,6 +248,7 @@ def main() -> int:
     bundle = load_evidence_bundle(workspace)
     errors, warnings = validate(bundle, workspace)
     paths = workspace_paths(workspace)
+    errors.extend(validate_external_registry(workspace))
     try:
         source = bundle.get("source")
         has_pdf_evidence = any(

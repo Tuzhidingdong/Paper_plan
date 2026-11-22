@@ -61,8 +61,11 @@ def validate_external_source_ref(workspace: Path, ref: dict[str, Any]) -> list[s
     if entity_type not in CATEGORY_TYPES:
         errors.append(f"unsupported external entity_type {entity_type!r}")
         return errors
-    record = load_registry(workspace).get("packages", {}).get(ref["evidence_package_id"])
-    if not record:
+    try:
+        record = load_registry(workspace).get("packages", {}).get(ref["evidence_package_id"])
+    except (OSError, json.JSONDecodeError) as exc:
+        return errors + [f"external source registry cannot be read: {exc}"]
+    if not isinstance(record, dict):
         return errors + [f"external evidence package {ref['evidence_package_id']} is not imported"]
     package_hash = record.get("package_sha256")
     if ref.get("package_sha256") != package_hash:
@@ -116,6 +119,84 @@ def validate_external_source_ref(workspace: Path, ref: dict[str, Any]) -> list[s
             errors.append("external source reference contains observation IDs not supplied by the package")
     if ref.get("operation_id") and item.get("operation_id") != ref["operation_id"]:
         errors.append("external source reference operation_id mismatch")
+    return errors
+
+
+def validate_external_registry(workspace: Path) -> list[str]:
+    """Verify the manifest pointer, registered package identities and immutable package hashes."""
+    errors: list[str] = []
+    paths = workspace_paths(workspace)
+    registry_file = registry_path(workspace)
+    manifest = load_json(paths["manifest"], default={}) if paths["manifest"].is_file() else {}
+    manifest_source = manifest.get("external_sources") or {}
+    if not registry_file.is_file():
+        if manifest_source or any(
+            item.get("evidence_source") in {"STRUCTURED_ANALYSIS", "MIXED"}
+            for item in load_json(paths["bundle"], default={}).get("result_units", {}).values()
+        ):
+            errors.append("External source manifest exists but state/external_sources/registry.json is missing")
+        return errors
+    try:
+        registry = load_registry(workspace)
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"External source registry cannot be read: {exc}"]
+    packages = registry.get("packages", {}) if isinstance(registry, dict) else None
+    if not isinstance(packages, dict):
+        return ["External source registry packages must be an object"]
+    if manifest_source:
+        if manifest_source.get("registry_path") != "state/external_sources/registry.json":
+            errors.append("State Manifest external_sources.registry_path does not match the workspace registry")
+        if manifest_source.get("package_count") != len(packages):
+            errors.append("State Manifest external_sources.package_count differs from the external registry")
+        last_id = manifest_source.get("last_imported_package_id")
+        if last_id and last_id not in packages:
+            errors.append("State Manifest last_imported_package_id is absent from the external registry")
+        elif last_id and manifest_source.get("last_imported_package_sha256") != packages[last_id].get("package_sha256"):
+            errors.append("State Manifest last imported package hash differs from the external registry")
+    workspace_root = workspace.resolve()
+    for package_id, record in packages.items():
+        if not isinstance(record, dict):
+            errors.append(f"{package_id}: external registry package record must be an object")
+            continue
+        if record.get("evidence_package_id") != package_id:
+            errors.append(f"{package_id}: registry package key/id mismatch")
+        relative = Path(record.get("package_path", ""))
+        package_file = (workspace / relative).resolve()
+        if relative.is_absolute() or workspace_root not in package_file.parents:
+            errors.append(f"{package_id}: imported package_path escapes the workspace")
+            continue
+        if not package_file.is_file():
+            errors.append(f"{package_id}: imported package file is missing")
+            continue
+        digest = sha256_file(package_file)
+        if digest != record.get("package_sha256"):
+            errors.append(f"{package_id}: imported package file hash does not match external registry")
+            continue
+        try:
+            package = json.loads(package_file.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"{package_id}: cannot read imported package: {exc}")
+            continue
+        if not isinstance(package, dict):
+            errors.append(f"{package_id}: imported package root must be an object")
+            continue
+        if package.get("evidence_package_id") != package_id:
+            errors.append(f"{package_id}: imported package evidence_package_id mismatch")
+        if (
+            package.get("contract_id") != "scientific-evidence-export"
+            or package.get("contract_version") != "1.0.0"
+            or package.get("source_system") != "Data_analysis"
+        ):
+            errors.append(f"{package_id}: imported package exchange contract identity mismatch")
+        categories = record.get("categories", {})
+        if not isinstance(categories, dict):
+            errors.append(f"{package_id}: registry categories must be an object")
+            continue
+        for entity_type, (collection, id_field) in CATEGORY_TYPES.items():
+            registered_ids = categories.get(collection, [])
+            package_ids = [item.get(id_field) for item in package.get(collection, [])]
+            if registered_ids != package_ids:
+                errors.append(f"{package_id}: registry {collection} identities differ from the stored package")
     return errors
 
 

@@ -141,6 +141,7 @@ class StructuredEvidenceImportTests(unittest.TestCase):
         self.assertTrue(any("requires external_source_refs" in item for item in errors), errors)
 
     def test_pdf_region_requirement_remains_mandatory(self):
+        self.import_fixture()
         result = self.structured_result("R001")
         result["evidence_source"] = "PDF_REPORT"
         result["external_source_refs"] = []
@@ -206,6 +207,13 @@ class StructuredEvidenceImportTests(unittest.TestCase):
         self.assertIn("Synthetic peak-screening warning", context)
         self.assertIn("Imported Data_analysis Evidence Packages", context)
         self.assertIn("does not create Result Units or Claims", context)
+        registry_path = paths["external_sources"] / "registry.json"
+        registry_bytes = registry_path.read_bytes()
+        registry_path.unlink()
+        missing_registry_report = validate_schemas(self.workspace)
+        self.assertEqual(missing_registry_report["status"], "ERROR")
+        self.assertTrue(any("registry.json is missing" in item for item in missing_registry_report["errors"]))
+        registry_path.write_bytes(registry_bytes)
 
     def test_external_reference_detects_tampered_package_and_identity_mismatch(self):
         self.import_fixture()

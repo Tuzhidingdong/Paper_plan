@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from era_core import atomic_write_json, workspace_paths
+from external_evidence import validate_external_registry
 
 
 BUNDLES = {
@@ -57,6 +58,7 @@ def validate_workspace(workspace: Path) -> dict:
             validated.append(bundle_name)
         except (OSError, json.JSONDecodeError, Exception) as exc:
             errors.append(f"{bundle_name}: {exc}")
+    errors.extend(validate_external_registry(workspace))
     return {"status": "ERROR" if errors else "PASS", "errors": errors, "validated": validated}
 
 
