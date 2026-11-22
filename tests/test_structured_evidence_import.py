@@ -207,6 +207,7 @@ class StructuredEvidenceImportTests(unittest.TestCase):
         self.assertIn("Synthetic peak-screening warning", context)
         self.assertIn("Imported Data_analysis Evidence Packages", context)
         self.assertIn("does not create Result Units or Claims", context)
+        paths = workspace_paths(self.workspace)
         registry_path = paths["external_sources"] / "registry.json"
         registry_bytes = registry_path.read_bytes()
         registry_path.unlink()
