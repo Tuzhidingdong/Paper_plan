@@ -110,7 +110,7 @@ def validate_external_source_ref(workspace: Path, ref: dict[str, Any]) -> list[s
                     errors.append(f"{field} contains a hash not declared for the referenced entity")
     if ref.get("artifact_ids") is not None:
         supplied = set(ref["artifact_ids"])
-        available = set(item.get("source_artifact_ids", []))
+        available = set(item.get("source_artifact_ids") or [])
         if not supplied.issubset(available):
             errors.append("external source reference contains unknown source artifact IDs")
     if ref.get("observation_ids"):

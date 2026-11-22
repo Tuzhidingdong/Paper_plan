@@ -334,6 +334,8 @@ class StructuredEvidenceImportTests(unittest.TestCase):
         self.import_fixture()
         ref = self.external_ref()
         self.assertEqual(validate_external_source_ref(self.workspace, ref), [])
+        nullable_artifact_ref = dict(ref, artifact_ids=None)
+        self.assertEqual(validate_external_source_ref(self.workspace, nullable_artifact_ref), [])
         wrong_run = dict(ref, analysis_run_id="ANALYSIS-SYN-OTHER")
         unknown_entity = dict(ref, entity_id="ANALYSIS-SYN-UNKNOWN")
         self.assertTrue(validate_external_source_ref(self.workspace, unknown_entity))
