@@ -163,5 +163,18 @@ The wrapper references the adjacent snapshot by relative filename. The importer 
 
 The two producer Dataset-only and Battery-only examples are preserved byte-for-byte as test fixtures. Synthetic report-only cases exercise Battery, XRD, Statistics, XANES, EIS and Cross-modal with `datasets=[]`; Statistics + XANES, all-seven-category, all-seven-empty rejection and each of the seven count/array mismatches are covered. Existing PDF-only, STRUCTURED_ONLY, MIXED, source-lineage, identity/hash, no-auto-promotion and immutable-registry checks remain in the integration suite.
 
-The drift utility verifies the local pinned snapshot and can compare a candidate future producer Schema file without a network request. The synchronization tests and CI have not yet run for this update. No cross-repository interface acceptance is claimed; PR #7 remains open and unmerged.
+The drift utility verifies the local pinned snapshot and can compare a candidate future producer Schema file without a network request.
+
+### Actual validation results
+
+- Implementation/test commit: `0231cef415e844f47a71d1a97df88e21068391b8`
+- GitHub Actions run: [ERA tests #44990406405](https://github.com/Tuzhidingdong/Paper_plan/actions/runs/44990406405)
+- Matrix: Python 3.10, 3.11 and 3.12 — all three jobs **PASS**.
+- Each job: `python scripts/verify_data_analysis_schema_sync.py` passed; `python -m compileall -q scripts tests` passed; `python -m unittest discover -s tests -v` ran **158 tests and passed**.
+- The test log confirms both pinned production examples completed actual `import_package()` ingestion. The importer-calculated package SHA-256 matched the original fixture bytes, and the immutable stored package bytes matched the source example bytes.
+- Synthetic report-only cases passed for Battery, Statistics, XRD, XANES, EIS and Cross-modal with `datasets=[]`; Statistics + XANES, all-seven-present, seven independent count/array mismatch rejections and all-empty rejection passed.
+- The existing PDF-only, STRUCTURED_ONLY and MIXED regressions, external registry/entity/hash/lineage checks and no-auto-promotion rules passed as part of the same 158-test suite.
+- The first CI attempt exposed a nullable `source_artifact_ids` consumer bug. The implementation was corrected in `0231cef415e844f47a71d1a97df88e21068391b8`; all three matrix jobs passed on the corrected commit.
+
+This is a consumer-contract synchronization and integration-development self-check. It does **not** constitute end-to-end acceptance of every producer execution path or scientific validation. No local user workspace acceptance is claimed. PR #7 remains open and unmerged for external review.
 
